@@ -1,115 +1,209 @@
-#include "graph.h"
+#include"graph.h"
+#include"General.h"
 
 #include<fstream>
 #include<sstream>
 #include<QMessageBox>
 
-uint Graph::count = 0;
-
-Graph::Graph() { // one vertex graph
-    this->ID = count;
-    this->count++;
-    this->V = 1;
-    this->E = 0;
-    this->vertexes = {};
-    this->connectivityList = { std::pair<uint, std::set<uint>>(0,this->vertexes) };
-    this->connectivityMat = new bool*[1];
-    this->connectivityMat[0] = 0;
+bool isValidPath(const std::string& path){
+    if(path == ""){
+        QMessageBox fail;
+        fail.setInformativeText(EMPTY_PATH);
+        fail.setWindowTitle("Fail");
+        fail.exec();
+        return false;
+    }
+    return true;
 }
 
-Graph::Graph(std::string path) {
-    std::ifstream file(path);
-    if(!file.is_open()){
+bool isOKFile(const std::fstream& initFile){
+    if(!initFile.is_open()){
         QMessageBox fail;
-        fail.setWindowTitle("Failed to open file");
-        fail.setText("Please, check Your path and file");
+        fail.setInformativeText(FAILED_TO_OPEN);
+        fail.setWindowTitle("Fail");
+        fail.exec();
+        return false;
+    }
+    return true;
+}
+
+edge getEdge(std::stringstream& ss){
+    uint begin = 0;
+    uint end = 0;
+    ss >> begin >> end;
+    return edge(begin, end);
+}
+
+void Graph::initConnectivityMat(std::string path) {
+
+    if(!isValidPath(path))
         return;
-    }
-    this->ID = count;
-    this->count++;
-    std::string temp;
-    std::getline(file, temp);
-    std::stringstream vertexCount(temp);
 
-    vertexCount >> this->V;
-    this->connectivityMat = new bool*[V];
-    for(uint i = 0; i < V; i++){
-        this->connectivityMat[i] = new bool[V] {false};
+    std::fstream initFile(path);
+    if(!isOKFile(initFile))
+        return;
+
+    initFile >> this->V;
+    this->connectivityMat = new bool*[this->V];
+    for(uint i = 0; i < this->V; i++){
+        this->connectivityMat[i] = new bool[this->V]{false};
     }
+
+    std::string tempS = "";
+    for(uint i = 0; !initFile.eof() && i < this->V; i++){
+        std::getline(initFile, tempS);
+        std::stringstream ss(tempS, std::ios_base::ate);
+        for(uint j = 0; j < this->V && !ss.eof(); j++){
+            int item = 0;
+            ss >> item;
+            this->connectivityMat[i][j] = item != 0 ? true : false;
+        }
+    }
+
+    // here the end of the file is not tracked
+    // if user will get uncorrectly initialized graph due to matrix
+    // they will not get message box here - error from user input
+}
+
+void Graph::initConnectivityList(std::string path) {
+    if(!isValidPath(path))
+        return;
+
+    std::fstream initFile(path);
+    if(!isOKFile(initFile))
+        return;
+
+    uint vertexCounter = 0;
+    this->V = 0;
     this->E = 0;
+    std::string tempS = "";
+    for(; !initFile.eof();){
+        std::getline(initFile, tempS);
+        vertexCounter++;
+        std::stringstream ss(tempS, std::ios_base::ate);
+        for(uint j = 0; j < !ss.eof(); j++){
+            int item = 0;
+            ss >> item;
+            if(item > this->V)
+                this->V = item;
+            this->connectivityList[vertexCounter].insert(item);
+            if(item)
+                this->E++;
+        }
+    }
 
+    if(vertexCounter != this->V)
+        undefinedError();
 
-    for(uint i = 0; i < this->V && !file.eof(); i++){
-        this->vertexes.insert(i);
-        std::getline(file, temp);
-        std::stringstream list(temp);
-        uint vert;
-        while(!list.eof()){
-            list >> vert;
-            this->connectivityList[i].insert(vert);
-            this->connectivityMat[i][vert] = true;
+    // V must be equals max index of vertexes
+    // because graph is connected and every vertex
+    // have even one neighbor, so even
+    // max index vertex is writed at file as some vertex's neighbor
+}
+
+void Graph::initEdgeList(std::string path) {
+    if(!isValidPath(path))
+        return;
+
+    std::fstream initFile(path);
+    if(!isOKFile(initFile))
+        return;
+
+    this->V = 0;
+    this->E = 0;
+    std::string tempS = "";
+    for(uint i = 0; !initFile.eof(); i++){
+        std::getline(initFile, tempS);
+        std::stringstream ss(tempS, std::ios_base::ate);
+        for(uint j = 0; j < this->V && !ss.eof(); j++){
+            int item = 0;
+            ss >> item;
+            if(item > this->V)
+                this->V = item;
+            this->edgeList.insert(getEdge(ss));
             this->E++;
         }
     }
-    this->E /= 2;
 
+    if(this->edgeList.size() != this->E)
+        undefinedError();
+
+    // such .el file looks like E strings by two nums
+    // and again, if in file was not connected graph
+    // it won't be detected here and probably will be
+    // tracked as "invalid input"/"invalid argument"/... then
+}
+
+void Graph::initByMat() { // before calling matrix must be initialized
     for(uint i = 0; i < this->V; i++){
-        for(uint j = i; j < this->V; j++){
-            if(this->connectivityMat[i][j] != this->connectivityMat[j][i]){
-                QMessageBox fail;
-                fail.setWindowTitle("Not undirected graph");
-                fail.setText("Please, check Your file");
-                return;
+        for(uint j = 0; j < this->V; j++){
+            if(this->connectivityMat[i][j]){
+                this->edgeList.insert(edge(i+1, j+1));
+                this->connectivityList[i+1].insert(j+1);
             }
         }
     }
+}
 
-    if(this->vertexes.size() != V){
-        QMessageBox fail;
-        fail.setWindowTitle("Something went wrong");
-        fail.setText("Please, check Your path and file");
-        return;
+void Graph::initByEL() {
+    this->connectivityMat = new bool*[this->V];
+    for(uint i = 0; i < this->V; i++){
+        this->connectivityMat[i] = new bool[this->V]{false};
+    }
+
+    for(edge e : this->edgeList){
+        this->connectivityMat[e.first-1][e.second-1] = true;
+        this->connectivityList[e.first].insert(e.second);
     }
 }
 
-Graph::~Graph() {
+void Graph::initByVL() {
+    this->connectivityMat = new bool*[this->V];
+    for(uint i = 0; i < this->V; i++){
+        this->connectivityMat[i] = new bool[this->V]{false};
+    }
+
+    for(auto& l : this->connectivityList){
+        for(uint v : l.second){
+            this->connectivityMat[l.first-1][v-1] = true;
+            this->edgeList.insert(edge(l.first, v));
+        }
+    }
+}
+
+void Graph::defaultSettings() {
+    this->V = 0;
+    this->E = 0;
+
+    this->connectivityMat = nullptr;
+    this->connectivityList = {};
+    this->edgeList = {};
+}
+
+Graph::Graph(std::string path) {
+    switch(getExtension(path)){
+    case mat: // file with matrix
+        this->initConnectivityMat(path);
+        this->initByMat();
+        break;
+    case edgesList: // file with list of edges
+        this->initEdgeList(path);
+        this->initByEL();
+        break;
+    case vertexesList: // file with lists of every vertex's neighbors
+        this->initConnectivityList(path);
+        this->initByVL();
+        break;
+    default: // undefined file
+        this->defaultSettings();
+        break;
+    }
+}
+
+Graph::~Graph()
+{
     for(uint i = 0; i < this->V; i++){
         delete[] this->connectivityMat[i];
     }
     delete[] this->connectivityMat;
-}
-
-float Graph::connectivity() {
-    float matSum = 0;
-    for(uint i = 0; i < this->V; i++){
-        for(uint j = i; j < this->V; j++){
-            matSum += this->connectivityMat[i][j] ? 1 : 0;
-        }
-    }
-    return matSum / (this->V * this->V / 2);
-}
-
-// Accessors
-uint* Graph::getID() {
-    return &this->ID;
-}
-
-uint* Graph::getV(){
-    return &this->V;
-}
-
-uint* Graph::getE(){
-    return &this->E;
-}
-
-std::set<uint> *Graph::getVertexes() {
-    return &this->vertexes;
-}
-
-std::map<id, std::set<uint> > *Graph::getConnectivityList() {
-    return &this->connectivityList;
-}
-
-bool ***Graph::getConnectivityMat() {
-    return &this->connectivityMat;
 }

@@ -1,40 +1,35 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include<string>
-#include<set>
 #include<map>
+#include<set>
+#include<string>
 
-typedef unsigned int uint, id;
+typedef unsigned int uint;
+typedef std::pair<unsigned int, unsigned int> edge;
 
 class Graph
 {
 private:
-    static uint count;
-    uint ID;
-    uint V;
-    uint E;
+    uint V; // vertexes
+    uint E; // edges
 
-    std::set<uint> vertexes;
-    std::map<id, std::set<uint>> connectivityList;
     bool** connectivityMat;
+    std::map<uint, std::set<uint>> connectivityList;
+    std::set<edge> edgeList;
+
+    void initConnectivityMat(std::string path);
+    void initConnectivityList(std::string path);
+    void initEdgeList(std::string path);
+
+    void initByMat();
+    void initByEL(); // edges list
+    void initByVL(); // vertexes list
+
+    void defaultSettings();
 public:
-    Graph();
-    Graph(std::string path);
-    ~Graph();
-
-    float connectivity();
-
-    void addVertex();
-
-    // Accessors
-    uint* getID();
-    uint* getV();
-    uint* getE();
-
-    std::set<uint>* getVertexes();
-    std::map<id, std::set<uint>>* getConnectivityList();
-    bool*** getConnectivityMat();
+    Graph(std::string path = "");
+    virtual ~Graph();
 };
 
 #endif // GRAPH_H
