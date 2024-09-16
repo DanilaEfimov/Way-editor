@@ -182,19 +182,19 @@ void Graph::defaultSettings() {
 
 Graph::Graph(std::string path) {
     switch(getExtension(path)){
-    case mat: // file with matrix
+    case mat:               // file with matrix
         this->initConnectivityMat(path);
         this->initByMat();
         break;
-    case edgesList: // file with list of edges
+    case edgesList:         // file with list of edges
         this->initEdgeList(path);
         this->initByEL();
         break;
-    case vertexesList: // file with lists of every vertex's neighbors
+    case vertexesList:      // file with lists of every vertex's neighbors
         this->initConnectivityList(path);
         this->initByVL();
         break;
-    default: // undefined file
+    default:                 // undefined file
         this->defaultSettings();
         break;
     }

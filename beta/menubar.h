@@ -6,6 +6,11 @@
 #include<QAction>
 #include<QMainWindow>
 
+enum {
+    newSession, save, whiteTheme, blackTheme,
+    rightMode, leftMode, help, openLine, history
+};
+
 class MenuBar : public QMenuBar
 {
     Q_OBJECT
@@ -16,6 +21,7 @@ public:
     // Accessors
     static QMenuBar* getMenuBar();
     static QMenu* getMenu(uint index);
+    static QAction* getAction(uint index);
 
 private:
     static QMenuBar* bar;

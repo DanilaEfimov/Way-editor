@@ -4,6 +4,8 @@
 #include<string>
 #include<QMessageBox>
 
+#define APP_NAME "Ways Editor"
+#define ICON_PATH "/way_editor_icon.png"
 #define EMPTY_PATH "ERROR::EMPTY_PATH"
 #define FAILED_TO_OPEN "ERROR::FAILED_TO_OPEN_FILE"
 #define UNDEFINED_ERROR "SOMETHING_WENT_WWRONG"
@@ -12,7 +14,7 @@ enum exetensions{
     undefined = 0, mat, edgesList, vertexesList
 };
 
-int getExtension(std::string path){
+static int getExtension(std::string path){
     std::string ext = "";
     std::string::iterator it = path.begin();
     while(*it != '.'){
@@ -38,7 +40,7 @@ int getExtension(std::string path){
     return undefined;
 }
 
-int undefinedError(){
+static int undefinedError(){
     QMessageBox fail;
     fail.setInformativeText(UNDEFINED_ERROR);
     fail.setWindowTitle("Fail");

@@ -2,8 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QIcon>
+#include <map>
 
-#include"menubar.h"
+#include "menubar.h"
+#include "graph.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -22,8 +25,13 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    static MenuBar* mainMenu;
+    static std::map<uint, Graph*> graphs;
 
-    static void initIcon();
+    static MenuBar* mainMenu;
+    static QIcon* icon;
+
+    void connectTabWithMenu();
+signals:
+
 };
 #endif // MAINWINDOW_H

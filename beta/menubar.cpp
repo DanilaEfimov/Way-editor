@@ -24,13 +24,21 @@ QMenuBar *MenuBar::getMenuBar() {
     return bar;
 }
 
-QMenu *MenuBar::getMenu(uint index)
-{
+QMenu *MenuBar::getMenu(uint index) {
     if(index >= menuc){
         return nullptr;
     }
     else{
         return menues[index];
+    }
+}
+
+QAction *MenuBar::getAction(uint index) {
+    if(index >= actc){
+        return nullptr;
+    }
+    else{
+        return actions[index];
     }
 }
 
