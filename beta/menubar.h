@@ -6,9 +6,9 @@
 #include<QAction>
 #include<QMainWindow>
 
-enum {
+enum Names{
     newSession, save, whiteTheme, blackTheme,
-    rightMode, leftMode, help, openLine, history
+    rightMode, leftMode, help, history
 };
 
 class MenuBar : public QMenuBar
@@ -27,7 +27,7 @@ private:
     static QMenuBar* bar;
 
     static const uint menuc = 3;    // file, view, command line
-    static const uint actc = 9;
+    static const uint actc = 8;
     // file: save, new session;
     // view: white theme, black theme, right mode, left mode;
     // command line: help, open line, history;
@@ -40,11 +40,18 @@ private:
     static void initMenues();
     static void bindActions();
     static void bindMenues();
+    // Binding
+    void bindActionSignals();
 
     // Destruct
     static void deleteActions();
     static void deleteMenues();
 
+public slots:
+    void whiteTheme();
+    void blackTheme();
+    void rightMode();
+    void leftMode();
 };
 
 #endif // MENUBAR_H

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include<QPalette>
 #include <QIcon>
 #include <map>
 
@@ -25,13 +26,22 @@ public:
 private:
     Ui::MainWindow *ui;
 
+    static const QPalette* white;
+    static const QPalette* black;
+
     static std::map<uint, Graph*> graphs;
 
     static MenuBar* mainMenu;
     static QIcon* icon;
 
-    void connectTabWithMenu();
-signals:
+    void connectViewMenu();
+    void connectLayoutWithMenu();
+    void connectWindowWithMenu();
+private slots:
+    void setBlackTheme();
+    void setWhiteTheme();
+    void setRightDirection();
+    void setLeftDirection();
 
 };
 #endif // MAINWINDOW_H
