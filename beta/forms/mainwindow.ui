@@ -18,9 +18,9 @@
     <item>
      <layout class="QHBoxLayout" name="generalLayout">
       <item>
-       <widget class="QTabWidget" name="tabWidget">
+       <widget class="QTabWidget" name="fields">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="Notes">
          <attribute name="title">
