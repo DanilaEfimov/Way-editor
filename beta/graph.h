@@ -4,6 +4,7 @@
 #include<map>
 #include<set>
 #include<string>
+#include<QString>
 
 typedef unsigned int uint;
 typedef std::pair<unsigned int, unsigned int> edge;
@@ -13,6 +14,7 @@ class Graph
 private:
     uint V; // vertexes
     uint E; // edges
+    static uint id;
 
     bool** connectivityMat;
     std::map<uint, std::set<uint>> connectivityList;
@@ -30,6 +32,9 @@ private:
 public:
     Graph(std::string path = "");
     virtual ~Graph();
+
+    uint getID() const;
+    QString show() const;
 };
 
 #endif // GRAPH_H

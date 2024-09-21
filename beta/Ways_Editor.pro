@@ -30,4 +30,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     ../../way_editor_icon.png \
-    test_graph.txt
+    test_graph.vl

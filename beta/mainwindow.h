@@ -35,6 +35,7 @@ private:
     static QIcon* icon;
 
     void connectViewMenu();
+    void connectFileMenu();
     void connectLayoutWithMenu();
     void connectWindowWithMenu();
 private slots:
@@ -42,6 +43,8 @@ private slots:
     void setWhiteTheme();
     void setRightDirection();
     void setLeftDirection();
+    void openFile();
+    void saveFile();
 
 };
 #endif // MAINWINDOW_H

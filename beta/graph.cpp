@@ -5,6 +5,8 @@
 #include<sstream>
 #include<QMessageBox>
 
+uint Graph::id = 0;
+
 bool isValidPath(const std::string& path){
     if(path == ""){
         QMessageBox fail;
@@ -77,12 +79,12 @@ void Graph::initConnectivityList(std::string path) {
     this->V = 0;
     this->E = 0;
     std::string tempS = "";
-    for(; !initFile.eof();){
+    while(!initFile.eof()) {
         std::getline(initFile, tempS);
         vertexCounter++;
-        std::stringstream ss(tempS, std::ios_base::ate);
-        for(uint j = 0; j < !ss.eof(); j++){
-            int item = 0;
+        std::stringstream ss(tempS);
+        while(!ss.eof()){
+            uint item = 0;
             ss >> item;
             if(item > this->V)
                 this->V = item;
@@ -112,11 +114,11 @@ void Graph::initEdgeList(std::string path) {
     this->V = 0;
     this->E = 0;
     std::string tempS = "";
-    for(uint i = 0; !initFile.eof(); i++){
+    while(!initFile.eof()){
         std::getline(initFile, tempS);
         std::stringstream ss(tempS, std::ios_base::ate);
         for(uint j = 0; j < this->V && !ss.eof(); j++){
-            int item = 0;
+            uint item = 0;
             ss >> item;
             if(item > this->V)
                 this->V = item;
@@ -181,6 +183,7 @@ void Graph::defaultSettings() {
 }
 
 Graph::Graph(std::string path) {
+    id++;
     switch(getExtension(path)){
     case mat:               // file with matrix
         this->initConnectivityMat(path);
@@ -200,10 +203,34 @@ Graph::Graph(std::string path) {
     }
 }
 
-Graph::~Graph()
-{
+Graph::~Graph() {
+    id--;
     for(uint i = 0; i < this->V; i++){
         delete[] this->connectivityMat[i];
     }
     delete[] this->connectivityMat;
+}
+
+uint Graph::getID() const {
+    return id;
+}
+
+QString Graph::show() const {
+    QString res = "";
+
+    std::string tempRes = "";
+    for(auto l : this->connectivityList){
+        tempRes += itos(l.first);
+        tempRes += ") ";
+        for(auto n : l.second){
+            tempRes += itos(n);
+            if(++l.second.find(n) != l.second.end()) {
+                tempRes += ", ";
+            }
+        }
+        tempRes += '\n';
+    }
+    res = tempRes.c_str();
+
+    return res;
 }

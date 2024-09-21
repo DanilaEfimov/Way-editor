@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "General.h"
+#include<QFileDialog>
 
 MenuBar* MainWindow::mainMenu = nullptr;
 QIcon* MainWindow::icon = nullptr;
@@ -20,12 +21,13 @@ MainWindow::MainWindow(QWidget *parent)
     mainMenu = new MenuBar;
     this->setMenuBar(mainMenu->getMenuBar());
     this->setBlackTheme();
-    ui->tabWidget->setTabText(0, "Notes");
-    ui->tabWidget->removeTab(1);            // default User have only note tab
+    ui->fields->setTabText(0, "Notes");
+    ui->fields->removeTab(1);            // default User have only note tab
 
     ui->infoGraph->setReadOnly(true);
 
     this->connectViewMenu();
+    this->connectFileMenu();
 }
 
 MainWindow::~MainWindow() {
@@ -41,6 +43,10 @@ void MainWindow::connectViewMenu() {
     connect(mainMenu->getAction(Names::leftMode),   SIGNAL(triggered(bool)), this, SLOT(setLeftDirection()));
 }
 
+void MainWindow::connectFileMenu() {
+    connect(mainMenu->getAction(Names::newSession), SIGNAL(triggered(bool)), this, SLOT(openFile()));
+}
+
 void MainWindow::connectLayoutWithMenu()
 {
 
@@ -54,11 +60,15 @@ void MainWindow::connectWindowWithMenu()
 void MainWindow::setBlackTheme(){
     this->setPalette(*black);
     mainMenu->setPalette(*black);
+    ui->fields->setPalette(*black);
+    ui->infoGraph->setPalette(*black);
 }
 
 void MainWindow::setWhiteTheme(){
     this->setPalette(*white);
     mainMenu->setPalette(*white);
+    ui->fields->setPalette(*white);
+    ui->infoGraph->setPalette(*white);
 }
 
 void MainWindow::setRightDirection() {
@@ -67,4 +77,16 @@ void MainWindow::setRightDirection() {
 
 void MainWindow::setLeftDirection() {
     ui->centralwidget->setLayoutDirection(Qt::LayoutDirection::RightToLeft);
+}
+
+void MainWindow::openFile() {
+    QString path = QFileDialog::getOpenFileName(this, QObject::tr("Choose graph file"), QDir::homePath(), 0);
+    Graph* newG = new Graph(path.toStdString());
+    graphs.emplace(std::pair<int, Graph*>(newG->getID(), newG));
+    ui->infoGraph->setText(newG->show());
+    ui->fields->addTab(new QTextEdit, path);
+}
+
+void MainWindow::saveFile() {
+
 }
