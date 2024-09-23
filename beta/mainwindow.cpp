@@ -1,7 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "General.h"
+
 #include<QFileDialog>
+#include<QDateTime>
+// STL
+#include<fstream>
 
 MenuBar* MainWindow::mainMenu = nullptr;
 QIcon* MainWindow::icon = nullptr;
@@ -13,24 +17,27 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    // basic init
     ui->setupUi(this);
     this->setWindowTitle(APP_NAME);
     icon = new QIcon(ICON_PATH);
     this->setWindowIcon(*icon);
 
+    // menubar
     mainMenu = new MenuBar;
     this->setMenuBar(mainMenu->getMenuBar());
     this->setBlackTheme();
     ui->fields->setTabText(0, "Notes");
     ui->fields->removeTab(1);            // default User have only note tab
 
+    // text edit
     ui->infoGraph->setReadOnly(true);
 
-    this->connectViewMenu();
-    this->connectFileMenu();
+    // binding signals with fonts
+    this->connectWindowWithMenu();
 }
 
-MainWindow::~MainWindow() {
+MainWindow::~MainWindow() { // fix it soon
     delete ui;
     delete icon;
     delete mainMenu;
@@ -44,18 +51,19 @@ void MainWindow::connectViewMenu() {
 }
 
 void MainWindow::connectFileMenu() {
-    connect(mainMenu->getAction(Names::newSession), SIGNAL(triggered(bool)), this,     SLOT(openFile()));
-    //connect(ui->fields, SIGNAL(currentChanged(int)), ui->fields, SLOT(setCurrentIndex(int)));
+    connect(mainMenu->getAction(Names::newSession), SIGNAL(triggered(bool)), this, SLOT(openFile()));
+    connect(mainMenu->getAction(Names::save),       SIGNAL(triggered(bool)), this, SLOT(saveFile()));
 }
 
-void MainWindow::connectLayoutWithMenu()
+void MainWindow::connectCommandMenu()
 {
 
 }
 
 void MainWindow::connectWindowWithMenu()
 {
-
+    this->connectFileMenu();
+    this->connectViewMenu();
 }
 
 void MainWindow::setBlackTheme(){
@@ -94,5 +102,19 @@ void MainWindow::openFile() {
 }
 
 void MainWindow::saveFile() {
+    int currentTab = ui->fields->currentIndex(); // one less than current graph id
+    std::string path = ui->fields->tabText(currentTab).toStdString();
+    std::fstream savedFile(path);
+    if(!savedFile.is_open()){
+        QMessageBox fail;
+        fail.setInformativeText(FAILED_TO_OPEN);
+        fail.setWindowTitle("Fail");
+        fail.exec();
+        return;
+    }
 
+    QString res = QDateTime::currentDateTime().toString("hh:mm dd.MM.yyyy") + '\n'; // windows system time API
+    savedFile << res.toStdString();
+    savedFile << graphs[currentTab - 1]->show().toStdString();
+    savedFile.close();
 }

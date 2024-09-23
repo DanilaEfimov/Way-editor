@@ -37,7 +37,7 @@ private:
     // Binding
     void connectViewMenu();
     void connectFileMenu();
-    void connectLayoutWithMenu();
+    void connectCommandMenu();
     void connectWindowWithMenu();
 private slots:
     // Menues

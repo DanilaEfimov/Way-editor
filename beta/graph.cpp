@@ -76,22 +76,27 @@ void Graph::initConnectivityList(std::string path) {
     if(!isOKFile(initFile))
         return;
 
-    uint vertexCounter = 0;
+    uint vertexCounter = -1;
     this->V = 0;
     this->E = 0;
     std::string tempS = "";
-    while(!initFile.eof()) {
+    uint item = -1;
+    while(!initFile.eof() && item) {
+        item = 0;
         std::getline(initFile, tempS);
         vertexCounter++;
         std::stringstream ss(tempS);
         while(!ss.eof()){
-            uint item = 0;
             ss >> item;
-            if(item > this->V)
-                this->V = item;
-            this->connectivityList[vertexCounter].insert(item);
-            if(item)
+            if(item > 0) {
+                if(item > this->V)
+                    this->V = item;
+                this->connectivityList[vertexCounter].insert(item);
                 this->E++;
+            }
+            else{
+                break;
+            }
         }
     }
 
