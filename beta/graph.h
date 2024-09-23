@@ -34,7 +34,7 @@ public:
     virtual ~Graph();
 
     uint getID() const;
-    QString show() const;
+    QString show(bool fileFlag = false) const;
 };
 
 #endif // GRAPH_H

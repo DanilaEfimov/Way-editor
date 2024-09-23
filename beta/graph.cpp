@@ -76,7 +76,7 @@ void Graph::initConnectivityList(std::string path) {
     if(!isOKFile(initFile))
         return;
 
-    uint vertexCounter = -1;
+    uint vertexCounter = 0;
     this->V = 0;
     this->E = 0;
     std::string tempS = "";
@@ -99,6 +99,7 @@ void Graph::initConnectivityList(std::string path) {
             }
         }
     }
+    vertexCounter--;
 
     if(vertexCounter != this->V)
         undefinedError();
@@ -221,7 +222,7 @@ uint Graph::getID() const {
     return id;
 }
 
-QString Graph::show() const {
+QString Graph::show(bool fileFlag) const {
     QString res = QDateTime::currentDateTime().toString("hh:mm dd.MM.yyyy") + '\n';
     std::string tempRes = "system " + itos(this->getID()) + '\n';
     for(auto l : this->connectivityList){
@@ -236,6 +237,12 @@ QString Graph::show() const {
         tempRes += '\n';
     }
     res += tempRes.c_str();
+
+    if(fileFlag){
+        // write mat and edges
+        // + other meta data
+        // + special road system & graph info
+    }
 
     return res;
 }

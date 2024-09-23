@@ -101,7 +101,7 @@ void MainWindow::openFile() {
     }
 }
 
-void MainWindow::saveFile() {
+void MainWindow::saveFile() { // not fixed yet
     int currentTab = ui->fields->currentIndex(); // one less than current graph id
     std::string path = ui->fields->tabText(currentTab).toStdString();
     std::fstream savedFile(path);
@@ -113,8 +113,6 @@ void MainWindow::saveFile() {
         return;
     }
 
-    QString res = QDateTime::currentDateTime().toString("hh:mm dd.MM.yyyy") + '\n'; // windows system time API
-    savedFile << res.toStdString();
-    savedFile << graphs[currentTab - 1]->show().toStdString();
+    savedFile << graphs[currentTab]->show().toStdString();
     savedFile.close();
 }
