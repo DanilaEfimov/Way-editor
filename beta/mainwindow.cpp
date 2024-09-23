@@ -44,7 +44,8 @@ void MainWindow::connectViewMenu() {
 }
 
 void MainWindow::connectFileMenu() {
-    connect(mainMenu->getAction(Names::newSession), SIGNAL(triggered(bool)), this, SLOT(openFile()));
+    connect(mainMenu->getAction(Names::newSession), SIGNAL(triggered(bool)), this,     SLOT(openFile()));
+    //connect(ui->fields, SIGNAL(currentChanged(int)), ui->fields, SLOT(setCurrentIndex(int)));
 }
 
 void MainWindow::connectLayoutWithMenu()
@@ -80,11 +81,16 @@ void MainWindow::setLeftDirection() {
 }
 
 void MainWindow::openFile() {
-    QString path = QFileDialog::getOpenFileName(this, QObject::tr("Choose graph file"), QDir::homePath(), 0);
-    Graph* newG = new Graph(path.toStdString());
-    graphs.emplace(std::pair<int, Graph*>(newG->getID(), newG));
-    ui->infoGraph->setText(newG->show());
-    ui->fields->addTab(new QTextEdit, path);
+    QString path = "";
+    path = QFileDialog::getOpenFileName(this, QObject::tr("Choose graph file"), QDir::homePath(), 0);
+    if(path.length()){
+        Graph* newG = new Graph(path.toStdString());
+        graphs.emplace(std::pair<int, Graph*>(newG->getID(), newG));
+
+        ui->infoGraph->setText(newG->show());
+        ui->fields->addTab(new QTextEdit, path);
+        ui->fields->setCurrentIndex(ui->fields->count() - 1);
+    }
 }
 
 void MainWindow::saveFile() {

@@ -34,17 +34,18 @@ private:
     static MenuBar* mainMenu;
     static QIcon* icon;
 
+    // Binding
     void connectViewMenu();
     void connectFileMenu();
     void connectLayoutWithMenu();
     void connectWindowWithMenu();
 private slots:
+    // Menues
     void setBlackTheme();
     void setWhiteTheme();
     void setRightDirection();
     void setLeftDirection();
     void openFile();
     void saveFile();
-
 };
 #endif // MAINWINDOW_H

@@ -4,6 +4,7 @@
 #include<fstream>
 #include<sstream>
 #include<QMessageBox>
+#include<QDateTime>
 
 uint Graph::id = 0;
 
@@ -216,12 +217,11 @@ uint Graph::getID() const {
 }
 
 QString Graph::show() const {
-    QString res = "";
-
-    std::string tempRes = "";
+    QString res = QDateTime::currentDateTime().toString("hh:mm dd.MM.yyyy") + '\n';
+    std::string tempRes = "system " + itos(this->getID()) + '\n';
     for(auto l : this->connectivityList){
         tempRes += itos(l.first);
-        tempRes += ") ";
+        tempRes += ")\t";
         for(auto n : l.second){
             tempRes += itos(n);
             if(++l.second.find(n) != l.second.end()) {
@@ -230,7 +230,7 @@ QString Graph::show() const {
         }
         tempRes += '\n';
     }
-    res = tempRes.c_str();
+    res += tempRes.c_str();
 
     return res;
 }
