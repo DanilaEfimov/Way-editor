@@ -4,6 +4,7 @@
 
 #include<QFileDialog>
 #include<QDateTime>
+#include<QDir>
 // STL
 #include<fstream>
 
@@ -55,15 +56,14 @@ void MainWindow::connectFileMenu() {
     connect(mainMenu->getAction(Names::save),       SIGNAL(triggered(bool)), this, SLOT(saveFile()));
 }
 
-void MainWindow::connectCommandMenu()
-{
-
+void MainWindow::connectCommandMenu() {
+    connect(mainMenu->getAction(Names::help),       SIGNAL(triggered(bool)), this, SLOT(helpInfo()));
 }
 
-void MainWindow::connectWindowWithMenu()
-{
+void MainWindow::connectWindowWithMenu() {
     this->connectFileMenu();
     this->connectViewMenu();
+    this->connectCommandMenu();
 }
 
 void MainWindow::setBlackTheme(){
@@ -97,7 +97,7 @@ void MainWindow::openFile() {
 
         ui->infoGraph->setText(newG->show());
         ui->fields->addTab(new QTextEdit, path);
-        ui->fields->setCurrentIndex(ui->fields->count() - 1);
+        ui->fields->setCurrentIndex(ui->fields->count() - 1); // nums from 0, but count from 1
     }
 }
 
@@ -113,6 +113,32 @@ void MainWindow::saveFile() { // not fixed yet
         return;
     }
 
-    savedFile << graphs[currentTab]->show().toStdString();
+    savedFile << graphs[currentTab]->show(true).toStdString(); // true is file flag
     savedFile.close();
+}
+
+void MainWindow::helpInfo() {
+
+    std::fstream help((QDir::currentPath() + HELP_NAME).toStdString()); // it's such cringe...
+    if(!help.is_open()){
+        QMessageBox fail;
+        fail.setInformativeText(FAILED_TO_OPEN);
+        fail.setWindowTitle("Fail");
+        fail.exec();
+        return;
+    }
+
+    QString res = "";
+    while(!help.eof()){
+        std::string tempS;
+        std::getline(help, tempS);
+        res += tempS + '\n';
+    }
+
+    ui->infoGraph->setText(res);
+}
+
+void MainWindow::showHystory()
+{
+
 }

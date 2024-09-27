@@ -47,5 +47,7 @@ private slots:
     void setLeftDirection();
     void openFile();
     void saveFile();
+    void helpInfo();
+    void showHystory();
 };
 #endif // MAINWINDOW_H

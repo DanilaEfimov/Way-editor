@@ -5,6 +5,7 @@
 #include<QMessageBox>
 
 #define APP_NAME "Ways Editor"
+#define HELP_NAME "/help.txt"
 #define ICON_PATH "/way_editor_icon.png"
 #define BLACK_BUTTON_THEME {0, 0, 0}
 #define BLACK_WINDOW_THEME {9, 27, 56}
