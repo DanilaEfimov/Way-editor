@@ -1,0 +1,6 @@
+Commands:
+addV v : you can add vertex by connectivity-list
+(list looks like { v1, v2 ... }
+addE e : you can add edge by pair of vertexies's id
+(you can't add e with even one undefined v
+pair looks like (v_in, v_out))
