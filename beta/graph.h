@@ -9,6 +9,11 @@
 typedef unsigned int uint;
 typedef std::pair<unsigned int, unsigned int> edge;
 
+enum call{ // names of functions & their id
+    addV = 0x01, addE, eraseV, eraseE,
+    getEulerCycle = 0x10, getCycleBase
+};
+
 class Graph
 {
 private:
@@ -33,8 +38,16 @@ public:
     Graph(std::string path = "");
     virtual ~Graph();
 
+    // Accessors
     uint getID() const;
     QString show(bool fileFlag = false) const;
+
+    // Math
+    int addVertex(std::vector<uint>& list);
+    int addEdge(edge& e);
+    int eraseVertex(uint id);
+    int eraseEdge(edge& e);
+
 };
 
 #endif // GRAPH_H

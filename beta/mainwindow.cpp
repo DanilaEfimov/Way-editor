@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->setBlackTheme();
     ui->fields->setTabText(0, "Notes");
     ui->fields->removeTab(1);            // default User have only note tab
+    ui->fields->setMovable(false);
 
     // text edit
     ui->infoGraph->setReadOnly(true);
@@ -58,12 +59,17 @@ void MainWindow::connectFileMenu() {
 
 void MainWindow::connectCommandMenu() {
     connect(mainMenu->getAction(Names::help),       SIGNAL(triggered(bool)), this, SLOT(helpInfo()));
+    connect(mainMenu->getAction(Names::history),    SIGNAL(triggered(bool)), this, SLOT(showHystory()));
 }
 
 void MainWindow::connectWindowWithMenu() {
     this->connectFileMenu();
     this->connectViewMenu();
     this->connectCommandMenu();
+}
+
+void MainWindow::connectWindowWithConsole() {
+    connect(ui->fields,                             SIGNAL(),                this, SLOT(parsing()));
 }
 
 void MainWindow::setBlackTheme(){
@@ -99,6 +105,9 @@ void MainWindow::openFile() {
         ui->fields->addTab(new QTextEdit, path);
         ui->fields->setCurrentIndex(ui->fields->count() - 1); // nums from 0, but count from 1
     }
+
+    // would user choose random file (not .vl/.el/.mat)
+    // will be inited empty graph
 }
 
 void MainWindow::saveFile() { // not fixed yet
@@ -119,7 +128,8 @@ void MainWindow::saveFile() { // not fixed yet
 
 void MainWindow::helpInfo() {
 
-    std::fstream help((QDir::currentPath() + HELP_NAME).toStdString()); // it's such cringe...
+    std::string cur = QDir::currentPath().toStdString();
+    std::fstream help(cur + HELP_NAME); // it's such cringe...
     if(!help.is_open()){
         QMessageBox fail;
         fail.setInformativeText(FAILED_TO_OPEN);
@@ -140,5 +150,9 @@ void MainWindow::helpInfo() {
 
 void MainWindow::showHystory()
 {
+
+}
+
+void MainWindow::parsing() {
 
 }

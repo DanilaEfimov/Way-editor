@@ -14,6 +14,8 @@
 #define EMPTY_PATH "ERROR::EMPTY_PATH"
 #define FAILED_TO_OPEN "ERROR::FAILED_TO_OPEN_FILE"
 #define UNDEFINED_ERROR "SOMETHING_WENT_WRONG"
+#define UNDEFINED_EDGE "ERROR::FAILED_TO_FIND_EDGE"
+#define UNDEFINED_VERTEX "ERROR::FAILED_TO_FIND_VERTEX"
 
 enum exetensions{
     undefined = 0, mat, edgesList, vertexesList
@@ -48,6 +50,13 @@ static int getExtension(std::string path){
 static int undefinedError(){
     QMessageBox fail;
     fail.setInformativeText(UNDEFINED_ERROR);
+    fail.setWindowTitle("Fail");
+    return fail.exec();
+}
+
+static int errorMassege(const char* massege){
+    QMessageBox fail;
+    fail.setInformativeText(massege);
     fail.setWindowTitle("Fail");
     return fail.exec();
 }

@@ -39,6 +39,7 @@ private:
     void connectFileMenu();
     void connectCommandMenu();
     void connectWindowWithMenu();
+    void connectWindowWithConsole();
 private slots:
     // Menues
     void setBlackTheme();
@@ -49,5 +50,7 @@ private slots:
     void saveFile();
     void helpInfo();
     void showHystory();
+    // Console
+    void parsing();
 };
 #endif // MAINWINDOW_H
