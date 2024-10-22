@@ -48,8 +48,7 @@ QAction *MenuBar::getAction(uint index) {
 
 //  ----------  INITIALIZE  ----------
 
-void MenuBar::initActions()
-{
+void MenuBar::initActions() {
     actions = new QAction*[actc];
     for(uint i = 0; i < actc; i++){
         actions[i] = new QAction;
@@ -74,8 +73,7 @@ void MenuBar::initActions()
     actions[5]->setCheckable(true);     // Left Mode
 }
 
-void MenuBar::initMenues()
-{
+void MenuBar::initMenues() {
     menues = new QMenu*[menuc];
     for(uint i = 0; i < menuc; i++){
         menues[i] = new QMenu;
@@ -86,8 +84,7 @@ void MenuBar::initMenues()
     menues[2]->setTitle("Command line");
 }
 
-void MenuBar::bindActions()
-{
+void MenuBar::bindActions() {
     menues[0]->addAction(actions[0]);   // file menu
     menues[0]->addAction(actions[1]);
     menues[1]->addAction(actions[2]);   // view menu
@@ -98,8 +95,7 @@ void MenuBar::bindActions()
     menues[2]->addAction(actions[7]);
 }
 
-void MenuBar::bindMenues()
-{
+void MenuBar::bindMenues() {
     bar = new QMenuBar;
     for(uint i = 0; i < menuc; i++){
         bar->addMenu(menues[i]);

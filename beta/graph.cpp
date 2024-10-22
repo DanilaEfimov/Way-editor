@@ -223,7 +223,7 @@ uint Graph::getID() const {
     return id;
 }
 
-QString Graph::show(bool fileFlag) const {
+QString Graph::show(const std::string& path) const {
     QString res = QDateTime::currentDateTime().toString("hh:mm dd.MM.yyyy") + '\n';
     std::string tempRes = "system " + itos(this->getID()) + '\n';
     for(auto l : this->connectivityList){
@@ -239,84 +239,69 @@ QString Graph::show(bool fileFlag) const {
     }
     res += tempRes.c_str();
 
-    if(fileFlag){
-        // write mat and edges
-        // + other meta data
-        // + special road system & graph info
+    if(path != ""){
+        std::fstream file(path, std::ios::app);
+        if(!file.is_open()){
+            QMessageBox fail;
+            fail.setInformativeText(FAILED_TO_OPEN);
+            fail.setWindowTitle("Fail");
+            fail.exec();
+        }
+
+        file << "count of vertexes:\t" << this->V << '\n';
+        file << "count of edges:\t\t"  << this->E << '\n';
+
+        this->showVL(file);
+        this->showEL(file);
+        this->showMat(file);
+
+        file.close();
     }
+
 
     return res;
 }
 
-int Graph::addVertex(std::vector<uint> &list) {
-    this->V++;
-    for(uint& v : list){
-        if(v <= V &&
-            this->connectivityList.find(v) != this->connectivityList.end()){
-            this->E++;
-            this->connectivityList[v].insert(V);
+void Graph::showVL(std::fstream &in) const {
+    if(in.good()){
+        in << "Vertexes connectivity list:\n";
+        for(auto& l : this->connectivityList){
+            in << l.first << ')' << '\t';
+            for(auto& v : l.second){
+                in << v << ' ';
+            }
+            in << std::endl;
         }
     }
-    for(uint i = 0; i < this->V - 1; i++){
-        delete[] this->connectivityMat[i];
+    else{
+        undefinedError();
     }
-    delete[] this->connectivityMat;
-
-    this->initByVL();
-
-    return addV;
 }
 
-int Graph::addEdge(edge &e) {
-    if(this->connectivityList.find(e.first) == this->connectivityList.end() ||
-       this->connectivityList.find(e.first) == this->connectivityList.end()){
-        return errorMassege(UNDEFINED_VERTEX);
+void Graph::showEL(std::fstream &in) const {
+    if(in.good()){
+        in << "Edges list:\n";
+        for(auto& e : this->edgeList){
+            in << '(' << e.first << ',' << ' ' << e.second << ')' << '\n';
+        }
     }
-    this->edgeList.insert(e);
-    this->E++;
-
-    for(uint i = 0; i < this->V; i++){
-        delete[] this->connectivityMat[i];
+    else{
+        undefinedError();
     }
-    delete[] this->connectivityMat;
-
-    this->initByEL();
-
-    return addE;
 }
 
-int Graph::eraseVertex(uint _id) {
-    if(this->connectivityList.find(_id) == this->connectivityList.end()){
-        return errorMassege(UNDEFINED_VERTEX);
+void Graph::showMat(std::fstream &in) const {
+    if(in.good()){
+        in << "Matrix of connectivity:\n";
+        for(uint i = 0; i < this->V; i++){
+            for(uint j = 0; j < this->V; j++){
+                in << (1 ? this->connectivityMat[i][j] : 0) << ' ';
+            }
+            in << '\n';
+        }
+        in << '\n';
     }
-    this->V--;
-    this->connectivityList.erase(_id);
-
-    for(uint i = 0; i < this->V + 1; i++){
-        delete[] this->connectivityMat[i];
+    else{
+        undefinedError();
     }
-    delete[] this->connectivityMat;
-
-    this->initByVL();
-
-    return eraseV;
-}
-
-int Graph::eraseEdge(edge &e) {
-    if(this->edgeList.find(e) == this->edgeList.end()){
-        return errorMassege(UNDEFINED_EDGE);
-    }
-
-    this->edgeList.erase(e);
-
-    this->E--;
-
-    for(uint i = 0; i < this->V; i++){
-        delete[] this->connectivityMat[i];
-    }
-    delete[] this->connectivityMat;
-
-    this->initByEL();
-
-    return eraseE;
 }

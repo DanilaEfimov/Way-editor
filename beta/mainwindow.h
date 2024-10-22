@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include<QPalette>
+#include <QPalette>
 #include <QIcon>
 #include <map>
 
@@ -40,6 +40,8 @@ private:
     void connectCommandMenu();
     void connectWindowWithMenu();
     void connectWindowWithConsole();
+signals:
+    void keyPressEvent(QKeyEvent* event) override;
 private slots:
     // Menues
     void setBlackTheme();

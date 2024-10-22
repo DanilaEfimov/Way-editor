@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     graph.cpp \
+    graphMath.cpp \
     main.cpp \
     mainwindow.cpp \
     menubar.cpp
@@ -29,6 +30,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    help.txt \
+    build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/help.txt \
+    build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/history.txt \
     test_graph.vl \
     way_editor_icon.png

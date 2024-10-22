@@ -5,6 +5,7 @@
 #include<QFileDialog>
 #include<QDateTime>
 #include<QDir>
+#include<QKeyEvent>
 // STL
 #include<fstream>
 
@@ -35,8 +36,9 @@ MainWindow::MainWindow(QWidget *parent)
     // text edit
     ui->infoGraph->setReadOnly(true);
 
-    // binding signals with fonts
+    // binding signals with slots
     this->connectWindowWithMenu();
+    this->connectWindowWithConsole();
 }
 
 MainWindow::~MainWindow() { // fix it soon
@@ -69,8 +71,30 @@ void MainWindow::connectWindowWithMenu() {
 }
 
 void MainWindow::connectWindowWithConsole() {
-    connect(ui->fields,                             SIGNAL(),                this, SLOT(parsing()));
+    connect(this, SIGNAL(keyPressEvent(QKeyEvent*)), this, SLOT(parsing()));
 }
+
+// SIGNALS
+
+void MainWindow::keyPressEvent(QKeyEvent* event){
+    int key = event->key();
+
+    // current tab shouldn't be 'Note' = 0
+    // and current tab have to be focused by text cursor
+    if(ui->fields->hasFocus() &&
+        ui->fields->currentIndex())
+    {
+        switch(key){
+        case Qt::Key_Enter:
+            parsing();
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+// SLOTS
 
 void MainWindow::setBlackTheme(){
     this->setPalette(*black);
@@ -101,8 +125,11 @@ void MainWindow::openFile() {
         Graph* newG = new Graph(path.toStdString());
         graphs.emplace(std::pair<int, Graph*>(newG->getID(), newG));
 
+        QTextEdit* newConsole = new QTextEdit(this);
+        newConsole->setOverwriteMode(true);
+        newConsole->setText(START_SESSION);
         ui->infoGraph->setText(newG->show());
-        ui->fields->addTab(new QTextEdit, path);
+        ui->fields->addTab(newConsole, path);
         ui->fields->setCurrentIndex(ui->fields->count() - 1); // nums from 0, but count from 1
     }
 
@@ -113,7 +140,10 @@ void MainWindow::openFile() {
 void MainWindow::saveFile() { // not fixed yet
     int currentTab = ui->fields->currentIndex(); // one less than current graph id
     std::string path = ui->fields->tabText(currentTab).toStdString();
-    std::fstream savedFile(path);
+    std::fstream savedFile;
+    if(getExtension(path) != undefined){
+            savedFile.open(path, std::ios::app);
+    }
     if(!savedFile.is_open()){
         QMessageBox fail;
         fail.setInformativeText(FAILED_TO_OPEN);
@@ -122,8 +152,7 @@ void MainWindow::saveFile() { // not fixed yet
         return;
     }
 
-    savedFile << graphs[currentTab]->show(true).toStdString(); // true is file flag
-    savedFile.close();
+    graphs[currentTab]->show(ui->fields->tabText(currentTab).toStdString());
 }
 
 void MainWindow::helpInfo() {
@@ -148,11 +177,34 @@ void MainWindow::helpInfo() {
     ui->infoGraph->setText(res);
 }
 
-void MainWindow::showHystory()
-{
+void MainWindow::showHystory() {
+    std::string cur = QDir::currentPath().toStdString();
+    std::fstream history(cur + HISTORY_NAME); // it's such cringe...
+    if(!history.is_open()){
+        QMessageBox fail;
+        fail.setInformativeText(FAILED_TO_OPEN);
+        fail.setWindowTitle("Fail");
+        fail.exec();
+        return;
+    }
 
+    QString res = "";
+    while(!history.eof()){
+        std::string tempS;
+        std::getline(history, tempS);
+        res += tempS + '\n';
+    }
+
+    ui->infoGraph->setText(res);
 }
 
 void MainWindow::parsing() {
+    QTextEdit* currTab = (QTextEdit*)ui->fields->currentWidget();
+    QString allText = currTab->toPlainText();
+    std::string lastComand = "";
 
+    std::stringstream allTextStream(allText.toStdString());
+    while(std::getline(allTextStream, lastComand));
+
+    qInfo() << lastComand;
 }
