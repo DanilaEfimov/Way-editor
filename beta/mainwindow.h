@@ -40,8 +40,10 @@ private:
     void connectCommandMenu();
     void connectWindowWithMenu();
     void connectWindowWithConsole();
-signals:
-    void keyPressEvent(QKeyEvent* event) override;
+
+    // after will be written custom classes
+    // insted ui forms
+    // now we have strange signals
 private slots:
     // Menues
     void setBlackTheme();
@@ -54,5 +56,6 @@ private slots:
     void showHystory();
     // Console
     void parsing();
+    void keyPressEvent(QKeyEvent* event) override;
 };
 #endif // MAINWINDOW_H

@@ -71,7 +71,7 @@ void MainWindow::connectWindowWithMenu() {
 }
 
 void MainWindow::connectWindowWithConsole() {
-    connect(this, SIGNAL(keyPressEvent(QKeyEvent*)), this, SLOT(parsing()));
+    //connect(this, SIGNAL(QMainWindow::enterEvent()), this, SLOT(keyPressEvent(QKeyEvent*)));
 }
 
 // SIGNALS
@@ -145,9 +145,13 @@ void MainWindow::saveFile() { // not fixed yet
             savedFile.open(path, std::ios::app);
     }
     if(!savedFile.is_open()){
+        // in alpha version will be maded message box function
+        // because here are many same msgBox calls
+        // only text difference
         QMessageBox fail;
         fail.setInformativeText(FAILED_TO_OPEN);
         fail.setWindowTitle("Fail");
+        fail.setIcon(QMessageBox::Information);
         fail.exec();
         return;
     }
