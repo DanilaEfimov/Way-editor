@@ -219,6 +219,54 @@ Graph::~Graph() {
     delete[] this->connectivityMat;
 }
 
+int Graph::parsing(std::string& cmd) const {
+    std::string callName = CMD_FLAG;
+    std::stringstream tempCmd(cmd);
+    tempCmd >> callName;
+
+    int Id = -1;
+    if(calls.find(callName) != calls.end()){
+        Id = calls.find(callName)->second;
+    }
+    else{
+        errorMassege(UNDEFINED_CMD);
+        return -1;
+    }
+
+    switch(Id){
+    case weigh:
+        break;
+    case addV:
+        break;
+    case addE:
+        break;
+    case eraseV:
+        break;
+    case eraseE:
+        break;
+    case EulerCycle:
+        break;
+    case CycleBase:
+        break;
+    case Blocks:
+        break;
+    case MaxV:
+        break;
+    case MaxE:
+        break;
+    case Degree:
+        break;
+    case Weight:
+        break;
+    default:
+        break;
+    }
+}
+
+int Graph::command(int code) {
+
+}
+
 uint Graph::getID() const {
     return id;
 }

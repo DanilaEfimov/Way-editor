@@ -29,6 +29,9 @@ public:
     Graph(std::string path = "");
     virtual ~Graph();
 
+    int parsing(std::string& cmd) const;
+    int command(int code = -1);
+
     // Accessors
     uint getID() const;
     QString show(const std::string& path = "") const;
@@ -55,9 +58,9 @@ public:
     void setVW(uint v = 0);
     void setEW(edge e);
 
-    tree computeDFSTree(uint root = 0) const;
-    tree computeBFSTree(uint root = 0) const;
-    tree computePrimaTree(uint root = 0) const;
+    tree computeDFS(uint root = 0) const;
+    tree computeBFS(uint root = 0) const;
+    tree computePrima(uint root = 0) const;
 };
 
 #endif // GRAPH_H

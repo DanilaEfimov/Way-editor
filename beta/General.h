@@ -20,16 +20,19 @@
 #define EMPTY_PATH "ERROR::EMPTY_PATH"
 #define FAILED_TO_OPEN "ERROR::FAILED_TO_OPEN_FILE"
 #define UNDEFINED_ERROR "SOMETHING_WENT_WRONG"
+#define UNDEFINED_CMD "ERROR::INVALID_INPUT::UNDEFINED_COMMAND::"
 #define UNDEFINED_EDGE "ERROR::FAILED_TO_FIND_EDGE"
 #define UNDEFINED_VERTEX "ERROR::FAILED_TO_FIND_VERTEX"
+#define CMD_FLAG "\n"
 
 typedef unsigned int uint;
 typedef std::pair<unsigned int, unsigned int> edge, wv; // weighted vertex
 typedef std::stack<std::stack<unsigned int>> cycleBase, blocks;
 typedef std::multiset<wv> tree;
+typedef std::pair<std::string, int> callID;
 
 enum entity {
-    Vertex, Edge, Tree
+    Index, Number, Vertex, Edge, Tree
 };
 
 enum Vmodes {
@@ -41,16 +44,25 @@ enum Emodes {
 };
 
 enum call { // names of functions & their id
-    wiegh = 0x00,
+    weigh = 0x00,
     addV = 0x10, addE, eraseV, eraseE,
-    getEulerCycle = 0x20, getCycleBase, getBlocks,
-    getMaxV, getMaxE, getDegree, getWeight,
+    EulerCycle = 0x20, CycleBase, Blocks,
+    MaxV, MaxE, Degree, Weight, // Weight means 'getWeight'
     setVW = 0x30, setEW,
     computeDFSTree = 0x40, computeBFSTree, computePrimaTree
 };
 
 enum exetensions{
     undefined = 0, mat, edgesList, vertexesList
+};
+
+static const std::map<std::string, int> calls{
+    callID("weigh", 0x00),
+    callID("addV", 0x10), callID("addE", 0x11), callID("eraseV", 0x12), callID("eraseE", 0x13),
+    callID("EulerCycle", 0x20), callID("CycleBase", 0x21), callID("Blocks", 0x22),
+    callID("MaxV", 0x23), callID("MaxE", 0x24), callID("Degree", 0x25), callID("Weight", 0x26),
+    callID("setVW", 0x30), callID("setEW", 0x31),
+    callID("computeDFSTree", 0x40), callID("computeBFSTree", 0x41), callID("computePrimaTree", 0x42)
 };
 
 static int getExtension(std::string path){
@@ -83,6 +95,7 @@ static int undefinedError(){
     QMessageBox fail;
     fail.setInformativeText(UNDEFINED_ERROR);
     fail.setWindowTitle("Fail");
+    fail.setIcon(QMessageBox::Information);
     return fail.exec();
 }
 
@@ -90,6 +103,7 @@ static int errorMassege(const char* massege){
     QMessageBox fail;
     fail.setInformativeText(massege);
     fail.setWindowTitle("Fail");
+    fail.setIcon(QMessageBox::Information);
     return fail.exec();
 }
 

@@ -8,12 +8,15 @@
 #include<QKeyEvent>
 // STL
 #include<fstream>
+#include<sstream>
+#include<string>
 
 MenuBar* MainWindow::mainMenu = nullptr;
 QIcon* MainWindow::icon = nullptr;
 const QPalette* MainWindow::black = new QPalette(BLACK_BUTTON_THEME, BLACK_WINDOW_THEME);
 const QPalette* MainWindow::white = new QPalette(WHITE_BUTTON_THEME, WHITE_WINDOW_THEME);
 std::map<uint, Graph*> MainWindow::graphs = {};
+std::map<uint, QTextEdit*> MainWindow::pages = {};
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -38,7 +41,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // binding signals with slots
     this->connectWindowWithMenu();
-    this->connectWindowWithConsole();
 }
 
 MainWindow::~MainWindow() { // fix it soon
@@ -70,28 +72,37 @@ void MainWindow::connectWindowWithMenu() {
     this->connectCommandMenu();
 }
 
-void MainWindow::connectWindowWithConsole() {
-    //connect(this, SIGNAL(QMainWindow::enterEvent()), this, SLOT(keyPressEvent(QKeyEvent*)));
+void MainWindow::connectWindowWithConsole(uint index) {
+    connect(this->pages[index], SIGNAL(textChanged()), this, SLOT(keyPressed()));
 }
 
 // SIGNALS
 
-void MainWindow::keyPressEvent(QKeyEvent* event){
-    int key = event->key();
-
+void MainWindow::keyPressed(){   // awfull thing... because I don't understand well signals & slots
     // current tab shouldn't be 'Note' = 0
     // and current tab have to be focused by text cursor
-    if(ui->fields->hasFocus() &&
-        ui->fields->currentIndex())
-    {
-        switch(key){
-        case Qt::Key_Enter:
-            parsing();
-            break;
-        default:
-            break;
-        }
+
+    int current = ui->fields->currentIndex();
+    std::string lastCmd = "";
+    std::string allText = pages[current]->toPlainText().toStdString();
+
+    std::stringstream text(allText);
+    while(!text.eof()){ // here we find last cmd's text
+        std::getline(text, lastCmd);    // O(lines)
     }
+
+    if(lastCmd == CMD_FLAG){
+        allText.erase(--allText.end()); // last char is '\n' - CMD_FLAG
+        std::stringstream CMDtext(allText);
+        while(!CMDtext.eof()){
+            std::getline(CMDtext, lastCmd);
+        }
+        int command = graphs[current]->parsing(lastCmd);
+        graphs[current]->command(command);
+    }
+    // if last command text is "" ("\n") it means that
+    // it was inputed yet and we have to pars this
+    qInfo() << lastCmd;
 }
 
 // SLOTS
@@ -130,7 +141,11 @@ void MainWindow::openFile() {
         newConsole->setText(START_SESSION);
         ui->infoGraph->setText(newG->show());
         ui->fields->addTab(newConsole, path);
-        ui->fields->setCurrentIndex(ui->fields->count() - 1); // nums from 0, but count from 1
+
+        uint index = ui->fields->count() - 1;
+        ui->fields->setCurrentIndex(index); // nums from 0, but count from 1
+        pages.emplace(std::make_pair(index, newConsole));
+        this->connectWindowWithConsole(index);
     }
 
     // would user choose random file (not .vl/.el/.mat)

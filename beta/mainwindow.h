@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QPalette>
 #include <QIcon>
+#include <QTextEdit>
 #include <map>
 
 #include "menubar.h"
@@ -30,6 +31,7 @@ private:
     static const QPalette* black;
 
     static std::map<uint, Graph*> graphs;
+    static std::map<uint, QTextEdit*> pages;
 
     static MenuBar* mainMenu;
     static QIcon* icon;
@@ -39,7 +41,7 @@ private:
     void connectFileMenu();
     void connectCommandMenu();
     void connectWindowWithMenu();
-    void connectWindowWithConsole();
+    void connectWindowWithConsole(uint index);
 
     // after will be written custom classes
     // insted ui forms
@@ -56,6 +58,6 @@ private slots:
     void showHystory();
     // Console
     void parsing();
-    void keyPressEvent(QKeyEvent* event) override;
+    void keyPressed();
 };
 #endif // MAINWINDOW_H
