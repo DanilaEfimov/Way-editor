@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QPalette>
+#include<QDateTime>
 #include <QIcon>
 #include <QTextEdit>
 #include <map>
@@ -43,6 +44,7 @@ private:
     void connectWindowWithMenu();
     void connectWindowWithConsole(uint index);
 
+    void updateHistory(std::string& cmd, QDateTime& time);
     // after will be written custom classes
     // insted ui forms
     // now we have strange signals

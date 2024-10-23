@@ -48,8 +48,8 @@ enum call { // names of functions & their id
     addV = 0x10, addE, eraseV, eraseE,
     EulerCycle = 0x20, CycleBase, Blocks,
     MaxV, MaxE, Degree, Weight, // Weight means 'getWeight'
-    setVW = 0x30, setEW,
-    computeDFSTree = 0x40, computeBFSTree, computePrimaTree
+    VW = 0x30, EW, // set vertexes weights; set edges weights
+    computeDFS = 0x40, computeBFS, computePrima
 };
 
 enum exetensions{
@@ -61,8 +61,8 @@ static const std::map<std::string, int> calls{
     callID("addV", 0x10), callID("addE", 0x11), callID("eraseV", 0x12), callID("eraseE", 0x13),
     callID("EulerCycle", 0x20), callID("CycleBase", 0x21), callID("Blocks", 0x22),
     callID("MaxV", 0x23), callID("MaxE", 0x24), callID("Degree", 0x25), callID("Weight", 0x26),
-    callID("setVW", 0x30), callID("setEW", 0x31),
-    callID("computeDFSTree", 0x40), callID("computeBFSTree", 0x41), callID("computePrimaTree", 0x42)
+    callID("VW", 0x30), callID("EW", 0x31),
+    callID("DFS", 0x40), callID("BFS", 0x41), callID("Prima", 0x42)
 };
 
 static int getExtension(std::string path){

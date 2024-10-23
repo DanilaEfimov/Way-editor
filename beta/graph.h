@@ -58,9 +58,9 @@ public:
     void setVW(uint v = 0);
     void setEW(edge e);
 
-    tree computeDFS(uint root = 0) const;
-    tree computeBFS(uint root = 0) const;
-    tree computePrima(uint root = 0) const;
+    tree computeDFSTree(uint root = 0) const;
+    tree computeBFSTree(uint root = 0) const;
+    tree computePrimaTree(uint root = 0) const;
 };
 
 #endif // GRAPH_H

@@ -10,10 +10,7 @@ uint Graph::id = 0;
 
 bool isValidPath(const std::string& path){
     if(path == ""){
-        QMessageBox fail;
-        fail.setInformativeText(EMPTY_PATH);
-        fail.setWindowTitle("Fail");
-        fail.exec();
+        errorMassege(EMPTY_PATH);
         return false;
     }
     return true;
@@ -21,10 +18,7 @@ bool isValidPath(const std::string& path){
 
 bool isOKFile(const std::fstream& initFile){
     if(!initFile.is_open()){
-        QMessageBox fail;
-        fail.setInformativeText(FAILED_TO_OPEN);
-        fail.setWindowTitle("Fail");
-        fail.exec();
+        errorMassege(FAILED_TO_OPEN);
         return false;
     }
     return true;
@@ -235,32 +229,59 @@ int Graph::parsing(std::string& cmd) const {
 
     switch(Id){
     case weigh:
+        return weigh;
         break;
     case addV:
+        return addV;
         break;
     case addE:
+        return addE;
         break;
     case eraseV:
+        return eraseV;
         break;
     case eraseE:
+        return eraseE;
         break;
     case EulerCycle:
+        return EulerCycle;
         break;
     case CycleBase:
+        return CycleBase;
         break;
     case Blocks:
+        return Blocks;
         break;
     case MaxV:
+        return MaxV;
         break;
     case MaxE:
+        return MaxE;
         break;
     case Degree:
+        return Degree;
         break;
-    case Weight:
+    case VW:
+        return VW;
+        break;
+    case EW:
+        return EW;
+        break;
+    case computeDFS:
+        return computeDFS;
+        break;
+    case computeBFS:
+        return computeBFS;
+        break;
+    case computePrima:
+        return computePrima;
         break;
     default:
+        return -1;
         break;
     }
+
+    return -1;
 }
 
 int Graph::command(int code) {

@@ -3,7 +3,6 @@
 #include "General.h"
 
 #include<QFileDialog>
-#include<QDateTime>
 #include<QDir>
 #include<QKeyEvent>
 // STL
@@ -74,6 +73,11 @@ void MainWindow::connectWindowWithMenu() {
 
 void MainWindow::connectWindowWithConsole(uint index) {
     connect(this->pages[index], SIGNAL(textChanged()), this, SLOT(keyPressed()));
+}
+
+void MainWindow::updateHistory(std::string &cmd, QDateTime &time)
+{
+
 }
 
 // SIGNALS
@@ -160,14 +164,7 @@ void MainWindow::saveFile() { // not fixed yet
             savedFile.open(path, std::ios::app);
     }
     if(!savedFile.is_open()){
-        // in alpha version will be maded message box function
-        // because here are many same msgBox calls
-        // only text difference
-        QMessageBox fail;
-        fail.setInformativeText(FAILED_TO_OPEN);
-        fail.setWindowTitle("Fail");
-        fail.setIcon(QMessageBox::Information);
-        fail.exec();
+        errorMassege(FAILED_TO_OPEN);
         return;
     }
 
@@ -179,10 +176,7 @@ void MainWindow::helpInfo() {
     std::string cur = QDir::currentPath().toStdString();
     std::fstream help(cur + HELP_NAME); // it's such cringe...
     if(!help.is_open()){
-        QMessageBox fail;
-        fail.setInformativeText(FAILED_TO_OPEN);
-        fail.setWindowTitle("Fail");
-        fail.exec();
+        errorMassege(FAILED_TO_OPEN);
         return;
     }
 
@@ -200,10 +194,7 @@ void MainWindow::showHystory() {
     std::string cur = QDir::currentPath().toStdString();
     std::fstream history(cur + HISTORY_NAME); // it's such cringe...
     if(!history.is_open()){
-        QMessageBox fail;
-        fail.setInformativeText(FAILED_TO_OPEN);
-        fail.setWindowTitle("Fail");
-        fail.exec();
+        errorMassege(FAILED_TO_OPEN);
         return;
     }
 
