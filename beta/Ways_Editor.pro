@@ -10,7 +10,6 @@ CONFIG += c++17
 
 SOURCES += \
     graph.cpp \
-    graphMath.cpp \
     main.cpp \
     mainwindow.cpp \
     menubar.cpp

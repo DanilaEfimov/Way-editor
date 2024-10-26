@@ -6,14 +6,14 @@
 class Graph
 {
 private:
-    uint V; // vertexes
-    uint E; // edges
+    uint V; // vertexes count
+    uint E; // edges count
     static uint id;
 
     bool** connectivityMat;
     std::map<uint, std::set<uint>> connectivityList;
-    std::map<uint, double> vertexWeights;
-    std::map<edge, double> edgeWeights;
+    std::map<uint, float> vertexWeights;
+    std::map<edge, float> edgeWeights;
     std::set<edge> edgeList;
 
     void initConnectivityMat(std::string path);
@@ -29,8 +29,8 @@ public:
     Graph(std::string path = "");
     virtual ~Graph();
 
-    int parsing(std::string& cmd) const;
-    int command(int code = -1);
+    std::string execution(const std::string& cmd);
+    std::string command(const std::string& parameters, int code = -1);
 
     // Accessors
     uint getID() const;
@@ -38,14 +38,14 @@ public:
     void showVL(std::fstream& in) const;
     void showEL(std::fstream& in) const;
     void showMat(std::fstream& in)const;
-
+protected:
     // Math
     int weightGraph(bool isVertex = true, uint mode = 0);
 
     int addVertex(std::vector<uint>& list);
-    int addEdge(edge& e);
-    int eraseVertex(uint id);
-    int eraseEdge(edge& e);
+    int addEdge(std::vector<edge>& e);
+    int eraseVertex(std::vector<uint>& _id);
+    int eraseEdge(std::vector<edge>& e);
 
     std::stack<uint> getEulerCycle(uint start = 0) const;
     cycleBase getcycleBase() const;
@@ -61,6 +61,15 @@ public:
     tree computeDFSTree(uint root = 0) const;
     tree computeBFSTree(uint root = 0) const;
     tree computePrimaTree(uint root = 0) const;
+
+    // Weights
+    void defaultVWeight();
+    void degreeVWeight();
+    void normalizeVWeight();
+
+    void defaultEWeight();
+    void degreeEWeight();
+    void normalizeEWeight();
 };
 
 #endif // GRAPH_H

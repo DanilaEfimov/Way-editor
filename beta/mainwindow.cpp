@@ -101,8 +101,8 @@ void MainWindow::keyPressed(){   // awfull thing... because I don't understand w
         while(!CMDtext.eof()){
             std::getline(CMDtext, lastCmd);
         }
-        int command = graphs[current]->parsing(lastCmd);
-        graphs[current]->command(command);
+        //int command = graphs[current]->parsing(lastCmd);
+        //graphs[current]->command(command);
     }
     // if last command text is "" ("\n") it means that
     // it was inputed yet and we have to pars this
