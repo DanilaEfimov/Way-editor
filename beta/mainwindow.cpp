@@ -40,12 +40,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     // binding signals with slots
     this->connectWindowWithMenu();
+    this->connectOutput();
 }
 
 MainWindow::~MainWindow() { // fix it soon
     delete ui;
     delete icon;
     delete mainMenu;
+    for(auto& g : graphs){
+        delete g.second;
+    }
 }
 
 void MainWindow::connectViewMenu() {
@@ -72,17 +76,30 @@ void MainWindow::connectWindowWithMenu() {
 }
 
 void MainWindow::connectWindowWithConsole(uint index) {
-    connect(this->pages[index], SIGNAL(textChanged()), this, SLOT(keyPressed()));
+    if(index){
+        connect(this->pages[index], SIGNAL(textChanged()), this, SLOT(keyPressed()));
+    }
 }
 
-void MainWindow::updateHistory(std::string &cmd, QDateTime &time)
-{
-
+void MainWindow::connectOutput() {
+    connect(this, SIGNAL(executed(std::string&)), this, SLOT(updateTexts(std::string&)));
 }
 
-// SIGNALS
+void MainWindow::updateHistory(std::string &cmd) {
+    QDateTime time = QDateTime::currentDateTime();
+    std::string timeDate = time.toString().toStdString();
+    std::fstream history(HISTORY_NAME);
+    if(!history.is_open()){
+        errorMassege(FAILED_TO_OPEN);
+    }
+    history << cmd << " " << timeDate << std::endl;
+    history.close();
+}
 
-void MainWindow::keyPressed(){   // awfull thing... because I don't understand well signals & slots
+// SLOTS
+
+void MainWindow::keyPressed(){
+    // awfull thing... because I don't understand well signals & slots
     // current tab shouldn't be 'Note' = 0
     // and current tab have to be focused by text cursor
 
@@ -101,12 +118,20 @@ void MainWindow::keyPressed(){   // awfull thing... because I don't understand w
         while(!CMDtext.eof()){
             std::getline(CMDtext, lastCmd);
         }
-        //int command = graphs[current]->parsing(lastCmd);
-        //graphs[current]->command(command);
+        std::string cmd = graphs[current]->execution(lastCmd);
+        emit this->executed(lastCmd);
     }
-    // if last command text is "" ("\n") it means that
+    // if last command text is "" ("\0") it means that
     // it was inputed yet and we have to pars this
     qInfo() << lastCmd;
+}
+
+void MainWindow::updateTexts(std::string &cmd) {
+    uint current = ui->fields->currentIndex();
+    this->updateHistory(cmd);
+
+    QString newText = this->graphs[current]->show();
+    ui->infoGraph->setText(newText);
 }
 
 // SLOTS
@@ -143,11 +168,12 @@ void MainWindow::openFile() {
         QTextEdit* newConsole = new QTextEdit(this);
         newConsole->setOverwriteMode(true);
         newConsole->setText(START_SESSION);
+        newConsole->moveCursor(QTextCursor::End);
         ui->infoGraph->setText(newG->show());
         ui->fields->addTab(newConsole, path);
 
-        uint index = ui->fields->count() - 1;
-        ui->fields->setCurrentIndex(index); // nums from 0, but count from 1
+        uint index = ui->fields->count() - 1;   // index from 0, but count from 1
+        ui->fields->setCurrentIndex(index);
         pages.emplace(std::make_pair(index, newConsole));
         this->connectWindowWithConsole(index);
     }
@@ -169,10 +195,10 @@ void MainWindow::saveFile() { // not fixed yet
     }
 
     graphs[currentTab]->show(ui->fields->tabText(currentTab).toStdString());
+    savedFile.close();
 }
 
 void MainWindow::helpInfo() {
-
     std::string cur = QDir::currentPath().toStdString();
     std::fstream help(cur + HELP_NAME); // it's such cringe...
     if(!help.is_open()){
@@ -188,6 +214,7 @@ void MainWindow::helpInfo() {
     }
 
     ui->infoGraph->setText(res);
+    help.close();
 }
 
 void MainWindow::showHystory() {
@@ -206,15 +233,5 @@ void MainWindow::showHystory() {
     }
 
     ui->infoGraph->setText(res);
-}
-
-void MainWindow::parsing() {
-    QTextEdit* currTab = (QTextEdit*)ui->fields->currentWidget();
-    QString allText = currTab->toPlainText();
-    std::string lastComand = "";
-
-    std::stringstream allTextStream(allText.toStdString());
-    while(std::getline(allTextStream, lastComand));
-
-    qInfo() << lastComand;
+    history.close();
 }

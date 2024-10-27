@@ -24,7 +24,8 @@
 #define UNDEFINED_CMD "ERROR::INVALID_INPUT::UNDEFINED_COMMAND::"
 #define UNDEFINED_EDGE "ERROR::FAILED_TO_FIND_EDGE"
 #define UNDEFINED_VERTEX "ERROR::FAILED_TO_FIND_VERTEX"
-#define CMD_FLAG "\n"
+#define DENGEROUS_PARAMETER "WARNING::INPUT_CAN_BE_DANGEROUS"
+#define CMD_FLAG ""
 
 typedef unsigned int uint;
 typedef std::pair<unsigned int, unsigned int> edge, wv; // weighted vertex

@@ -30,7 +30,7 @@ private:
     static const uint actc = 8;
     // file: save, new session;
     // view: white theme, black theme, right mode, left mode;
-    // command line: help, open line, history;
+    // command line: help, history;
 
     static QMenu** menues;
     static QAction** actions;

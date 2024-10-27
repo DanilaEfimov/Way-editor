@@ -32,7 +32,6 @@ edge getEdge(std::stringstream& ss){
 }
 
 void Graph::initConnectivityMat(std::string path) {
-
     if(!isValidPath(path))
         return;
 
@@ -56,7 +55,6 @@ void Graph::initConnectivityMat(std::string path) {
             this->connectivityMat[i][j] = item != 0 ? true : false;
         }
     }
-
     // here the end of the file is not tracked
     // if user will get uncorrectly initialized graph due to matrix
     // they will not get message box here - error from user input
@@ -94,10 +92,9 @@ void Graph::initConnectivityList(std::string path) {
         }
     }
     vertexCounter--;
-
-    if(vertexCounter != this->V)
+    if(vertexCounter != this->V){
         undefinedError();
-
+    }
     // V must be equals max index of vertexes
     // because graph is connected and every vertex
     // have even one neighbor, so even
@@ -127,10 +124,9 @@ void Graph::initEdgeList(std::string path) {
             this->E++;
         }
     }
-
-    if(this->edgeList.size() != this->E)
+    if(this->edgeList.size() != this->E){
         undefinedError();
-
+    }
     // such .el file looks like E strings by two nums
     // and again, if in file was not connected graph
     // it won't be detected here and probably will be
@@ -161,10 +157,17 @@ void Graph::initByEL() {
 }
 
 void Graph::initByVL() {
-    this->connectivityMat = new bool*[this->V];
-    for(uint i = 0; i < this->V; i++){
-        this->connectivityMat[i] = new bool[this->V]{false};
+    uint size = 0;
+    for(auto& v : this->connectivityList){
+        if(v.first > size){
+            size = v.first;
+        }
     }
+    this->connectivityMat = new bool*[size];
+    for(uint i = 0; i < this->V; i++){
+        this->connectivityMat[i] = new bool[size]{false};
+    }
+    this->edgeList = {};
 
     for(auto& l : this->connectivityList){
         for(uint v : l.second){
@@ -203,6 +206,8 @@ Graph::Graph(std::string path) {
         errorMassege(EMPTY_PATH);
         break;
     }
+    this->normalizeVWeight();
+    this->normalizeEWeight();
 }
 
 Graph::~Graph() {
@@ -224,20 +229,20 @@ std::string Graph::execution(const std::string& cmd) {
     }
     else{
         errorMassege(UNDEFINED_CMD);
-        return (std::string&)"";
+        return UNDEFINED_CMD;
     }
 
     // here in own case reading parameters and turns into command(...)
     std::string parameters = CMD_FLAG;
-    tempCmd >> parameters;
+    std::getline(tempCmd, parameters);
     return this->command(parameters, Id);
 }
 
 std::string Graph::command(const std::string &parameters, int code) {
-    std::stringstream ss(parameters, std::ios_base::ate);
+    std::stringstream ss(parameters);
     std::string answer = CMD_FLAG;
     switch(code){
-    case weigh:
+    case weigh: // weight v 2 || weight e 1     e.g.
         break;
     case addV:  // addV 1 2 3 4 ...
         if(true){
@@ -277,7 +282,7 @@ std::string Graph::command(const std::string &parameters, int code) {
                 ss >> vert;
                 list.push_back(vert);
             }
-            this->addVertex(list);
+            this->eraseVertex(list);
         }
         break;
     case eraseE:
@@ -419,10 +424,14 @@ void Graph::showMat(std::fstream &in) const {
 
 inline int Graph::addVertex(std::vector<uint> &list) {
     for(uint& v : list){
-        if(v <= V &&
-            this->connectivityList.find(v) != this->connectivityList.end()){
+        if(v <= V && this->connectivityList.find(v) != this->connectivityList.end()){
             this->E++;
-            this->connectivityList[v].insert(V);
+            this->connectivityList[v].insert(V + 1);
+            this->connectivityList[V + 1].insert(v);
+        }
+        else{
+            errorMassege(DENGEROUS_PARAMETER);
+            return -1;
         }
     }
     for(uint i = 0; i < this->V; i++){
@@ -461,6 +470,11 @@ inline int Graph::eraseVertex(std::vector<uint>& _id) {
         if(this->connectivityList.find(vert) == this->connectivityList.end()){
             return errorMassege(UNDEFINED_VERTEX);
         }
+        for(auto& cl : this->connectivityList){
+            if(cl.second.find(vert) != cl.second.end()){
+                this->connectivityList[cl.first].erase(vert);
+            }
+        }
         this->connectivityList.erase(vert);
     }
 
@@ -469,7 +483,7 @@ inline int Graph::eraseVertex(std::vector<uint>& _id) {
     }
     delete[] this->connectivityMat;
 
-    this->V--;
+    this->V -= _id.size();
     this->initByVL();
 
     return eraseV;
@@ -494,38 +508,145 @@ inline int Graph::eraseEdge(std::vector<edge>& e) {
     return eraseE;
 }
 
+std::stack<uint> Graph::getEulerCycle(uint start) const {
+
+}
+
+cycleBase Graph::getcycleBase() const {
+
+}
+
+blocks Graph::getBlocks() const {
+
+}
+
+uint Graph::getMaxV() const {
+    uint maxV = 0;  // default root
+    for(auto& v : this->connectivityList){
+        float tempMax = this->vertexWeights.find(maxV)->second;
+        float temp = this->vertexWeights.find(v.first)->second;
+        if(temp > tempMax){
+            maxV = v.first; // update max weight vertex
+        }
+    }
+    return maxV;
+}
+
+edge Graph::getMaxE() const {
+    edge maxE = edge(0,0);
+    for(auto& e : this->edgeList){
+        float tempMax = this->edgeWeights.find(maxE)->second;
+        float temp = this->edgeWeights.find(e)->second;
+        if(temp > tempMax){
+            maxE = e;
+        }
+    }
+    return maxE;
+}
+
+uint Graph::getDegree(uint v) const {
+    if(this->connectivityList.find(v) == this->connectivityList.end()){
+        errorMassege(INVALID_ARGUMENT);
+        return 0xFFFFFFFF;
+    }
+    else{
+        return this->connectivityList.find(v)->second.size();
+    }
+}
+
+float Graph::getWeight(bool isVertex, edge p) const {
+    float weight = 0.0f;
+    if(isVertex){
+        if(this->vertexWeights.find(p.first) !=
+            this->vertexWeights.end()){
+            if(this->vertexWeights.find(p.first)->second > 0.0f){
+                weight = this->vertexWeights.find(p.first)->second;
+            }
+            else{
+                return undefinedError();
+            }
+        }
+        else{
+            return errorMassege(UNDEFINED_VERTEX);
+        }
+        return weight;
+    }
+    else{
+        if(this->edgeWeights.find(p) !=
+            this->edgeWeights.end()){
+            if(this->vertexWeights.find(p.first)->second > 0.0f){
+                weight = this->vertexWeights.find(p.first)->second;
+            }
+            else{
+                return undefinedError();
+            }
+        }
+        else{
+            return errorMassege(UNDEFINED_EDGE);
+        }
+        return weight;
+    }
+    return 0.0f;    // 0.0f is imposible answer
+}
+
+void Graph::setVW(uint v, float newW) {
+    if(this->connectivityList.find(v) !=
+        this->connectivityList.end()){
+        if(newW > 0.0f){
+            this->vertexWeights.find(v)->second = newW;
+        }
+        else{
+            errorMassege(INVALID_ARGUMENT);
+        }
+    }
+    else{
+        errorMassege(UNDEFINED_VERTEX);
+    }
+}
+
+void Graph::setEW(edge e, float newW) {
+    if(this->edgeList.find(e) !=
+        this->edgeList.end()){
+        if(newW >= 0.0f){
+            this->edgeWeights.find(e)->second = newW;
+        }
+        else{
+            errorMassege(INVALID_ARGUMENT);
+        }
+    }
+    else{
+        errorMassege(UNDEFINED_EDGE);
+    }
+}
+
+tree Graph::computeDFSTree(uint root) const {
+
+}
+
+tree Graph::computeBFSTree(uint root) const {
+
+}
+
+tree Graph::computePrimaTree(uint root) const {
+
+}
+
 int Graph::weightGraph(bool isVertex, uint mode) {
     int res = isVertex ? 0x10000000 : 0x00000000;
     if(isVertex){
         switch(mode){
-        case defaultV:
-            this->defaultVWeight();
-            res += defaultV;
-            break;
-        case degreeV:
-            this->degreeVWeight();
-            res += degreeV;
-            break;
-        case normalizeV:
-            this->normalizeVWeight();
-            res += normalizeV;
-            break;
+        case defaultV: this->defaultVWeight(); res += defaultV; break;
+        case degreeV: this->degreeVWeight(); res += degreeV; break;
+        case normalizeV: this->normalizeVWeight(); res += normalizeV; break;
+        default: this->normalizeVWeight(); res += normalizeV; break;
         }
     }
     else {
         switch(mode){
-        case defaultE:
-            this->defaultEWeight();
-            res += defaultE;
-            break;
-        case degreeE:
-            this->degreeEWeight();
-            res += degreeE;
-            break;
-        case normalizeE:
-            this->normalizeEWeight();
-            res += normalizeE;
-            break;
+        case defaultE: this->defaultEWeight(); res += defaultE; break;
+        case degreeE: this->degreeEWeight(); res += degreeE; break;
+        case normalizeE: this->normalizeEWeight(); res += normalizeE; break;
+        default: this->normalizeEWeight(); res += normalizeE; break;
         }
     }
     return res;
@@ -554,13 +675,13 @@ inline void Graph::defaultVWeight() {
     }
 }
 
-void Graph::degreeVWeight() {
+inline void Graph::degreeVWeight() {
     for(auto& v : this->connectivityList){
         this->vertexWeights[v.first] = (float)v.second.size();
     }
 }
 
-void Graph::normalizeVWeight() {
+inline void Graph::normalizeVWeight() {
     for(auto& v : this->connectivityList){
         this->vertexWeights[v.first] = 1.0f;
     }
@@ -570,7 +691,7 @@ inline void Graph::defaultEWeight() {
     for(auto& e : this->edgeList){
         uint beginPower = this->connectivityList[e.first].size();
         uint endPower = this->connectivityList[e.second].size();
-        this->edgeWeights[e] = beginPower > endPower ? 1 : 0;
+        this->edgeWeights[e] = beginPower > endPower ? 1.0f : 0.0f;
     }
     // it means that edge directed from stronger vertex to weaker it's FALSE = 0
     // if edge directed reverse it's TRUE = 1
@@ -578,19 +699,18 @@ inline void Graph::defaultEWeight() {
 
 inline void Graph::degreeEWeight() {
     this->normalizeEWeight();
-    for(auto& w : this->edgeWeights){ // O(V)
+    for(auto& w : this->edgeWeights){ // O(V) [2*V]
         edge e = w.first;    // vertex id
         float weight = 0.0f;
         weight += this->connectivityList[e.first].size();   // degree of begin vertex
         weight += this->connectivityList[e.second].size();   // degree of end vertex
-        weight /= 2;
+        weight /= 2.0f;
         this->edgeWeights[e] = weight;
     }
 }
 
-void Graph::normalizeEWeight()
-{
-
+inline void Graph::normalizeEWeight() {
+    for(auto& e : this->edgeList){
+        this->edgeWeights[e] = 1.0f;
+    }
 }
-
-

@@ -20,11 +20,6 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
-public:
-    MainWindow(QWidget *parent = nullptr);
-    virtual ~MainWindow();
-
 private:
     Ui::MainWindow *ui;
 
@@ -43,11 +38,17 @@ private:
     void connectCommandMenu();
     void connectWindowWithMenu();
     void connectWindowWithConsole(uint index);
+    void connectOutput();
 
-    void updateHistory(std::string& cmd, QDateTime& time);
+    void updateHistory(std::string& cmd);
     // after will be written custom classes
     // insted ui forms
     // now we have strange signals
+public:
+    MainWindow(QWidget *parent = nullptr);
+    virtual ~MainWindow();
+signals:
+    void executed(std::string& cmd);
 private slots:
     // Menues
     void setBlackTheme();
@@ -58,8 +59,9 @@ private slots:
     void saveFile();
     void helpInfo();
     void showHystory();
+
     // Console
-    void parsing();
     void keyPressed();
+    void updateTexts(std::string& cmd);
 };
 #endif // MAINWINDOW_H

@@ -25,6 +25,10 @@ private:
     void initByVL(); // vertexes list
 
     void defaultSettings(); // empty graph
+
+    void showVL(std::fstream& in) const;
+    void showEL(std::fstream& in) const;
+    void showMat(std::fstream& in)const;
 public:
     Graph(std::string path = "");
     virtual ~Graph();
@@ -35,9 +39,6 @@ public:
     // Accessors
     uint getID() const;
     QString show(const std::string& path = "") const;
-    void showVL(std::fstream& in) const;
-    void showEL(std::fstream& in) const;
-    void showMat(std::fstream& in)const;
 protected:
     // Math
     int weightGraph(bool isVertex = true, uint mode = 0);
@@ -53,23 +54,23 @@ protected:
     uint getMaxV() const;
     edge getMaxE() const;
     uint getDegree(uint v = 0) const;
-    double getWeight() const;
+    float getWeight(bool isVertex = false, edge p = edge(0,0)) const;
 
-    void setVW(uint v = 0);
-    void setEW(edge e);
+    void setVW(uint v = 0, float newW = 0.0f);
+    void setEW(edge e = edge(0,0), float newW = 0.0f);
 
     tree computeDFSTree(uint root = 0) const;
     tree computeBFSTree(uint root = 0) const;
     tree computePrimaTree(uint root = 0) const;
 
     // Weights
-    void defaultVWeight();
-    void degreeVWeight();
-    void normalizeVWeight();
+    inline void defaultVWeight();
+    inline void degreeVWeight();
+    inline void normalizeVWeight();
 
-    void defaultEWeight();
-    void degreeEWeight();
-    void normalizeEWeight();
+    inline void defaultEWeight();
+    inline void degreeEWeight();
+    inline void normalizeEWeight();
 };
 
 #endif // GRAPH_H
