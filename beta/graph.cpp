@@ -248,6 +248,20 @@ std::string Graph::command(const std::string &parameters, int code) {
     std::string answer = CMD_FLAG;
     switch(code){
     case weigh: // weight v 2 || weight e 1     e.g.
+        if(true){
+            std::string entityFlag = "";
+            ss >> entityFlag;
+            if(entityFlag == "v"){
+                uint mode = defaultV;
+                ss >> mode;
+                this->weightGraph(true, mode);
+            }
+            else if(entityFlag == "e"){
+                uint mode = defaultE;
+                ss >> mode;
+                this->weightGraph(false, mode);
+            }
+        }
         break;
     case addV:  // addV 1 2 3 4 ...
         if(true){

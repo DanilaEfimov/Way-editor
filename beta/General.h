@@ -34,7 +34,7 @@ typedef std::multiset<wv> tree;
 typedef std::pair<std::string, int> callID;
 
 enum entity {
-    Index, Number, Vertex, Edge, Tree
+    Vertex, Edge, Tree
 };
 
 enum Vmodes {
