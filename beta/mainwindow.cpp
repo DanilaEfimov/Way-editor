@@ -88,7 +88,7 @@ void MainWindow::connectOutput() {
 void MainWindow::updateHistory(std::string &cmd) {
     QDateTime time = QDateTime::currentDateTime();
     std::string timeDate = time.toString().toStdString();
-    std::fstream history(HISTORY_NAME);
+    std::fstream history(HISTORY_NAME, std::ios_base::app);
     if(!history.is_open()){
         errorMassege(FAILED_TO_OPEN);
     }
@@ -113,7 +113,7 @@ void MainWindow::keyPressed(){
     }
 
     if(lastCmd == CMD_FLAG){
-        allText.erase(--allText.end()); // last char is '\n' - CMD_FLAG
+        allText.erase(--allText.end()); // last char is '\0' - CMD_FLAG
         std::stringstream CMDtext(allText);
         while(!CMDtext.eof()){
             std::getline(CMDtext, lastCmd);
