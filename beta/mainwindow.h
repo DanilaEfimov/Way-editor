@@ -32,6 +32,8 @@ private:
     static MenuBar* mainMenu;
     static QIcon* icon;
 
+    static bool errorCall;
+
     // Binding
     void connectViewMenu();
     void connectFileMenu();

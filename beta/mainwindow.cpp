@@ -16,6 +16,7 @@ const QPalette* MainWindow::black = new QPalette(BLACK_BUTTON_THEME, BLACK_WINDO
 const QPalette* MainWindow::white = new QPalette(WHITE_BUTTON_THEME, WHITE_WINDOW_THEME);
 std::map<uint, Graph*> MainWindow::graphs = {};
 std::map<uint, QTextEdit*> MainWindow::pages = {};
+bool MainWindow::errorCall = false;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -102,36 +103,47 @@ void MainWindow::keyPressed(){
     // awfull thing... because I don't understand well signals & slots
     // current tab shouldn't be 'Note' = 0
     // and current tab have to be focused by text cursor
+    if(!errorCall){
+        int current = ui->fields->currentIndex();
+        std::string lastCmd = "";
+        std::string allText = pages[current]->toPlainText().toStdString();
 
-    int current = ui->fields->currentIndex();
-    std::string lastCmd = "";
-    std::string allText = pages[current]->toPlainText().toStdString();
-
-    std::stringstream text(allText);
-    while(!text.eof()){ // here we find last cmd's text
-        std::getline(text, lastCmd);    // O(lines)
-    }
-
-    if(lastCmd == CMD_FLAG){
-        allText.erase(--allText.end()); // last char is '\0' - CMD_FLAG
-        std::stringstream CMDtext(allText);
-        while(!CMDtext.eof()){
-            std::getline(CMDtext, lastCmd);
+        std::stringstream text(allText);
+        while(!text.eof()){ // here we find last cmd's text
+            std::getline(text, lastCmd);    // O(lines)
         }
-        std::string cmd = graphs[current]->execution(lastCmd);
-        emit this->executed(lastCmd);
+
+        if(lastCmd == CMD_FLAG && !errorCall){
+            allText.erase(--allText.end()); // last char is '\0' - CMD_FLAG
+            std::stringstream CMDtext(allText);
+            while(!CMDtext.eof()){
+                std::getline(CMDtext, lastCmd);
+            }
+            std::string cmd = graphs[current]->execution(lastCmd);
+            emit this->executed(cmd);
+        }
+    }
+    else{
+        errorCall = false;
     }
     // if last command text is "" ("\0") it means that
     // it was inputed yet and we have to pars this
-    qInfo() << lastCmd;
 }
 
-void MainWindow::updateTexts(std::string &cmd) {
+void MainWindow::updateTexts(std::string &answer) {
     uint current = ui->fields->currentIndex();
-    this->updateHistory(cmd);
-
     QString newText = this->graphs[current]->show();
     ui->infoGraph->setText(newText);
+    if(answer.find("ERROR") != std::string::npos ||
+        answer.find("WARNING") != std::string::npos){
+        errorCall = true;
+        // here we check what was last string
+    }
+
+    this->updateHistory(answer);
+    QString text = "";
+    text += answer;
+    this->pages[current]->insertPlainText(text);
 }
 
 // SLOTS

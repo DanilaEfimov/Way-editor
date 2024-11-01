@@ -211,6 +211,7 @@ Graph::Graph(std::string path) {
         errorMassege(EMPTY_PATH);
         break;
     }
+    // default weights
     this->normalizeVWeight();
     this->normalizeEWeight();
 }
@@ -323,7 +324,38 @@ std::string Graph::command(const std::string &parameters, int code) {
             this->eraseEdge(list);
         }
         break;
-    case EulerCycle:
+    case EulerCycle:    // EulerCycle 0 [direction bit] {0 - directed cycle; 1 - undirected}
+        if(true){
+            bool directionBit = false; // default graph is directed
+            if(!ss.eof()){
+                ss >> directionBit;
+            }
+            // check of possible:
+            for(auto& list : this->connectivityList){
+                int inDegree = list.second.size();
+                int outDegree = 0;
+                for(auto& vert : list.second){
+                    if(vert != list.first){
+                        if(this->connectivityList[vert].find(list.first)
+                            != this->connectivityList[vert].end()){
+                            outDegree++;
+                        }
+                    }
+                }
+                if(inDegree != outDegree){
+                    answer = IMPOSIBLE_TO_FIND_EULERCYCLE;
+                    break;
+                }
+            }
+            // executing
+            if(directionBit){
+
+            }
+            else {
+
+            }
+            return answer;
+        }
         break;
     case CycleBase:
         break;

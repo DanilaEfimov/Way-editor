@@ -17,15 +17,17 @@
 #define WHITE_BUTTON_THEME {255, 255, 255}
 #define WHITE_WINDOW_THEME {190, 230, 255}
 #define START_SESSION "Hello, Way Editor!\n"
-#define EMPTY_PATH "ERROR::EMPTY_PATH"
-#define FAILED_TO_OPEN "ERROR::FAILED_TO_OPEN_FILE"
-#define INVALID_ARGUMENT "ERROR::INVALID_ARGUMENT::"
-#define UNDEFINED_ERROR "SOMETHING_WENT_WRONG"
-#define UNDEFINED_CMD "ERROR::INVALID_INPUT::UNDEFINED_COMMAND::"
-#define UNDEFINED_EDGE "ERROR::FAILED_TO_FIND_EDGE"
-#define UNDEFINED_VERTEX "ERROR::FAILED_TO_FIND_VERTEX"
-#define DENGEROUS_PARAMETER "WARNING::INPUT_CAN_BE_DANGEROUS"
+#define EMPTY_PATH "ERROR::EMPTY_PATH\n"
+#define FAILED_TO_OPEN "ERROR::FAILED_TO_OPEN_FILE\n"
+#define INVALID_ARGUMENT "ERROR::INVALID_ARGUMENT::\n"
+#define UNDEFINED_ERROR "SOMETHING_WENT_WRONG\n"
+#define UNDEFINED_CMD "ERROR::INVALID_INPUT::UNDEFINED_COMMAND::\n"
+#define UNDEFINED_EDGE "ERROR::FAILED_TO_FIND_EDGE\n"
+#define UNDEFINED_VERTEX "ERROR::FAILED_TO_FIND_VERTEX\n"
+#define DENGEROUS_PARAMETER "WARNING::INPUT_CAN_BE_DANGEROUS\n"
 #define CMD_FLAG ""
+// COMMANDS RETURNS
+#define IMPOSIBLE_TO_FIND_EULERCYCLE "WARNING::CANNOT_FIND_EULER_CYCLE\n"
 
 typedef unsigned int uint;
 typedef std::pair<unsigned int, unsigned int> edge, wv; // weighted vertex
@@ -119,9 +121,14 @@ static std::string itos(uint n){ // integer to string
         return "0";
     }
     std::string res = "";
+    std::stack<char> revers{};
     while(n){
-        res += dtoch(n);
+        revers.push(dtoch(n));
         n /= 10;
+    }
+    while(!revers.empty()){
+        res += revers.top();
+        revers.pop();
     }
     return res;
 }
