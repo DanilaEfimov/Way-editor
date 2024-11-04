@@ -3,14 +3,16 @@
 
 #include"Graph.h"
 
-class UDirGraph : public Graph						// most primitive graph class
+typedef unsigned char byte_t, byte;
+
+class UDirGraph : public Graph								// most primitive graph class
 {
 protected:
 	uint E;
 
-	bool* connectivityVector;					// byte-vector of connectivity matrix
+	byte_t* connectivityVector;								// byte-vector of connectivity matrix
 public:
-	UDirGraph(uint _V, uint _E, bool** mat);
+	UDirGraph(uint _V, byte** mat);
 	virtual ~UDirGraph() override;
 
 	//===========	ACCESSORS	===========
@@ -18,9 +20,9 @@ public:
 	virtual int getDegree(uint _Vertex) const;
 
 	// ===========	 MATH	===========
-	virtual Graph& operator+(Graph& _Right) = 0;
-	virtual Graph& operator+(std::stack<uint>& _Right) = 0;
-	virtual Graph& operator-(Graph& _Right) = 0;
+	virtual Graph& operator+(Graph& _Right) override;
+	virtual Graph& operator+(std::stack<uint>& _Right) override;
+	virtual Graph& operator-(Graph& _Right) override;
 	virtual Graph& operator-(uint _Vertex) override;
 	virtual int operator()(uint _Vertex) override;
 };
@@ -31,17 +33,17 @@ public:
 * it cuts memory amount for 16 times.
 * e.g. full 3-vertex graph connectivity matrix:
 * 
-*			x|	1	|	2	|	3
-*			-+------+-------+-------+------+-------+------
-*			1|	1	|	1	|	1
-*			-+------+-------+-------+------+-------+------
-*			2|	1	|	1	|	1
-*			-+------+-------+-------+------+-------+------
-*			3|	1	|	1	|	1
+*						x|	1	|	2	|	3
+*						-+------+-------+------
+*						1|	0	|	1	|	1
+*						-+------+-------+------
+*						2|	1	|	0	|	1
+*						-+------+-------+------
+*						3|	1	|	1	|	0
 * 
 * Here we have to get only three bits: [1][2], [1][3], [2][3]
-* and these bits written into vector string by string: "1 1 1"
-* instead 0xFF_FF_FF_FF_FF_FF_FF_FF_FF -> 0b111
+* and these bits written into vector string by string: "1 1 1 0 0 0 0 0"
+* instead 0x00FFFFFF00FFFFFF00 -> 0b111	(9 bytes to 1)
 ****************************************************************/
 
 #endif 
