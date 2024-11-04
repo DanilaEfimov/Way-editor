@@ -27,7 +27,7 @@ UDirGraph::UDirGraph(uint _V, byte** mat) : Graph(_V){
 												// (B + 7) / 8	is count of new bytes for necessary bits
 	for (size_t i = 0; i < _V; i++) {
 		uint skippedBits = (i + 1) * (i + 2) / 2;
-		for (size_t j = i + 1; j < _V; j++) {	// i + 1 is shift for skipping unnecessary fields
+		for (size_t j = i + 1; j < _V; j++) {						// i + 1 is shift for skipping unnecessary fields
 			uint matBits = i * _V + j;
 			uint bit = matBits - skippedBits;
 			uint byte = bit / 8;
@@ -67,21 +67,21 @@ int UDirGraph::getDegree(uint _Vertex) const {
 	}
 	uint res = 0;
 	for (size_t v = 1; v < _Vertex; v++) {						// check all vertexes littler than _Vertex
-		uint offset = _Vertex - v - 1;							// how many bits we have to shift to find [v][_Vertex] field
+		uint offset = _Vertex - v - 1;						// how many bits we have to shift to find [v][_Vertex] field
 		uint compliment = this->V - v;
-		uint base = v * this->V - v * (v + 1) / 2 - compliment;	// it's like begin of segment, but for matrix row
+		uint base = v * this->V - v * (v + 1) / 2 - compliment;			// it's like begin of segment, but for matrix row
 		uint address = base + offset;
 		uint byte = address / 8;
 		byte_t isConnect = getBit(offset, this->connectivityVector[byte]);
-		res += isConnect;										// getBit() returns 1 or 0
-	}															// here checked all vertexes littler than _Vertex
-																// let's check others, what bigger than _Vertex
+		res += isConnect;							// getBit() returns 1 or 0
+	}										// here checked all vertexes littler than _Vertex
+											// let's check others, what bigger than _Vertex
 	uint _compliment = this->V - _Vertex;						// how many bits contains about _Vertex's connectivity
 	uint _base = _Vertex * this->V - _Vertex * (_Vertex + 1) / 2 - _compliment;
 	for (size_t i = 0; i < _compliment; i++) {
 		uint byte = (_base + _compliment) / 8;
 		byte_t field = this->connectivityVector[byte];
-		res += getBit(i, field);								// look at definition of 'getBit()': there i %= 8 too
+		res += getBit(i, field);						// look at definition of 'getBit()': there i %= 8 too
 	}
 	return res;
 }
