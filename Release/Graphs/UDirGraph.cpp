@@ -7,6 +7,14 @@ static byte setBit(uint pos = 0) {
 	return res;
 }
 
+static byte setBit(uint pos = 0, byte& value) {		// for change bit
+	byte res = 0b00000001;
+	pos %= 8;
+	res <<= pos;	// res *= 2^pos
+	value |= res;
+	return res;
+}
+
 static byte getBit(uint pos, byte value) {
 	byte mask = 0b00000001;
 	pos %= 8;
@@ -27,7 +35,7 @@ UDirGraph::UDirGraph(uint _V, byte** mat) : Graph(_V){
 												// (B + 7) / 8	is count of new bytes for necessary bits
 	for (size_t i = 0; i < _V; i++) {
 		uint skippedBits = (i + 1) * (i + 2) / 2;
-		for (size_t j = i + 1; j < _V; j++) {						// i + 1 is shift for skipping unnecessary fields
+		for (size_t j = i + 1; j < _V; j++) {	// i + 1 is shift for skipping unnecessary fields
 			uint matBits = i * _V + j;
 			uint bit = matBits - skippedBits;
 			uint byte = bit / 8;
@@ -67,23 +75,65 @@ int UDirGraph::getDegree(uint _Vertex) const {
 	}
 	uint res = 0;
 	for (size_t v = 1; v < _Vertex; v++) {						// check all vertexes littler than _Vertex
-		uint offset = _Vertex - v - 1;						// how many bits we have to shift to find [v][_Vertex] field
+		uint offset = _Vertex - v - 1;							// how many bits we have to shift to find [v][_Vertex] field
 		uint compliment = this->V - v;
-		uint base = v * this->V - v * (v + 1) / 2 - compliment;			// it's like begin of segment, but for matrix row
+		uint base = v * this->V - v * (v + 1) / 2 - compliment;	// it's like begin of segment, but for matrix row
 		uint address = base + offset;
 		uint byte = address / 8;
 		byte_t isConnect = getBit(offset, this->connectivityVector[byte]);
-		res += isConnect;							// getBit() returns 1 or 0
-	}										// here checked all vertexes littler than _Vertex
-											// let's check others, what bigger than _Vertex
+		res += isConnect;										// getBit() returns 1 or 0
+	}															// here checked all vertexes littler than _Vertex
+																// let's check others, what bigger than _Vertex
 	uint _compliment = this->V - _Vertex;						// how many bits contains about _Vertex's connectivity
 	uint _base = _Vertex * this->V - _Vertex * (_Vertex + 1) / 2 - _compliment;
 	for (size_t i = 0; i < _compliment; i++) {
 		uint byte = (_base + _compliment) / 8;
 		byte_t field = this->connectivityVector[byte];
-		res += getBit(i, field);						// look at definition of 'getBit()': there i %= 8 too
+		res += getBit(i, field);								// look at definition of 'getBit()': there i %= 8 too
 	}
 	return res;
+}
+
+const bool UDirGraph::isConnected(uint _in, uint _out) const {
+	bool res = false;
+	if (_in > this->V || _out > this->V) {
+		return res;
+	}
+	if (_in > _out) {													// _in have to be littlest
+		uint temp = _out;
+		_out = _in;
+		_in = temp;
+	}
+	uint complimentIN = this->V - _in;
+	uint baseIN = _in * this->V - _in * (_in + 1) / 2 - complimentIN;	// in bits everywhere!
+	uint offset = _out - _in - 1;
+	uint address = baseIN + offset;
+	uint byte = (address + 7) / 8;
+	uint bit = address % 8;
+	res = getBit(bit, this->connectivityVector[byte]);
+	return res;
+}
+
+const uint UDirGraph::getEdges() const {
+	return this->E;
+}
+
+void UDirGraph::setEdge(uint _in, uint _out) {
+	if (_in > this->V || _out > this->V) {
+		return;
+	}
+	if (_in > _out) {													// _in have to be littlest
+		uint temp = _out;
+		_out = _in;
+		_in = temp;
+	}
+	uint complimentIN = this->V - _in;
+	uint baseIN = _in * this->V - _in * (_in + 1) / 2 - complimentIN;	// in bits everywhere!
+	uint offset = _out - _in - 1;
+	uint address = baseIN + offset;
+	uint byte = (address + 7) / 8;
+	uint bit = address % 8;
+	setBit(address, this->connectivityVector[byte]);
 }
 
 Graph& UDirGraph::operator+(Graph& _Right)
@@ -92,7 +142,7 @@ Graph& UDirGraph::operator+(Graph& _Right)
 }
 
 Graph& UDirGraph::operator+(std::stack<uint>& _Right)
-{
+{ 
 	return *this;
 }
 
@@ -103,6 +153,9 @@ Graph& UDirGraph::operator-(Graph& _Right)
 
 Graph& UDirGraph::operator-(uint _Vertex)
 {
+	if (_Vertex > this->V) {
+		return *this;
+	}
 	return *this;
 }
 

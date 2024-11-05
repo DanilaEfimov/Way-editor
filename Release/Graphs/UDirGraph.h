@@ -3,8 +3,6 @@
 
 #include"Graph.h"
 
-typedef unsigned char byte_t, byte;
-
 class UDirGraph : public Graph								// most primitive graph class
 {
 protected:
@@ -18,6 +16,10 @@ public:
 	//===========	ACCESSORS	===========
 	virtual void print(std::fstream& _to) const override;
 	virtual int getDegree(uint _Vertex) const;
+	virtual const bool isConnected(uint _in, uint _out) const;
+	const uint getEdges() const;
+
+	virtual void setEdge(uint _in, uint _out);
 
 	// ===========	 MATH	===========
 	virtual Graph& operator+(Graph& _Right) override;
@@ -29,7 +31,7 @@ public:
 
 /***************************************************************
 * UDirGraph performed like bit vector of up-half (upper main diagonal)
-* i.e. for V vertex we have (V * V + 1) / 2 BITS instead V * V BYTES
+* i.e. for V vertex we have V * (V - 1) / 2 BITS instead V * V BYTES
 * it cuts memory amount for 16 times.
 * e.g. full 3-vertex graph connectivity matrix:
 * 
@@ -42,8 +44,8 @@ public:
 *						3|	1	|	1	|	0
 * 
 * Here we have to get only three bits: [1][2], [1][3], [2][3]
-* and these bits written into vector string by string: "1 1 1 0 0 0 0 0"
-* instead 0x00FFFFFF00FFFFFF00 -> 0b111	(9 bytes to 1)
+* and these bits written into vector row by row: "1 1 1 0 0 0 0 0"
+* instead 0x00FFFFFF00FFFFFF00 -> 0b11100000	(9 bytes to 1)
 ****************************************************************/
 
 #endif 
