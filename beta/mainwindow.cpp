@@ -51,6 +51,7 @@ MainWindow::~MainWindow() { // fix it soon
     for(auto& g : graphs){
         delete g.second;
     }
+    qApp->exit(0);
 }
 
 void MainWindow::connectViewMenu() {
@@ -135,7 +136,8 @@ void MainWindow::updateTexts(std::string &answer) {
     QString newText = this->graphs[current]->show();
     ui->infoGraph->setText(newText);
     if(answer.find("ERROR") != std::string::npos ||
-        answer.find("WARNING") != std::string::npos){
+        answer.find("WARNING") != std::string::npos ||
+        answer.find("ANSWER") != std::string::npos){
         errorCall = true;
         // here we check what was last string
     }

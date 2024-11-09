@@ -324,9 +324,9 @@ std::string Graph::command(const std::string &parameters, int code) {
             this->eraseEdge(list);
         }
         break;
-    case EulerCycle:    // EulerCycle 0 [direction bit] {0 - directed cycle; 1 - undirected}
+    case EulerCycle:    // EulerCycle 0 [direction bit] {1 - directed cycle; 0 - undirected}
         if(true){
-            bool directionBit = false; // default graph is directed
+            bool directionBit = true; // default graph is directed
             if(!ss.eof()){
                 ss >> directionBit;
             }
@@ -362,12 +362,49 @@ std::string Graph::command(const std::string &parameters, int code) {
     case Blocks:
         break;
     case MaxV:
+        if(true){
+            static uint maxV;
+            static float weight;
+            for(auto& v : this->vertexWeights){
+                if(v.second > weight){
+                    weight = v.second;
+                    maxV = v.first;
+                }
+            }
+            answer += INFO_ANSWER; answer += '('; answer += itos(maxV);
+            answer += ','; answer += ftos(weight); answer += ")\n";
+        }
         break;
     case MaxE:
+        if(true){
+            static edge maxE;
+            static float weight;
+            for(auto& e : this->edgeWeights){
+                if(e.second > weight){
+                    weight = e.second;
+                    maxE = e.first;
+                }
+            }
+            answer += INFO_ANSWER; answer += '('; answer += itos(maxE.first) += itos(maxE.second);
+            answer += ','; answer += ftos(weight); answer += ")\n";
+        }
         break;
     case Degree:
+        if(true){
+            uint degree;
+            uint vertex;
+            ss >> vertex;
+            degree = this->connectivityList[vertex].size();
+            answer += INFO_ANSWER;
+            answer += itos(degree); //answer += "\n";
+        }
         break;
     case VW:
+        if(true){
+            int mode;
+            ss >> mode;
+
+        }
         break;
     case EW:
         break;
@@ -379,10 +416,11 @@ std::string Graph::command(const std::string &parameters, int code) {
         break;
     default:
         undefinedError();
-        return CMD_FLAG;
+        return UNDEFINED_ERROR;
         break;
     }
 
+    ss.clear();
     return answer;
 }
 
@@ -620,15 +658,15 @@ inline float Graph::getWeight(bool isVertex, edge p) const {
                 weight = this->vertexWeights.find(p.first)->second;
             }
             else{
-                return undefinedError();
+                return (float)undefinedError();
             }
         }
         else{
-            return errorMassege(UNDEFINED_VERTEX);
+            return (float)errorMassege(UNDEFINED_VERTEX);
         }
         return weight;
     }
-    else{
+    else {
         if(this->edgeWeights.find(p) !=
             this->edgeWeights.end()){
             if(this->vertexWeights.find(p.first)->second > 0.0f){

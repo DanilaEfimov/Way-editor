@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QPalette>
-#include<QDateTime>
+#include <QDateTime>
 #include <QIcon>
 #include <QTextEdit>
 #include <map>

@@ -5,6 +5,7 @@
 #include<set>
 #include<stack>
 #include<string>
+#include<sstream>
 #include<QString>
 #include<QMessageBox>
 
@@ -26,13 +27,14 @@
 #define UNDEFINED_VERTEX "ERROR::FAILED_TO_FIND_VERTEX\n"
 #define DENGEROUS_PARAMETER "WARNING::INPUT_CAN_BE_DANGEROUS\n"
 #define CMD_FLAG ""
-// COMMANDS RETURNS
+//      COMMANDS ANSWERS
+#define INFO_ANSWER "ANSWER:: "
 #define IMPOSIBLE_TO_FIND_EULERCYCLE "WARNING::CANNOT_FIND_EULER_CYCLE\n"
 
 typedef unsigned int uint;
-typedef std::pair<unsigned int, unsigned int> edge, wv; // weighted vertex
+typedef std::pair<unsigned int, unsigned int> edge, pch; // perent-child
 typedef std::stack<std::stack<unsigned int>> cycleBase, blocks;
-typedef std::multiset<wv> tree;
+typedef std::multiset<pch> tree;
 typedef std::pair<std::string, int> callID;
 
 enum entity {
@@ -111,12 +113,12 @@ static int errorMassege(const char* massege){
     return fail.exec();
 }
 
-static char dtoch(uint n){ // digit to char
+inline char dtoch(uint n){ // digit to char
     int _n = n % 10; // to digit
     return _n + 0x30; // to char
 }
 
-static std::string itos(uint n){ // integer to string
+inline std::string itos(uint n){ // integer to string
     if(!n) {
         return "0";
     }
@@ -130,6 +132,13 @@ static std::string itos(uint n){ // integer to string
         res += revers.top();
         revers.pop();
     }
+    return res;
+}
+
+inline std::string ftos(float n){
+    std::stringstream ss;
+    ss << n;
+    std::string res(ss.str());
     return res;
 }
 
