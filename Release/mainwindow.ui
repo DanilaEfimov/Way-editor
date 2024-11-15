@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>428</width>
+    <height>345</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>428</width>
+    <height>345</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="mainLayout">
+   <property name="minimumSize">
+    <size>
+     <width>428</width>
+     <height>306</height>
+    </size>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="Console">
+      <item>
+       <widget class="QTabWidget" name="inputArea">
+        <widget class="QWidget" name="workArea">
+         <attribute name="title">
+          <string>Tab 1</string>
+         </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QTextEdit" name="notes"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="nothing">
+         <attribute name="title">
+          <string>Tab 2</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTextEdit" name="outputArea"/>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="mainMenu">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>428</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="File">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="New_file"/>
+    <addaction name="Save"/>
+   </widget>
+   <widget class="QMenu" name="View">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="Black_theme"/>
+    <addaction name="White_theme"/>
+    <addaction name="Right_mode"/>
+    <addaction name="Left_mode"/>
+   </widget>
+   <widget class="QMenu" name="Command_line">
+    <property name="title">
+     <string>Command line</string>
+    </property>
+    <addaction name="Help"/>
+    <addaction name="Hystory"/>
+   </widget>
+   <addaction name="File"/>
+   <addaction name="View"/>
+   <addaction name="Command_line"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="New_file">
+   <property name="text">
+    <string>new file</string>
+   </property>
+  </action>
+  <action name="Save">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="Black_theme">
+   <property name="text">
+    <string>Black theme</string>
+   </property>
+  </action>
+  <action name="White_theme">
+   <property name="text">
+    <string>white theme</string>
+   </property>
+  </action>
+  <action name="Right_mode">
+   <property name="text">
+    <string>right mode</string>
+   </property>
+  </action>
+  <action name="Left_mode">
+   <property name="text">
+    <string>left mode</string>
+   </property>
+  </action>
+  <action name="Help">
+   <property name="text">
+    <string>Help</string>
+   </property>
+  </action>
+  <action name="Hystory">
+   <property name="text">
+    <string>Hystory</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
