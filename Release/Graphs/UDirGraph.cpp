@@ -7,7 +7,7 @@ static byte setBit(uint pos = 0) {
 	return res;
 }
 
-static byte setBit(uint pos = 0, byte& value) {		// for change bit
+static byte setBit(uint pos, byte& value) {		// for change bit
 	byte res = 0b00000001;
 	pos %= 8;
 	res <<= pos;	// res *= 2^pos
@@ -94,11 +94,14 @@ int UDirGraph::getDegree(uint _Vertex) const {
 	return res;
 }
 
-const bool UDirGraph::isConnected(uint _in, uint _out) const {
+bool UDirGraph::isConnected(uint _in, uint _out) const {                // can't be equals arguments
 	bool res = false;
 	if (_in > this->V || _out > this->V) {
 		return res;
 	}
+    if(_in == _out){
+        return res;
+    }
 	if (_in > _out) {													// _in have to be littlest
 		uint temp = _out;
 		_out = _in;
@@ -114,14 +117,17 @@ const bool UDirGraph::isConnected(uint _in, uint _out) const {
 	return res;
 }
 
-const uint UDirGraph::getEdges() const {
+uint UDirGraph::getEdges() const {
 	return this->E;
 }
 
-void UDirGraph::setEdge(uint _in, uint _out) {
+void UDirGraph::setEdge(uint _in, uint _out) {                          // can't be equals arguments
 	if (_in > this->V || _out > this->V) {
 		return;
 	}
+    if(_in == _out){
+        return;
+    }
 	if (_in > _out) {													// _in have to be littlest
 		uint temp = _out;
 		_out = _in;
@@ -133,26 +139,22 @@ void UDirGraph::setEdge(uint _in, uint _out) {
 	uint address = baseIN + offset;
 	uint byte = (address + 7) / 8;
 	uint bit = address % 8;
-	setBit(address, this->connectivityVector[byte]);
+    setBit(bit, this->connectivityVector[byte]);
 }
 
-Graph& UDirGraph::operator+(Graph& _Right)
-{
+Graph& UDirGraph::operator+(Graph& _Right) {
 	return *this;
 }
 
-Graph& UDirGraph::operator+(std::stack<uint>& _Right)
-{ 
+Graph& UDirGraph::operator+(std::stack<uint>& _Right) {
 	return *this;
 }
 
-Graph& UDirGraph::operator-(Graph& _Right)
-{
+Graph& UDirGraph::operator-(Graph& _Right) {
 	return *this;
 }
 
-Graph& UDirGraph::operator-(uint _Vertex)
-{
+Graph& UDirGraph::operator-(uint _Vertex) {
 	if (_Vertex > this->V) {
 		return *this;
 	}

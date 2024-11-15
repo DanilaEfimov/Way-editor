@@ -10,14 +10,14 @@ protected:
 
 	byte_t* connectivityVector;								// byte-vector of connectivity matrix
 public:
-	UDirGraph(uint _V, byte** mat);
+    UDirGraph(uint _V = 0, byte** mat = nullptr);
 	virtual ~UDirGraph() override;
 
 	//===========	ACCESSORS	===========
 	virtual void print(std::fstream& _to) const override;
 	virtual int getDegree(uint _Vertex) const;
-	virtual const bool isConnected(uint _in, uint _out) const;
-	const uint getEdges() const;
+    virtual bool isConnected(uint _in, uint _out) const;
+    uint getEdges() const;
 
 	virtual void setEdge(uint _in, uint _out);
 
