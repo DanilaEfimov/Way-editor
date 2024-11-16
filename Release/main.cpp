@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     std::srand(time(0));
-    int size = 1000;
+    int size = rand()%200 + 100;
     byte** mat = new byte*[size];
     for(int i = 0; i < size; i++){
         mat[i] = new byte[size];
