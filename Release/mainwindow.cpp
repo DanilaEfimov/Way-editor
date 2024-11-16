@@ -10,8 +10,7 @@ std::map<uint, QTextEdit*> MainWindow::fields = std::map<uint, QTextEdit*>{};
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-{
+    , ui(new Ui::MainWindow) {
     ui->setupUi(this);
     this->initWindow();
     this->binding();
