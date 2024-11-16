@@ -1,14 +1,15 @@
 #ifndef UDIRGRAPH_H
 #define UDIRGRAPH_H
+#define STATIC_MEMORY 48U   // 2 bytes from this->V + 4 bytes from this->E
 
 #include"Graph.h"
 
 class UDirGraph : public Graph								// most primitive graph class
 {
 protected:
-	uint E;
+    uint E;
+    byte_t* connectivityVector;                             // byte-vector of connectivity matrix
 
-	byte_t* connectivityVector;								// byte-vector of connectivity matrix
 public:
     UDirGraph(uint _V = 0, byte** mat = nullptr);
 	virtual ~UDirGraph() override;
@@ -22,11 +23,11 @@ public:
 	virtual void setEdge(uint _in, uint _out);
 
 	// ===========	 MATH	===========
-	virtual Graph& operator+(Graph& _Right) override;
+    virtual Graph& operator+(const Graph& _Right) override;
 	virtual Graph& operator+(std::stack<uint>& _Right) override;
-	virtual Graph& operator-(Graph& _Right) override;
+    virtual Graph& operator-(const Graph& _Right) override;
 	virtual Graph& operator-(uint _Vertex) override;
-	virtual int operator()(uint _Vertex) override;
+    virtual int operator()(uint _Vertex) const override;
 };
 
 /***************************************************************

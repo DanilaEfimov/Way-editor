@@ -1,4 +1,5 @@
 #include "UDirGraph.h"
+#include<bitset>
 
 static byte setBit(uint pos = 0) {
 	byte res = 0b00000001;
@@ -27,8 +28,7 @@ UDirGraph::UDirGraph(uint _V, byte** mat) : Graph(_V){
 	this->E = 0;
 	if (mat == nullptr) {
 		this->V = 0;
-		this->connectivityVector = nullptr;
-												// empty graph branch
+        this->connectivityVector = nullptr;     // empty graph branch
 	}
 	this->connectivityVector = new byte[(_V * (_V - 1) / 2 + 7) / 8] {false};
 												// _V * (_V - 1) / 2 = B is count of necessary bits of matrix, half without diagonal
@@ -56,7 +56,10 @@ void UDirGraph::print(std::fstream& _to) const {
 	if (!_to.is_open()) {
 		return;
 	}
-	_to << "\nbit vector of connectivity mat:\n";
+    _to << "\nbit descriptor:\n";
+    std::bitset<32> edges(this->E);
+    std::bitset<16> vertexes(this->V);
+    _to << vertexes << ' ' << edges << ' ';
 	uint bytes = ((this->V * this->V + 1) / 2 + 7) / 8;
 	uint bits = this->V * (this->V - 1) / 2;
 	for (size_t base = 0; base < bytes; base++) {
@@ -67,6 +70,8 @@ void UDirGraph::print(std::fstream& _to) const {
 			_to << (int)getBit(offset, value);
 		}
 	}
+    uint size = STATIC_MEMORY + ((this->V*(this->V-1)/2+7)/8)*8;    // in bits everywhere!
+    _to << "\n" << size << std::endl;
 }
 
 int UDirGraph::getDegree(uint _Vertex) const {
@@ -87,7 +92,7 @@ int UDirGraph::getDegree(uint _Vertex) const {
 	uint _compliment = this->V - _Vertex;						// how many bits contains about _Vertex's connectivity
 	uint _base = _Vertex * this->V - _Vertex * (_Vertex + 1) / 2 - _compliment;
 	for (size_t i = 0; i < _compliment; i++) {
-		uint byte = (_base + _compliment) / 8;
+        uint byte = (_base + i) / 8;
 		byte_t field = this->connectivityVector[byte];
 		res += getBit(i, field);								// look at definition of 'getBit()': there i %= 8 too
 	}
@@ -96,11 +101,8 @@ int UDirGraph::getDegree(uint _Vertex) const {
 
 bool UDirGraph::isConnected(uint _in, uint _out) const {                // can't be equals arguments
 	bool res = false;
-	if (_in > this->V || _out > this->V) {
+    if (_in > this->V || _out > this->V || _in == _out) {
 		return res;
-	}
-    if(_in == _out){
-        return res;
     }
 	if (_in > _out) {													// _in have to be littlest
 		uint temp = _out;
@@ -122,11 +124,8 @@ uint UDirGraph::getEdges() const {
 }
 
 void UDirGraph::setEdge(uint _in, uint _out) {                          // can't be equals arguments
-	if (_in > this->V || _out > this->V) {
+    if (_in > this->V || _out > this->V || _in == _out) {
 		return;
-	}
-    if(_in == _out){
-        return;
     }
 	if (_in > _out) {													// _in have to be littlest
 		uint temp = _out;
@@ -142,7 +141,7 @@ void UDirGraph::setEdge(uint _in, uint _out) {                          // can't
     setBit(bit, this->connectivityVector[byte]);
 }
 
-Graph& UDirGraph::operator+(Graph& _Right) {
+Graph& UDirGraph::operator+(const Graph& _Right) {
 	return *this;
 }
 
@@ -150,7 +149,7 @@ Graph& UDirGraph::operator+(std::stack<uint>& _Right) {
 	return *this;
 }
 
-Graph& UDirGraph::operator-(Graph& _Right) {
+Graph& UDirGraph::operator-(const Graph& _Right) {
 	return *this;
 }
 
@@ -161,6 +160,6 @@ Graph& UDirGraph::operator-(uint _Vertex) {
 	return *this;
 }
 
-int UDirGraph::operator()(uint _Vertex) {
+int UDirGraph::operator()(uint _Vertex) const {
 	return this->getDegree(_Vertex);
 }
