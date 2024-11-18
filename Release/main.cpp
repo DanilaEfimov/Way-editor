@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     std::srand(time(0));
-    int size = rand()%200 + 100;
+    int size = rand()%50 + 20;
     byte** mat = new byte*[size];
     for(int i = 0; i < size; i++){
         mat[i] = new byte[size];
@@ -22,9 +22,11 @@ int main(int argc, char *argv[])
     std::fstream output("E:/Qt creator/Way_Editor/test.txt");
     G1.print(output);
     G2.print(output);
-    output << G1.getDegree(rand()%size+1,OUT) << std::endl;
-    output << G1.getDegree(rand()%size+1, IN) << std::endl;
-    output << G2.getDegree(rand()%size+1) << std::endl;
+    output.close();
+    for(size_t i = 0; i < size; i++){
+        delete mat[i];
+    }
+    delete[] mat;
     w.show();
     return a.exec();
 }

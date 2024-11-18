@@ -94,7 +94,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="New_file">
    <property name="text">
-    <string>new file</string>
+    <string>New file</string>
    </property>
   </action>
   <action name="Save">
@@ -109,17 +109,17 @@
   </action>
   <action name="White_theme">
    <property name="text">
-    <string>white theme</string>
+    <string>White theme</string>
    </property>
   </action>
   <action name="Right_mode">
    <property name="text">
-    <string>right mode</string>
+    <string>Right mode</string>
    </property>
   </action>
   <action name="Left_mode">
    <property name="text">
-    <string>left mode</string>
+    <string>Left mode</string>
    </property>
   </action>
   <action name="Help">

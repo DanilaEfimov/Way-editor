@@ -9,17 +9,23 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Error.cpp \
     Graphs/DirGraph.cpp \
     Graphs/Graph.cpp \
     Graphs/UDirGraph.cpp \
+    Graphs/UDWGraph.cpp \
+    Parser.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
+    Error.h \
     General.h \
     Graphs/DirGraph.h \
     Graphs/Graph.h \
     Graphs/UDirGraph.h \
+    Graphs/UDWGraph.h \
+    Parser.h \
     mainwindow.h
 
 FORMS += \
@@ -29,3 +35,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    way_editor_icon.png

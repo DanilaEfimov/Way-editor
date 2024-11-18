@@ -28,6 +28,7 @@ private:
 
     // INITIALIZE
     void initMenu();
+    void initWidgetsView();
     void initInputArea();
     void initOutputArea();
     void initWindow();
