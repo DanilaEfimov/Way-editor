@@ -29,6 +29,7 @@ UDirGraph::UDirGraph(uint _V, byte** mat) : Graph(_V){
 	if (mat == nullptr) {
 		this->V = 0;
         this->connectivityVector = nullptr;     // empty graph branch
+        return;
 	}
 	this->connectivityVector = new byte[(_V * (_V - 1) / 2 + 7) / 8] {false};
 												// _V * (_V - 1) / 2 = B is count of necessary bits of matrix, half without diagonal
@@ -113,7 +114,7 @@ bool UDirGraph::isConnected(uint _in, uint _out) const {                // can't
 	uint baseIN = _in * this->V - _in * (_in + 1) / 2 - complimentIN;	// in bits everywhere!
 	uint offset = _out - _in - 1;
 	uint address = baseIN + offset;
-	uint byte = (address + 7) / 8;
+    uint byte = address / 8;
 	uint bit = address % 8;
 	res = getBit(bit, this->connectivityVector[byte]);
 	return res;
@@ -139,6 +140,21 @@ void UDirGraph::setEdge(uint _in, uint _out) {                          // can't
 	uint byte = (address + 7) / 8;
 	uint bit = address % 8;
     setBit(bit, this->connectivityVector[byte]);
+}
+
+std::stack<uint>& UDirGraph::BFS(uint _root) const {
+    static std::stack<uint> _BFS = std::stack<uint>{};
+    return _BFS;
+}
+
+std::stack<uint>& UDirGraph::DFS(uint _root) const {
+    static std::stack<uint> _DFS = std::stack<uint>{};
+    return _DFS;
+}
+
+std::stack<uint>& UDirGraph::EulerCycle(uint _begin) const {
+    static std::stack<uint> _EulerCycle = std::stack<uint>{};
+    return _EulerCycle;
 }
 
 Graph& UDirGraph::operator+(const Graph& _Right) {

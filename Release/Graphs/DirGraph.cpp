@@ -26,10 +26,11 @@ static byte getBit(uint pos, byte value) {
 
 DirGraph::DirGraph(uint _V, byte **mat) : Graph(_V) {
     this->E = 0;
-    if(mat == nullptr){
+    if(mat == nullptr){                 // empty graph
         this->V = 0;
         this->upConnectivityMat = nullptr;
         this->downConnectivityMat = nullptr;
+        return;
     }
     this->upConnectivityMat = new byte[(_V*(_V-1)/2 + 7)/8]{0};         // half of connectivity matrix upper diagonal
     this->downConnectivityMat = new byte[(_V*(_V-1)/2 + 7)/8]{0};       // half of connectivity matrix lower diagonal
@@ -122,8 +123,23 @@ int DirGraph::getDegree(uint _Vertex, bool io) const {          // io: in - fals
     return degree;
 }
 
-bool DirGraph::isConnected(uint _in, uint _out) const {                // can be equals arguments
-    return 1;
+bool DirGraph::isConnected(uint _in, uint _out) const {                // can't be equals arguments
+    bool res = false;
+    if (_in > this->V || _out > this->V || _in == _out) {
+        return res;
+    }
+    uint complimentIN = this->V - _in;
+    uint baseIN = _in * this->V - _in * (_in + 1) / 2 - complimentIN;	// in bits everywhere!
+    uint offset = _out - _in - 1;
+    uint address = baseIN + offset;
+    uint byte = address / 8;
+    uint bit = address % 8;
+    res = getBit(bit, _in > _out ? this->upConnectivityMat[byte] : this->downConnectivityMat[byte]);
+    return res;
+    // here we have not difference between _in and _out. We have't swap it for _in < _out (look at UDirGraph)
+    // here if _in > _out then we have to search such field of matrix, where i > j
+    // it's about this->upConnectivityMat, else i < j -> this->downConnectivityMat
+    // look at ternar operator in prelast line
 }
 
 uint DirGraph::getEdges() const {
@@ -131,31 +147,53 @@ uint DirGraph::getEdges() const {
 }
 
 void DirGraph::setEdge(uint _in, uint _out) {                          // can't be equals arguments
+    if (_in > this->V || _out > this->V || _in == _out) {
+        return;
+    }
+    uint complimentIN = this->V - _in;
+    uint baseIN = _in * this->V - _in * (_in + 1) / 2 - complimentIN;	// in bits everywhere!
+    uint offset = _out - _in - 1;
+    uint address = baseIN + offset;
+    uint byte = (address + 7) / 8;
+    uint bit = address % 8;
+    setBit(bit, _in > _out ? this->upConnectivityMat[byte] : this->downConnectivityMat[byte]);
+    // here all like in isConnected. Look at DirGraph::isConnected() description
+    // only there we return getBit(...) instead setBit(...)
+}
 
+std::stack<uint>& DirGraph::BFS(uint _root) const {
+    static std::stack<uint> _BFS = std::stack<uint>{};
+    return _BFS;
+}
+
+std::stack<uint>& DirGraph::DFS(uint _root) const {
+    static std::stack<uint> _DFS = std::stack<uint>{};
+    return _DFS;
+}
+
+std::stack<uint>& DirGraph::EulerCycle(uint _begin) const {
+    static std::stack<uint> _EulerCycle = std::stack<uint>{};
+    return _EulerCycle;
 }
 
 Graph& DirGraph::operator+(const Graph& _Right){
-
+    return *this;
 }
 
-Graph &DirGraph::operator+(std::stack<uint> &_Right)
-{
-
+Graph &DirGraph::operator+(std::stack<uint> &_Right) {
+    return *this;
 }
 
-Graph &DirGraph::operator-(const Graph &_Right)
-{
-
+Graph &DirGraph::operator-(const Graph &_Right) {
+    return *this;
 }
 
 Graph& DirGraph::operator-(uint _Vertex){
-
+    return *this;
 }
 
-int DirGraph::operator()(uint _Vertex) const
-{
-
+int DirGraph::operator()(uint _Vertex) const {
+    return this->getDegree(_Vertex, OUT);
+    // it hard to choose IN | OUT
+    // but I think that usefull OUT for bypass algorithms
 }
-
-
-
