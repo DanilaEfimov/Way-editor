@@ -21,7 +21,7 @@ public:
 
 	// ===========	 MATH	===========
     virtual Graph& operator+(const Graph& _Right) = 0;			// union of graphs
-    virtual Graph& operator+(std::stack<uint>& _Right = std::stack<uint>{}) = 0;		// adding new vertex
+    virtual Graph& operator+(std::stack<uint>& _Right) = 0;		// adding new vertex
     virtual Graph& operator-(const Graph& _Right) = 0;			// difference of graphs
 	virtual Graph& operator-(uint _Vertex) = 0;					// deleting vertex
     virtual int operator()(uint _Vertex) const = 0;				// degree of _Vertex (-1 for undefined _V)

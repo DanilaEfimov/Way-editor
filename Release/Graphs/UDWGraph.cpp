@@ -1,6 +1,29 @@
 #include "UDWGraph.h"
 #include<cmath>
 
+static byte setBit(uint pos = 0) {
+    byte res = 0b00000001;
+    pos %= 8;
+    res <<= pos;	// res *= 2^pos
+    return res;
+}
+
+static byte setBit(uint pos, byte& value) {		// for change bit
+    byte res = 0b00000001;
+    pos %= 8;
+    res <<= pos;	// res *= 2^pos
+    value |= res;
+    return res;
+}
+
+static byte getBit(uint pos, byte value) {
+    byte mask = 0b00000001;
+    pos %= 8;
+    mask <<= pos;	// res *= 2^pos
+    byte res = value & mask ? 0b00000001 : 0b00000000;
+    return res;
+}
+
 static void setDefaultWeight(word* weights, uint _V, double weight){
     for(size_t i = 0; i < _V; i++){
         weights[i] = weight;
@@ -38,7 +61,21 @@ bool UDWGraph::isConnected(uint _in, uint _out) const
 
 void UDWGraph::setEdge(uint _in, uint _out)
 {
-
+    if (_in > this->V || _out > this->V || _in == _out) {
+        return;
+    }
+    if (_in > _out) {													// _in have to be littlest
+        uint temp = _out;
+        _out = _in;
+        _in = temp;
+    }
+    uint complimentIN = this->V - _in;
+    uint baseIN = _in * this->V - _in * (_in + 1) / 2 - complimentIN;	// in bits everywhere!
+    uint offset = _out - _in - 1;
+    uint address = baseIN + offset;
+    uint byte = (address + 7) / 8;
+    uint bit = address % 8;
+    setBit(bit, this->connectivityVector[byte]);
 }
 
 void UDWGraph::setNormalVWeights() {
@@ -72,6 +109,16 @@ void UDWGraph::setMedianVWeights() {
     }
     delete[] degreeSum;
     delete[] degrees;
+}
+
+void UDWGraph::setNormalEWeights()
+{
+
+}
+
+void UDWGraph::setMedianEWeights()
+{
+
 }
 
 void UDWGraph::setVWeight(uint _Vertex, double _value) {

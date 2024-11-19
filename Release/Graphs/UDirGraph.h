@@ -9,7 +9,6 @@ class UDirGraph : public Graph								// most primitive graph class
 protected:
     uint E;
     byte_t* connectivityVector;                             // byte-vector of connectivity matrix
-
 public:
     UDirGraph(uint _V = 0, byte** mat = nullptr);
 	virtual ~UDirGraph() override;
