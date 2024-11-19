@@ -9,11 +9,11 @@ static void setDefaultWeight(word* weights, uint _V, double weight){
 
 UDWGraph::UDWGraph(uint _V, byte** mat, double weight) : UDirGraph(_V, mat){
     if(this->V == 0 || this->connectivityVector == nullptr){
-        this->weights = nullptr;
+        this->vWeights = nullptr;
         return;
     }
-    this->weights = new word[this->V];
-    setDefaultWeight(this->weights, this->V, weight);
+    this->vWeights = new word[this->V];
+    setDefaultWeight(this->vWeights, this->V, weight);
 }
 
 UDWGraph::~UDWGraph()
@@ -41,15 +41,15 @@ void UDWGraph::setEdge(uint _in, uint _out)
 
 }
 
-void UDWGraph::setNormalWeights() {
+void UDWGraph::setNormalVWeights() {
     for(size_t i = 0; i < this->V; i++){
-        this->weights[i] = 1.0f;
+        this->vWeights[i] = 1.0f;
     }
     // like this->setRandomWeights(0);
     // look at setRandomWeights definition
 }
 
-void UDWGraph::setMedianWeights() {
+void UDWGraph::setMedianVWeights() {
     if(this->V == 0){
         return;
     }
@@ -68,33 +68,34 @@ void UDWGraph::setMedianWeights() {
         }
     }
     for(size_t i = 0; i < this->V; i++){
-        this->weights[i] = degrees[i] ? double(degreeSum[i] / degrees[i]) : 0.0f;
+        this->vWeights[i] = degrees[i] ? double(degreeSum[i] / degrees[i]) : 0.0f;
     }
     delete[] degreeSum;
     delete[] degrees;
 }
 
-void UDWGraph::setWeight(uint _Vertex, double _value) {
+void UDWGraph::setVWeight(uint _Vertex, double _value) {
     if(_Vertex == 0 || _Vertex > this->V){
         return;
     }
-    this->weights[_Vertex] = _value;
+    this->vWeights[_Vertex] = _value;
 }
 
-void UDWGraph::setRandomWeights(uint _seed1, uint _seed2, double _begin, double _end) {
+void UDWGraph::setRandomWeights(uint _seedV, uint _seedE, double _begin, double _end) {
     if(_begin > _end){
         return;
     }
     for(size_t i = 0; i < this->V; i++){
         double weight = (_end + _begin)/2.0f;
-        double k = sin(_seed1 + _seed2);
+        double k = sin(2.0f * atan(_seedV));
         weight += k * (_end - weight)/2.0f;
-        this->weights[i] = weight;
+        this->vWeights[i] = weight;
     }
     /*
     * this random weights performd median between _begin & _end
     * plus some value what turns median between _begin & _end
-    * by sinusoid sin(_seed1 + _seed2) [_seed2 = 0, _begin = 0, _end = 100]
+    * by sinusoid sin(2.0f * atan(_seed))
+    * [_seed1 = 0, _seed2 = 0, _begin = 0, _end = 100]
     */
 }
 

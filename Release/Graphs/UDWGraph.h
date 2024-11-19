@@ -9,7 +9,8 @@ typedef double word, word_t;
 class UDWGraph : public UDirGraph
 {
 protected:
-    word* weights; // + 64*V bits
+    word* vWeights; // + 64*V bits
+    word* eWeights; // + O(V*V) bits
 public:
     UDWGraph(uint _V = 0, byte** mat = nullptr, double weights = 0.0f);
     virtual ~UDWGraph() override;
@@ -19,10 +20,15 @@ public:
     virtual int getDegree(uint _Vertex) const override;
     virtual bool isConnected(uint _in, uint _out) const override;
     virtual void setEdge(uint _in, uint _out) override;
-    virtual void setNormalWeights();
-    virtual void setMedianWeights();
-    void setWeight(uint _Vertex, double _value);
-    void setRandomWeights(uint _seed1 = 0, uint _seed2 = 0, double _begin = 0.0, double _end = 100.0);
+    virtual void setNormalVWeights();
+    virtual void setMedianVWeights();
+    virtual void setNormalEWeights();
+    virtual void setMedianEWeights();
+    double getWeightV(uint _Vertex) const;
+    double getWeightE(uint _in, uint _out) const;
+    void setVWeight(uint _Vertex, double _value);
+    void setRandomWeights(uint _seedV = 0, uint _seedE = 0,
+                          double _begin = 0.0, double _end = 100.0);
 
     // ===========	 MATH	===========
     virtual std::stack<uint>& Dejcstra(uint _in, uint _out) const;
