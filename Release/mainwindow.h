@@ -36,7 +36,8 @@ private:
 
     friend void bindFileMenu(QMenuBar* mainMenu, MainWindow& mainWindow);
     friend void bindViewMenu(QMenuBar* mainMenu, MainWindow& mainWindow);
-    friend void bindInfoMenu(QMenuBar* mainMenu, MainWindow& mainWindow); // it's about Console line menu
+    friend void bindInfoMenu(QMenuBar* mainMenu, MainWindow& mainWindow);
+    // it's about Console line menu
 private slots:
     // MENUES
     // FILE MENU

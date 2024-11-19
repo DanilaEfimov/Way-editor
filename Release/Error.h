@@ -1,12 +1,17 @@
 #ifndef ERROR_H
 #define ERROR_H
 
+#include<QMessageBox>
+#include<QString>
 #include<exception>
 
-class error : public std::exception
+class Error : public std::exception
 {
 public:
-    error();
+    Error(const QString message);
+    virtual ~Error();
+
+    virtual void show() const;
 };
 
 #endif // ERROR_H

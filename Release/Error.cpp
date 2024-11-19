@@ -1,3 +1,3 @@
 #include "Error.h"
 
-error::error() {}
+Error::Error() {}
