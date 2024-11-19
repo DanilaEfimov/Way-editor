@@ -91,7 +91,7 @@
    <addaction name="View"/>
    <addaction name="Command_line"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="returns"/>
   <action name="New_file">
    <property name="text">
     <string>New file</string>

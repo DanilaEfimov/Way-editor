@@ -3,15 +3,18 @@
 
 #include<QMessageBox>
 #include<QString>
-#include<exception>
 
-class Error : public std::exception
+class Error
 {
+private:
+    QMessageBox* ErrorBox;
+    QString infoText;
 public:
     Error(const QString message);
     virtual ~Error();
 
-    virtual void show() const;
+    QString what() const;
+    int code() const;
 };
 
 #endif // ERROR_H

@@ -10,10 +10,13 @@ CONFIG += c++17
 
 SOURCES += \
     Error.cpp \
+    Graphs/DPseudoGraph.cpp \
     Graphs/DirGraph.cpp \
     Graphs/Graph.cpp \
     Graphs/UDirGraph.cpp \
     Graphs/UDWGraph.cpp \
+    Graphs/UPseudoGraph.cpp \
+    Graphs/WDGraph.cpp \
     Parser.cpp \
     main.cpp \
     mainwindow.cpp
@@ -21,10 +24,13 @@ SOURCES += \
 HEADERS += \
     Error.h \
     General.h \
+    Graphs/DPseudoGraph.h \
     Graphs/DirGraph.h \
     Graphs/Graph.h \
     Graphs/UDirGraph.h \
     Graphs/UDWGraph.h \
+    Graphs/UPseudoGraph.h \
+    Graphs/WDGraph.h \
     Parser.h \
     mainwindow.h
 

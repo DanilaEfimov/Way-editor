@@ -5,6 +5,7 @@
 #include <QTextEdit>
 #include <map>
 #include "Graphs/Graph.h"
+#include "Error.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -31,18 +32,19 @@ private:
     void initWidgetsView();
     void initInputArea();
     void initOutputArea();
+    void initStatusBar();
     void initWindow();
-    void binding();
 
-    friend void bindFileMenu(QMenuBar* mainMenu, MainWindow& mainWindow);
-    friend void bindViewMenu(QMenuBar* mainMenu, MainWindow& mainWindow);
-    friend void bindInfoMenu(QMenuBar* mainMenu, MainWindow& mainWindow);
+    void binding();
+    void bindFileMenu();
+    void bindViewMenu();
+    void bindInfoMenu();
     // it's about Console line menu
 private slots:
     // MENUES
     // FILE MENU
-    void newFile(const char* path);
-    void saveFile(const char* path) const;
+    void newFile();
+    void saveFile() const;
     // VIEW MENU
     void setBlackTheme();
     void setWhiteTheme();
