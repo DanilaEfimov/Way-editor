@@ -17,7 +17,7 @@ public:
 	virtual ~Graph();
 
 	//===========	ACCESSORS	===========
-	virtual void print(std::fstream& _to) const = 0;
+    virtual void print(std::fstream& _to) const = 0;
 
 	// ===========	 MATH	===========
     virtual Graph& operator+(const Graph& _Right) = 0;			// union of graphs
@@ -37,9 +37,13 @@ public:
 **			|
 **			+ UDirGraph ----+
 **			|				|
-**			|				+ UDWGraph	(weighted graph)
-**			|				|
 **			|				+ UPseudoGraph
+**			|				|
+**			|				+ UDWGraph -+
+**			|               |           |
+**			|               + Tree -----+ WTree
+**			|                           |
+**			|                           + BiTree
 **			|
 **			+ DirGraph -----+
 **							|

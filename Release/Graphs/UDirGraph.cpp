@@ -1,5 +1,6 @@
 #include "UDirGraph.h"
 #include<bitset>
+#include<queue>
 
 static byte setBit(uint pos = 0) {
 	byte res = 0b00000001;
@@ -162,6 +163,7 @@ Graph& UDirGraph::operator+(const Graph& _Right) {
 }
 
 Graph& UDirGraph::operator+(std::stack<uint>& _Right) {
+
 	return *this;
 }
 

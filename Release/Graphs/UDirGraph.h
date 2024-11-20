@@ -25,11 +25,12 @@ public:
     std::stack<uint>& BFS(uint _root = 1) const;
     std::stack<uint>& DFS(uint _root = 1) const;
     std::stack<uint>& EulerCycle(uint _begin = 1) const;
-    virtual Graph& operator+(const Graph& _Right) override;
-    virtual Graph& operator+(std::stack<uint>& _Right) override;
-    virtual Graph& operator-(const Graph& _Right) override;
-	virtual Graph& operator-(uint _Vertex) override;
-    virtual int operator()(uint _Vertex) const override;
+private:
+    Graph& operator+(const Graph& _Right) override;
+    Graph& operator+(std::stack<uint>& _Right) override;
+    Graph& operator-(const Graph& _Right) override;
+    Graph& operator-(uint _Vertex) override;
+    int operator()(uint _Vertex) const override;
 };
 
 /***************************************************************

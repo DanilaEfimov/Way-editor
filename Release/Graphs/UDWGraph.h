@@ -19,7 +19,7 @@ public:
     virtual void print(std::fstream& _to) const override;
     virtual int getDegree(uint _Vertex) const override;
     virtual bool isConnected(uint _in, uint _out) const override;
-    virtual void setEdge(uint _in, uint _out) override;
+    void setEdge(uint _in, uint _out) override;     // can't be virtual due to WTree, which don't able to setEdge
     virtual void setNormalVWeights();
     virtual void setMedianVWeights();
     virtual void setNormalEWeights();
@@ -29,14 +29,14 @@ public:
     void setVWeight(uint _Vertex, double _value);
     void setRandomWeights(uint _seedV = 0, uint _seedE = 0,
                           double _begin = 0.0, double _end = 100.0);
-
+private:
     // ===========	 MATH	===========
-    virtual std::stack<uint>& Dejcstra(uint _in, uint _out) const;
-    virtual Graph& operator+(const Graph& _Right) override;
-    virtual Graph& operator+(std::stack<uint>& _Right) override;
-    virtual Graph& operator-(const Graph& _Right) override;
-    virtual Graph& operator-(uint _Vertex) override;
-    virtual int operator()(uint _Vertex) const override;
+    std::stack<uint>& Dejcstra(uint _in, uint _out) const;
+    Graph& operator+(const Graph& _Right) override;
+    Graph& operator+(std::stack<uint>& _Right) override;
+    Graph& operator-(const Graph& _Right) override;
+    Graph& operator-(uint _Vertex) override;
+    int operator()(uint _Vertex) const override;
 };
 
 #endif // UDWGRAPH_H
