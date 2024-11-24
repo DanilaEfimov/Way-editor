@@ -7,6 +7,7 @@ class BiTree : public Tree
 {
 public:
     BiTree();
+    virtual ~BiTree();
 };
 
 #endif // BITREE_H

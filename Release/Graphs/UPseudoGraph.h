@@ -7,6 +7,7 @@ class UPseudoGraph : public UDirGraph
 {
 public:
     UPseudoGraph();
+    virtual ~UPseudoGraph();
 };
 
 #endif // UPSEUDOGRAPH_H

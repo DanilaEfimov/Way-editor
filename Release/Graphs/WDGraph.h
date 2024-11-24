@@ -7,6 +7,7 @@ class WDGraph : public DirGraph
 {
 public:
     WDGraph();
+    virtual ~WDGraph();
 };
 
 #endif // WDGRAPH_H

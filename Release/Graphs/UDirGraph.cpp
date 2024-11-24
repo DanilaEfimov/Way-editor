@@ -17,12 +17,28 @@ static byte setBit(uint pos, byte& value) {		// for change bit
 	return res;
 }
 
+static bool setBit(uint pos, bool& value){
+    bool res = 0b00000001;
+    pos %= 8;
+    res <<= pos;    // res *= 2^pos
+    value |= res;
+    return res;
+}
+
 static byte getBit(uint pos, byte value) {
 	byte mask = 0b00000001;
 	pos %= 8;
 	mask <<= pos;	// res *= 2^pos
 	byte res = value & mask ? 0b00000001 : 0b00000000;
 	return res;
+}
+
+static bool isConnected(uint pos, byte value){
+    bool res = 0b00000001;
+    pos %= 8;
+    res <<= pos;    // res *= 2^pos
+    value |= res;
+    return res;
 }
 
 UDirGraph::UDirGraph(uint _V, byte** mat) : Graph(_V){
@@ -145,34 +161,189 @@ void UDirGraph::setEdge(uint _in, uint _out) {                          // can't
 
 std::stack<uint>& UDirGraph::BFS(uint _root) const {
     static std::stack<uint> _BFS = std::stack<uint>{};
+    _BFS = std::stack<uint>{};
+    if(_root > this->V || _root == 0){
+        return _BFS;    // empty stack is invalid input flag
+    }
+    bool* scoped = new bool[this->V]{0};     // here contains scoped vertexes
+    ushort* distance = new ushort[this->V];
+    for(size_t i = 0; i < this->V; i++){
+        distance[i] = USHORT_MAX;   // set unscoped flag
+    }
+    std::queue<uint> Q{};
+    Q.push(_root);
+    scoped[_root-1] = true;
+    distance[_root-1] = 0;
+    while(!Q.empty()){
+        Q.pop();
+        uint power = this->getDegree(_root);
+        uint progress = 0;
+        for(size_t i = 1;
+            i <= this->V && progress != power;
+            i++)
+        {
+            if(!this->isConnected(i, _root) || scoped[i-1]){
+                continue;
+            }
+            else{
+                ++progress;
+                distance[i-1] = distance[_root-1] + 1;  // track distance
+                scoped[i-1] = true;
+                Q.push(i);
+            }
+        }
+        if (!Q.empty()){
+            _root = Q.front();  // update queue
+        }
+    }
+    for(size_t i = 0; i < this->V; i++){
+        _BFS.push(distance[i]);
+    }
+    delete[] distance;
+    delete[] scoped;
     return _BFS;
+    /*
+    *   BFS tree performed like substitution of vertexes
+    *   like: perent -> child
+    *   1, 2, 3, 4, 5, 6, 7 ... V
+    *   2, 4, 1, 5, V, 7, 3 ... 6    (this sequence will be returned)
+    *   WARNING: this function means that static _BFS
+    *   will be poped out after return. Every entry time
+    *   _BFS should be empty
+    */
 }
 
 std::stack<uint>& UDirGraph::DFS(uint _root) const {
     static std::stack<uint> _DFS = std::stack<uint>{};
+    _DFS = std::stack<uint>{};
+    if(_root > this->V || _root == 0){
+        return _DFS;    // empty stack is invalid input flag
+    }
+    bool* scoped = new bool[this->V]{0};     // here contains scoped vertexes
+    ushort* distance = new ushort[this->V];
+    for(size_t i = 0; i < this->V; i++){
+        distance[i] = USHORT_MAX;   // set unscoped flag
+    }
+    std::stack<uint> S{};
+    S.push(_root);
+    scoped[_root-1] = true;
+    distance[_root-1] = 0;
+    while(!S.empty()){
+        _root = S.top();
+        uint power = this->getDegree(_root);
+        uint progress = 0;
+        for(size_t i = 1;
+             i <= this->V && progress != power;
+             i++)
+        {
+            if(!this->isConnected(i, _root) || scoped[i-1]){
+                continue;
+            }
+            else{
+                ++progress;
+                distance[i-1] = distance[_root-1] + 1;  // track distance
+                scoped[i-1] = true;
+                S.push(i);
+            }
+        }
+        if (!S.empty()){
+            _root = S.top();  // update queue
+        }
+    }
+    for(size_t i = 0; i < this->V; i++){
+        _DFS.push(distance[i]);
+    }
+    delete[] distance;
+    delete[] scoped;
     return _DFS;
+    /*
+    *   DFS tree performed like substitution of vertexes
+    *   like: perent -> child
+    *   1, 2, 3, 4, 5, 6, 7 ... V
+    *   2, 4, 1, 5, V, 7, 3 ... 6    (this sequence will be returned)
+    *   WARNING: this function means that static _DFS
+    *   will be poped out after return. Every entry time
+    *   _DFS should be empty
+    */
 }
 
 std::stack<uint>& UDirGraph::EulerCycle(uint _begin) const {
     static std::stack<uint> _EulerCycle = std::stack<uint>{};
+    _EulerCycle = std::stack<uint>{};
+    if(!this->isPossibleEulerCycle()){
+        _EulerCycle.push(UINT_MAX);
+        return _EulerCycle; // flag of impossibility to find EulerCycle
+    }
+    if(_begin > this->V || _begin == 0){
+        return _EulerCycle; // empty stack is invalid input flag
+    }
+    byte* toCheck = new byte[(this->V * (this->V - 1) / 2 + 7) / 8]{0};
+    for (size_t i = 0; i < this->V; i++) {
+        uint skippedBits = (i + 1) * (i + 2) / 2;
+        for (size_t j = i + 1; j < this->V; j++) {	// i + 1 is shift for skipping unnecessary fields
+            uint matBits = i * this->V + j;
+            uint bit = matBits - skippedBits;
+            uint byte = bit / 8;
+            if (this->isConnected(i+1, j+1)) {
+                toCheck[byte] |= setBit(bit);
+            }
+        }
+    }
+    std::stack<uint> S;
+    S.push(_begin);
+    while (!S.empty()){
+        unsigned v = S.top();
+        for(size_t i = 1; i <= this->V; i++){
+            uint _in = v < i ? v : i;
+            uint _out = v > i ? v : i;
+            uint complimentIN = this->V - _in;
+            uint baseIN = _in * this->V - _in * (_in + 1) / 2 - complimentIN;	// in bits everywhere!
+            uint offset = _out - _in - 1;
+            uint address = baseIN + offset;
+            uint byte = address / 8;
+            uint bit = address % 8;
+            if(!this->isConnected(i, v) ||
+                getBit(bit, toCheck[byte]) ||
+                i == v){
+                continue;
+            }
+            else{
+                S.push(i);
+                setBit(bit, toCheck[byte]);
+            }
+        }
+        if(!S.empty()){
+            S.pop();
+            _EulerCycle.push(v);
+        }
+    }
+    delete[] toCheck;
     return _EulerCycle;
 }
 
-Graph& UDirGraph::operator+(const Graph& _Right) {
+UDirGraph& UDirGraph::operator+(const UDirGraph &_Right) {
+    /*
+    * this operator performs adding of graphs
+    * it means that same edges will be added at
+    *  _Left (this) Graph.
+    */
+    return *this;
+}
+
+
+
+UDirGraph& UDirGraph::operator-(const Graph& _Right) {
+    /*
+    * this operator performs submition of graphs
+    * it means that same edges will be deleted at
+    *  _Left (this) Graph.
+    */
+    ushort minV = this->V < _Right.getV() ? this->V : _Right.getV();
 	return *this;
 }
 
-Graph& UDirGraph::operator+(std::stack<uint>& _Right) {
-
-	return *this;
-}
-
-Graph& UDirGraph::operator-(const Graph& _Right) {
-	return *this;
-}
-
-Graph& UDirGraph::operator-(uint _Vertex) {
-	if (_Vertex > this->V) {
+UDirGraph& UDirGraph::operator-(uint _Vertex) {
+    if (_Vertex > this->V || _Vertex == 0) {
 		return *this;
 	}
 	return *this;
@@ -180,4 +351,13 @@ Graph& UDirGraph::operator-(uint _Vertex) {
 
 int UDirGraph::operator()(uint _Vertex) const {
 	return this->getDegree(_Vertex);
+}
+
+bool UDirGraph::isPossibleEulerCycle() const{
+    for(size_t i = 1; i <= this->V; i++){
+        if(this->getDegree(i)){
+            return false;
+        }
+    }
+    return true;
 }

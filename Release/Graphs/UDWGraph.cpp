@@ -151,21 +151,7 @@ std::stack<uint>& UDWGraph::Dejcstra(uint _in, uint _out) const {
     return _Dejcstra;
 }
 
-Graph& UDWGraph::operator+(const Graph &_Right)
-{
-    return *this;
-}
-
-Graph& UDWGraph::operator+(std::stack<uint>& _Right){
-    return *this;
-}
-
-Graph& UDWGraph::operator-(uint _Vertex){
-    return *this;
-}
-
-Graph &UDWGraph::operator-(const Graph &_Right)
-{
+UDirGraph& UDWGraph::operator-(uint _Vertex){
     return *this;
 }
 

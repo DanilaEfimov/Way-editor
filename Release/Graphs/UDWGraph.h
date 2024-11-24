@@ -32,10 +32,7 @@ public:
 private:
     // ===========	 MATH	===========
     std::stack<uint>& Dejcstra(uint _in, uint _out) const;
-    Graph& operator+(const Graph& _Right) override;
-    Graph& operator+(std::stack<uint>& _Right) override;
-    Graph& operator-(const Graph& _Right) override;
-    Graph& operator-(uint _Vertex) override;
+    UDirGraph& operator-(uint _Vertex) override;
     int operator()(uint _Vertex) const override;
 };
 

@@ -1,6 +1,8 @@
 #ifndef UDIRGRAPH_H
 #define UDIRGRAPH_H
 #define STATIC_MEMORY 48U   // 2 bytes from this->V + 4 bytes from this->E
+#define USHORT_MAX 0xFFFF
+#define UINT_MAX 0xFFFFFFFF
 
 #include"Graph.h"
 
@@ -26,11 +28,13 @@ public:
     std::stack<uint>& DFS(uint _root = 1) const;
     std::stack<uint>& EulerCycle(uint _begin = 1) const;
 private:
-    Graph& operator+(const Graph& _Right) override;
-    Graph& operator+(std::stack<uint>& _Right) override;
-    Graph& operator-(const Graph& _Right) override;
-    Graph& operator-(uint _Vertex) override;
+    UDirGraph& operator+(const UDirGraph& _Right);
+    UDirGraph& operator+(std::stack<uint>& _Right) override;
+    UDirGraph& operator-(const Graph& _Right);
+    virtual UDirGraph& operator-(uint _Vertex) override;
     int operator()(uint _Vertex) const override;
+
+    bool isPossibleEulerCycle() const;
 };
 
 /***************************************************************

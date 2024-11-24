@@ -176,19 +176,18 @@ std::stack<uint>& DirGraph::EulerCycle(uint _begin) const {
     return _EulerCycle;
 }
 
-Graph& DirGraph::operator+(const Graph& _Right){
+DirGraph &DirGraph::operator+(const DirGraph &_Right) {
+    /*
+    * this operator performs adding of graphs
+    * it means that same edges will be added at
+    *  _Left (this) Graph.
+    */
     return *this;
 }
 
-Graph &DirGraph::operator+(std::stack<uint> &_Right) {
-    return *this;
-}
 
-Graph &DirGraph::operator-(const Graph &_Right) {
-    return *this;
-}
 
-Graph& DirGraph::operator-(uint _Vertex){
+DirGraph& DirGraph::operator-(uint _Vertex){
     return *this;
 }
 
