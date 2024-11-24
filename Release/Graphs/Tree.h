@@ -13,8 +13,8 @@ public:
     virtual ~Tree() override;
 
     virtual void print(std::fstream& _to) const override;
-    virtual int getDegree(uint _Vertex) const override;
-    virtual bool isConnected(uint _in, uint _out) const override;
+    virtual int getDegree(uint _Vertex) const;
+    virtual bool isConnected(uint _in, uint _out) const;
 };
 
 #endif // TREE_H
