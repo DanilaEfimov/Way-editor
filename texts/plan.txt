@@ -1,0 +1,5 @@
+1. Алгоритм Косарайю (Kosaraju's algorithm)
+2. Алгоритм Шарира-Харари (Sharir-Shiloach algorithm)
+3. Алгоритм Тарьяна (Tarjan's algorithm)
+4. Алгоритм Габова (Gabov's algorithm)
+5. Алгоритм DCSC
