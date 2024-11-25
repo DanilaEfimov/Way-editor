@@ -17,11 +17,12 @@ static byte setBit(uint pos, byte& value) {		// for change bit
 	return res;
 }
 
-static bool setBit(uint pos, bool& value){
+static byte resetBit(uint pos, byte& value){
     bool res = 0b00000001;
     pos %= 8;
     res <<= pos;    // res *= 2^pos
-    value |= res;
+    res = ~res;     // 0b11110111 e.g.
+    value &= res;
     return res;
 }
 
@@ -33,12 +34,20 @@ static byte getBit(uint pos, byte value) {
 	return res;
 }
 
-static bool isConnected(uint pos, byte value){
-    bool res = 0b00000001;
-    pos %= 8;
-    res <<= pos;    // res *= 2^pos
-    value |= res;
-    return res;
+static bool** toMatrix(ushort V, byte* cv, bool** mat){
+    for(size_t i = 0; i < V; i++){
+        mat[i][i] = false;
+        for(size_t j = i+1; j < V; j++){
+            uint offset = V - j;                                // how many bits we have to shift to find [v][_Vertex] field
+            uint compliment = V - j - 1;
+            uint base = i * V - ((i+1) * i) / 2 - compliment;	// it's like begin of segment, but for matrix row
+            uint address = base + offset;
+            uint byte = address / 8;
+            bool connected = getBit(address, cv[byte]);
+            mat[i][j] = mat[j][i] = connected;
+        }
+    }
+    return mat;
 }
 
 UDirGraph::UDirGraph(uint _V, byte** mat) : Graph(_V){
@@ -88,7 +97,7 @@ void UDirGraph::print(std::fstream& _to) const {
 			_to << (int)getBit(offset, value);
 		}
 	}
-    uint size = STATIC_MEMORY + ((this->V*(this->V-1)/2+7)/8)*8;    // in bits everywhere!
+    uint size = STATIC_MEMORY + ((this->V*(this->V-1)/2+7)/8)*8;// in bits everywhere!
     _to << "\n" << size << std::endl;
 }
 
@@ -321,31 +330,82 @@ std::stack<uint>& UDirGraph::EulerCycle(uint _begin) const {
     return _EulerCycle;
 }
 
-UDirGraph& UDirGraph::operator+(const UDirGraph &_Right) {
-    /*
-    * this operator performs adding of graphs
-    * it means that same edges will be added at
-    *  _Left (this) Graph.
-    */
-    return *this;
-}
-
-
-
-UDirGraph& UDirGraph::operator-(const Graph& _Right) {
+UDirGraph& UDirGraph::operator+(const UDirGraph& _Right) {
     /*
     * this operator performs submition of graphs
     * it means that same edges will be deleted at
     *  _Left (this) Graph.
     */
     ushort minV = this->V < _Right.getV() ? this->V : _Right.getV();
+    for(size_t i = 1; i <= minV; i++){
+        for(size_t j = i + 1; j <= minV; j++){
+            if(!this->isConnected(i, j) && _Right.isConnected(i, j)){
+                uint offset = this->V - j - 1;							// how many bits we have to shift to find [v][_Vertex] field
+                uint compliment = this->V - j;
+                uint base = (i-1) * this->V - ((i-1) * i) / 2 - compliment;	// it's like begin of segment, but for matrix row
+                uint address = base + offset;
+                uint byte = address / 8;
+                setBit(address, this->connectivityVector[byte]);
+            }
+        }
+    }
+    return *this;
+}
+
+UDirGraph& UDirGraph::operator-(const UDirGraph& _Right) {
+    /*
+    * this operator performs submition of graphs
+    * it means that same edges will be deleted at
+    *  _Left (this) Graph.
+    */
+    ushort minV = this->V < _Right.getV() ? this->V : _Right.getV();
+    for(size_t i = 1; i <= minV; i++){
+        for(size_t j = i + 1; j <= minV; j++){
+            if(!this->isConnected(i, j) && _Right.isConnected(i, j)){
+                uint offset = this->V - j - 1;							// how many bits we have to shift to find [v][_Vertex] field
+                uint compliment = this->V - j;
+                uint base = (i-1) * this->V - ((i-1) * i) / 2 - compliment;	// it's like begin of segment, but for matrix row
+                uint address = base + offset;
+                uint byte = address / 8;
+                resetBit(address, this->connectivityVector[byte]);
+            }
+        }
+    }
 	return *this;
 }
 
-UDirGraph& UDirGraph::operator-(uint _Vertex) {
+UDirGraph& UDirGraph::operator-(uint _Vertex) { // last thing not fixed
     if (_Vertex > this->V || _Vertex == 0) {
 		return *this;
 	}
+    if(this->V == 1){
+        this->V--;
+        delete[] this->connectivityVector;
+        this->connectivityVector = nullptr;
+    }
+    bool** mat = new bool*[this->V];
+    for(size_t i = 0; i < this->V; i++){
+        mat[i] = new bool[this->V];
+    }
+    mat = toMatrix(this->V, this->connectivityVector, mat);
+    this->V--;
+    delete[] this->connectivityVector;
+    this->connectivityVector = new byte[(this->V * (this->V - 1) / 2 + 7) / 8]{false};
+    for (size_t i = 0; i <= this->V; i++) {
+        uint skippedBits = (i + 1) * (i + 2) / 2;
+        for (size_t j = i + 1; j <= this->V; j++) {	// i + 1 is shift for skipping unnecessary fields
+            uint matBits = i * this->V + j;
+            uint bit = matBits - skippedBits;
+            uint byte = bit / 8;
+            if (mat[i][j]) {
+                if(i+1 == _Vertex || j+1 == _Vertex){
+                    continue;
+                }
+                this->connectivityVector[byte] |= setBit(bit);
+                this->E++;
+            }
+        }
+    }
 	return *this;
 }
 
@@ -355,7 +415,7 @@ int UDirGraph::operator()(uint _Vertex) const {
 
 bool UDirGraph::isPossibleEulerCycle() const{
     for(size_t i = 1; i <= this->V; i++){
-        if(this->getDegree(i)){
+        if(this->getDegree(i) % 2){
             return false;
         }
     }

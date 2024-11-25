@@ -29,9 +29,9 @@ public:
     std::stack<uint>& EulerCycle(uint _begin = 1) const;
 private:
     UDirGraph& operator+(const UDirGraph& _Right);
-    UDirGraph& operator+(std::stack<uint>& _Right) override;
-    UDirGraph& operator-(const Graph& _Right);
-    virtual UDirGraph& operator-(uint _Vertex) override;
+    UDirGraph& operator+(std::stack<uint>& _Right);
+    UDirGraph& operator-(const UDirGraph& _Right);
+    virtual UDirGraph& operator-(uint _Vertex);
     int operator()(uint _Vertex) const override;
 
     bool isPossibleEulerCycle() const;

@@ -177,22 +177,19 @@ std::stack<uint>& DirGraph::EulerCycle(uint _begin) const {
 }
 
 DirGraph &DirGraph::operator+(const DirGraph &_Right) {
-    /*
-    * this operator performs adding of graphs
-    * it means that same edges will be added at
-    *  _Left (this) Graph.
-    */
     return *this;
 }
 
+DirGraph &DirGraph::operator-(const DirGraph &_Right) {
+    return *this;
+}
 
-
-DirGraph& DirGraph::operator-(uint _Vertex){
+DirGraph &DirGraph::operator-(uint _Vertex) {
     return *this;
 }
 
 int DirGraph::operator()(uint _Vertex) const {
     return this->getDegree(_Vertex, OUT);
     // it hard to choose IN | OUT
-    // but I think that usefull OUT for bypass algorithms
+    // but I think that usefull is OUT for bypass algorithms
 }

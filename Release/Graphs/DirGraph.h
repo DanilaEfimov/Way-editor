@@ -1,6 +1,6 @@
 #ifndef DIRGRAPH_H
 #define DIRGRAPH_H
-#define STATIC_MEMORY 48U   // 2 bytes from this->V + 4 bytes from this->E
+#define STATIC_MEMORY 48   // 2 bytes from this->V + 4 bytes from this->E
 
 #include"Graph.h"
 
@@ -31,12 +31,10 @@ public:
     std::stack<uint>& BFS(uint _root = 1) const;
     std::stack<uint>& DFS(uint _root = 1) const;
     std::stack<uint>& EulerCycle(uint _begin = 1) const;
-    DirGraph& operator+(const DirGraph& _Right) {
-        return *this;
-    }
-    DirGraph& operator+(std::stack<uint>& _Right) override;
+    DirGraph& operator+(const DirGraph& _Right);
+    DirGraph& operator+(std::stack<uint>& _Right);
     DirGraph& operator-(const DirGraph& _Right);
-    virtual DirGraph& operator-(uint _Vertex) override;
+    virtual DirGraph& operator-(uint _Vertex);
     virtual int operator()(uint _Vertex) const override;
 };
 
