@@ -27,7 +27,6 @@ public:
     std::stack<uint>& BFS(uint _root = 1) const;
     std::stack<uint>& DFS(uint _root = 1) const;
     std::stack<uint>& EulerCycle(uint _begin = 1) const;
-private:
     UDirGraph& operator+(const UDirGraph& _Right);
     UDirGraph& operator+(std::stack<uint>& _Right);
     UDirGraph& operator-(const UDirGraph& _Right);

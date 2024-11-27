@@ -34,16 +34,19 @@ static byte getBit(uint pos, byte value) {
 	return res;
 }
 
-static bool** toMatrix(ushort V, byte* cv, bool** mat){
+static bool** toMatrix(ushort V, byte* cv){
+    bool** mat = new bool*[V];
+    for(size_t i = 0; i < V; i++){
+        mat[i] = new bool[V];
+    }
     for(size_t i = 0; i < V; i++){
         mat[i][i] = false;
+        uint skippedBits = (i + 1) * (i + 2) / 2;
         for(size_t j = i+1; j < V; j++){
-            uint offset = V - j;                                // how many bits we have to shift to find [v][_Vertex] field
-            uint compliment = V - j - 1;
-            uint base = i * V - ((i+1) * i) / 2 - compliment;	// it's like begin of segment, but for matrix row
-            uint address = base + offset;
-            uint byte = address / 8;
-            bool connected = getBit(address, cv[byte]);
+            uint matBits = i * V + j;
+            uint bit = matBits - skippedBits;
+            uint byte = bit / 8;
+            bool connected = getBit(bit, cv[byte]);
             mat[i][j] = mat[j][i] = connected;
         }
     }
@@ -374,7 +377,7 @@ UDirGraph& UDirGraph::operator-(const UDirGraph& _Right) {
 	return *this;
 }
 
-UDirGraph& UDirGraph::operator-(uint _Vertex) { // last thing not fixed
+UDirGraph& UDirGraph::operator-(uint _Vertex) { // NOT FIXXXXXED
     if (_Vertex > this->V || _Vertex == 0) {
 		return *this;
 	}
@@ -383,29 +386,27 @@ UDirGraph& UDirGraph::operator-(uint _Vertex) { // last thing not fixed
         delete[] this->connectivityVector;
         this->connectivityVector = nullptr;
     }
-    bool** mat = new bool*[this->V];
-    for(size_t i = 0; i < this->V; i++){
-        mat[i] = new bool[this->V];
-    }
-    mat = toMatrix(this->V, this->connectivityVector, mat);
-    this->V--;
+    bool** mat = toMatrix(this->V, this->connectivityVector);
     delete[] this->connectivityVector;
-    this->connectivityVector = new byte[(this->V * (this->V - 1) / 2 + 7) / 8]{false};
-    for (size_t i = 0; i <= this->V; i++) {
-        uint skippedBits = (i + 1) * (i + 2) / 2;
-        for (size_t j = i + 1; j <= this->V; j++) {	// i + 1 is shift for skipping unnecessary fields
-            uint matBits = i * this->V + j;
-            uint bit = matBits - skippedBits;
-            uint byte = bit / 8;
-            if (mat[i][j]) {
-                if(i+1 == _Vertex || j+1 == _Vertex){
-                    continue;
-                }
+    this->connectivityVector = new byte[((this->V - 1) * (this->V - 2) / 2 + 7) / 8]{false};
+    uint compliment = this->V - _Vertex;
+    for(size_t i = 0; i < this->V; i++){
+        for(size_t j = i+1; j < this->V; j++){
+            if(mat[i][j]){
+                uint matBits = i*this->V + j;
+                uint skipped = (i+1)*(i+2)/2;
+                uint bit = matBits - skipped;
+                if(j == _Vertex){ continue; };
+                if(j >= _Vertex){ bit -= i + 1; };
+                if(i+1 == _Vertex){ break; };
+                if(i+1 >= _Vertex){ bit -= compliment; };
+                uint byte = bit / 8;
                 this->connectivityVector[byte] |= setBit(bit);
                 this->E++;
             }
         }
     }
+    this->V--;
 	return *this;
 }
 
