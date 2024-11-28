@@ -3,8 +3,9 @@
 
 #include<QMessageBox>
 #include<QString>
+#include<exception>
 
-class Error
+class Error : private std::exception
 {
 private:
     QMessageBox* ErrorBox;
@@ -13,7 +14,7 @@ public:
     Error(const QString message);
     virtual ~Error();
 
-    QString what() const;
+    inline QString what();
     int code() const;
 };
 

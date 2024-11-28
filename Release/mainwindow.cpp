@@ -1,9 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QPalette>
-#include <QRadioButton>
 #include "General.h"
 
+QRadioButton* MainWindow::ErrorReturned = nullptr;
+QRadioButton* MainWindow::WarningReturned = nullptr;
 std::map<uint, Graph*> MainWindow::graphs = std::map<uint, Graph*>{};
 std::map<uint, QTextEdit*> MainWindow::fields = std::map<uint, QTextEdit*>{};
 QIcon* MainWindow::icon = nullptr;
@@ -15,14 +16,16 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow) {
     ui->setupUi(this);
     this->initWindow();
+    this->initMenu();
     this->initInputArea();
     this->initOutputArea();
     this->initWidgetsView();
-    this->binding();
 }
 
 MainWindow::~MainWindow() {
     delete ui;
+    delete ErrorReturned;
+    delete WarningReturned;
     for(auto& graph : this->graphs){
         delete graph.second;
     }
@@ -32,7 +35,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::initMenu() {
-
+    this->binding();
 }
 
 void MainWindow::initWidgetsView() {
@@ -53,17 +56,17 @@ void MainWindow::initOutputArea() {
 }
 
 void MainWindow::initStatusBar() {
-    static QRadioButton* ErrorReturned = new QRadioButton(ui->returns);
-    static QRadioButton* WarningReturned = new QRadioButton(ui->returns);
+    ErrorReturned =  new QRadioButton(ui->returns);
+    WarningReturned = new QRadioButton(ui->returns);
     ErrorReturned->setText(_ERROR_);
     ErrorReturned->setChecked(false);
     ErrorReturned->setCheckable(false);
-    const QPalette errorTheme(ERROR_BUTTON_THEME, BLACK_BUTTON_THEME);
+    const QPalette errorTheme(ERROR_BUTTON_THEME);
     ErrorReturned->setPalette(errorTheme);
     WarningReturned->setText(_WARNING_);
     WarningReturned->setChecked(false);
     WarningReturned->setCheckable(false);
-    const QPalette warningTheme(WARNING_BUTTON_THEME, BLACK_BUTTON_THEME);
+    const QPalette warningTheme(WARNING_BUTTON_THEME);
     WarningReturned->setPalette(warningTheme);
     ui->returns->addWidget(ErrorReturned);
     ui->returns->addWidget(WarningReturned);
@@ -113,19 +116,26 @@ void MainWindow::setBlackTheme() {
     ui->mainMenu->setPalette(blackTheme);
     ui->inputArea->setPalette(blackTheme);
     ui->outputArea->setPalette(blackTheme);
+    ui->returns->setPalette(blackTheme);
 }
 
 void MainWindow::setWhiteTheme() {
-
+    const QPalette whiteTheme(WHITE_BUTTON_THEME, WHITE_WINDOW_THEME);
+    this->setPalette(whiteTheme);
+    ui->mainMenu->setPalette(whiteTheme);
+    ui->inputArea->setPalette(whiteTheme);
+    ui->outputArea->setPalette(whiteTheme);
+    ui->returns->setPalette(whiteTheme);
 }
 
 void MainWindow::setRightMode() {
-
+    ui->central->setLayoutDirection(Qt::LayoutDirection::RightToLeft);
 }
 
 void MainWindow::setLeftMode() {
-
+    ui->central->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
 }
+
 
 void MainWindow::help() {
 

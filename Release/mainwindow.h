@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTextEdit>
+#include <QRadioButton>
 #include <map>
 #include "Graphs/Graph.h"
 #include "Error.h"
@@ -19,13 +20,16 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    virtual ~MainWindow();
 
 private:
     Ui::MainWindow *ui;
     static QIcon* icon;
     static std::map<uint, Graph*> graphs;
     static std::map<uint, QTextEdit*> fields;
+
+    static QRadioButton* ErrorReturned;
+    static QRadioButton* WarningReturned;
 
     // INITIALIZE
     void initMenu();

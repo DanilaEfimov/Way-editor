@@ -13,8 +13,8 @@ Error::~Error() {
     delete this->ErrorBox;
 }
 
-QString Error::what() const {
-    return this->infoText;
+QString Error::what() {
+    return infoText;
 }
 
 int Error::code() const
