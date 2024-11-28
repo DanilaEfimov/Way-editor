@@ -34,10 +34,11 @@ static byte getBit(uint pos, byte value) {
 	return res;
 }
 
-static bool** toMatrix(ushort V, byte* cv){
-    bool** mat = new bool*[V];
-    for(size_t i = 0; i < V; i++){
-        mat[i] = new bool[V];
+static bool** toMatrix(ushort V, byte* cv, uint size = 0){
+    size = size ? size : V; // in operator+(std::stack<uint>) we need make mat one row more
+    bool** mat = new bool*[size];
+    for(size_t i = 0; i < size; i++){
+        mat[i] = new bool[size];
     }
     for(size_t i = 0; i < V; i++){
         mat[i][i] = false;
@@ -324,10 +325,8 @@ std::stack<uint>& UDirGraph::EulerCycle(uint _begin) const {
                 setBit(bit, toCheck[byte]);
             }
         }
-        if(!S.empty()){
-            S.pop();
-            _EulerCycle.push(v);
-        }
+        S.pop();
+        _EulerCycle.push(v);
     }
     delete[] toCheck;
     return _EulerCycle;
@@ -343,7 +342,7 @@ UDirGraph& UDirGraph::operator+(const UDirGraph& _Right) {
     for(size_t i = 1; i <= minV; i++){
         for(size_t j = i + 1; j <= minV; j++){
             if(!this->isConnected(i, j) && _Right.isConnected(i, j)){
-                uint offset = this->V - j - 1;							// how many bits we have to shift to find [v][_Vertex] field
+                uint offset = this->V - j - 1;                              // how many bits we have to shift to find [v][_Vertex] field
                 uint compliment = this->V - j;
                 uint base = (i-1) * this->V - ((i-1) * i) / 2 - compliment;	// it's like begin of segment, but for matrix row
                 uint address = base + offset;
@@ -352,6 +351,43 @@ UDirGraph& UDirGraph::operator+(const UDirGraph& _Right) {
             }
         }
     }
+    return *this;
+}
+
+UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) {
+    if(_Right.empty()){ return *this; }
+    bool** mat = toMatrix(this->V, this->connectivityVector, this->V + 1);
+    /*
+    *   here we have mat like:
+    *   0 1 1 0
+    *   1 0 1 0
+    *   1 1 0 0
+    *   0 0 0 0     where is one unconnected vertex
+    */
+    while(!_Right.empty()){
+        uint _Vertex = _Right.top();
+        if(_Vertex != 0 && _Vertex < this->V){
+            mat[_Vertex-1][this->V] = true; // setEdge
+            this->E++;
+        }
+        _Right.pop();
+    }
+    this->V++;
+    delete[] this->connectivityVector;
+    this->connectivityVector = new byte[(this->V * (this->V - 1) / 2 + 7) / 8];
+    for (size_t i = 0; i < this->V; i++) {
+        uint skippedBits = (i + 1) * (i + 2) / 2;
+        for (size_t j = i + 1; j < this->V; j++) {
+            uint matBits = i * this->V + j;
+            uint bit = matBits - skippedBits;
+            uint byte = bit / 8;
+            if (mat[i][j]) {
+                this->connectivityVector[byte] |= setBit(bit);
+            }
+        }
+    }
+    // here _Right std::stack<uint> is empty !!!
+    // not able to be used more !!!
     return *this;
 }
 
@@ -365,9 +401,9 @@ UDirGraph& UDirGraph::operator-(const UDirGraph& _Right) {
     for(size_t i = 1; i <= minV; i++){
         for(size_t j = i + 1; j <= minV; j++){
             if(!this->isConnected(i, j) && _Right.isConnected(i, j)){
-                uint offset = this->V - j - 1;							// how many bits we have to shift to find [v][_Vertex] field
+                uint offset = this->V - j - 1;
                 uint compliment = this->V - j;
-                uint base = (i-1) * this->V - ((i-1) * i) / 2 - compliment;	// it's like begin of segment, but for matrix row
+                uint base = (i-1) * this->V - ((i-1) * i) / 2 - compliment;
                 uint address = base + offset;
                 uint byte = address / 8;
                 resetBit(address, this->connectivityVector[byte]);
@@ -377,7 +413,7 @@ UDirGraph& UDirGraph::operator-(const UDirGraph& _Right) {
 	return *this;
 }
 
-UDirGraph& UDirGraph::operator-(uint _Vertex) { // NOT FIXXXXXED
+UDirGraph& UDirGraph::operator-(uint _Vertex) {
     if (_Vertex > this->V || _Vertex == 0) {
 		return *this;
 	}
@@ -386,20 +422,22 @@ UDirGraph& UDirGraph::operator-(uint _Vertex) { // NOT FIXXXXXED
         delete[] this->connectivityVector;
         this->connectivityVector = nullptr;
     }
+    this->E = 0;
     bool** mat = toMatrix(this->V, this->connectivityVector);
     delete[] this->connectivityVector;
     this->connectivityVector = new byte[((this->V - 1) * (this->V - 2) / 2 + 7) / 8]{false};
     uint compliment = this->V - _Vertex;
     for(size_t i = 0; i < this->V; i++){
+        if(i + 1 == _Vertex){ continue; }
         for(size_t j = i+1; j < this->V; j++){
             if(mat[i][j]){
                 uint matBits = i*this->V + j;
                 uint skipped = (i+1)*(i+2)/2;
                 uint bit = matBits - skipped;
-                if(j == _Vertex){ continue; };
-                if(j >= _Vertex){ bit -= i + 1; };
-                if(i+1 == _Vertex){ break; };
-                if(i+1 >= _Vertex){ bit -= compliment; };
+                if(j + 1 == _Vertex){ continue; }
+                if(i+1 >= _Vertex && j+1 >= _Vertex){bit-=this->V-1;}
+                else if(j+1 >= _Vertex) {bit -= i+1;}
+                else if(i+1 >= _Vertex) {bit -= compliment;}
                 uint byte = bit / 8;
                 this->connectivityVector[byte] |= setBit(bit);
                 this->E++;
@@ -408,6 +446,23 @@ UDirGraph& UDirGraph::operator-(uint _Vertex) { // NOT FIXXXXXED
     }
     this->V--;
 	return *this;
+    /*
+    *   for example G - 2: (deleting of second vertex)
+    *   matrix of some UDirGraph:
+    *   0 1 0 0 1   or  * 1 0 0 1
+    *   1 0 0 1 0       * * 0 1 0
+    *   0 0 0 0 0       * * * 0 0
+    *   0 1 0 0 1       * * * * 1
+    *   1 0 0 1 0       * * * * *
+    *   how must looks returned graph mat:
+    *   * * 0 0 1   there isn't all i = 1 || j = 1 places
+    *   * * * * *   (vertexes id: 0, 1, 2 ... second have id = 1)
+    *   * * * 0 0
+    *   * * * * 1
+    *   * * * * *
+    *   so every vertex in mat deals with this->V - 1 places
+    *   it's used in conditions after 'bit' calculations
+    */
 }
 
 int UDirGraph::operator()(uint _Vertex) const {

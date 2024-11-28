@@ -49,18 +49,7 @@ void UDWGraph::print(std::fstream &_to) const
 
 }
 
-int UDWGraph::getDegree(uint _Vertex) const
-{
-    return 0;
-}
-
-bool UDWGraph::isConnected(uint _in, uint _out) const
-{
-    return true;
-}
-
-void UDWGraph::setEdge(uint _in, uint _out)
-{
+void UDWGraph::setEdge(uint _in, uint _out) {
     if (_in > this->V || _out > this->V || _in == _out) {
         return;
     }
@@ -76,6 +65,7 @@ void UDWGraph::setEdge(uint _in, uint _out)
     uint byte = (address + 7) / 8;
     uint bit = address % 8;
     setBit(bit, this->connectivityVector[byte]);
+    this->eWeights;
 }
 
 void UDWGraph::setNormalVWeights() {
@@ -100,7 +90,7 @@ void UDWGraph::setMedianVWeights() {
         for(size_t j = i + 1; j < this->V; j++){
             if(this->isConnected(i, j)){
                 degreeSum[i] += degrees[j];
-                degreeSum[j] += degrees[j];
+                degreeSum[j] += degrees[i];
             }
         }
     }
@@ -155,7 +145,6 @@ UDirGraph& UDWGraph::operator-(uint _Vertex){
     return *this;
 }
 
-int UDWGraph::operator()(uint _Vertex) const
-{
+int UDWGraph::operator()(uint _Vertex) const {
     return this->getDegree(_Vertex);
 }

@@ -16,6 +16,15 @@ static byte setBit(uint pos, byte& value) {		// for change bit
     return res;
 }
 
+static byte resetBit(uint pos, byte& value){
+    bool res = 0b00000001;
+    pos %= 8;
+    res <<= pos;    // res *= 2^pos
+    res = ~res;     // 0b11110111 e.g.
+    value &= res;
+    return res;
+}
+
 static byte getBit(uint pos, byte value) {
     byte mask = 0b00000001;
     pos %= 8;
@@ -94,7 +103,7 @@ void DirGraph::print(std::fstream &_to) const {
             _to << (int)getBit(offset, value);
         }
     }
-    uint size = STATIC_MEMORY + ((this->V*(this->V-1)+7)/8)*8;      // in bits everywhere!
+    uint size = STATIC_MEMORY + ((this->V*(this->V-1)+7)/8)*8;  // in bits everywhere!
     _to << "\n" << size << std::endl;
 }
 
@@ -176,15 +185,50 @@ std::stack<uint>& DirGraph::EulerCycle(uint _begin) const {
     return _EulerCycle;
 }
 
-DirGraph &DirGraph::operator+(const DirGraph &_Right) {
+DirGraph& DirGraph::operator+(const DirGraph &_Right) { // NOT FIXXXED !!!
+    /*
+    * this operator performs submition of graphs
+    * it means that same edges will be deleted at
+    *  _Left (this) Graph.
+    */
+    ushort minV = this->V < _Right.getV() ? this->V : _Right.getV();
+    for(size_t i = 1; i <= minV; i++){
+        for(size_t j = 1; j <= minV; j++){
+            if(i == j) { break; }
+            if(!this->isConnected(i, j) && _Right.isConnected(i, j)){
+                uint offset = this->V - j - 1;
+                uint compliment = this->V - j;
+                uint base = (i-1) * this->V - ((i-1) * i) / 2 - compliment;
+                uint address = base + offset;
+                uint byte = address / 8;
+                if(i > j)   {  setBit(address, this->downConnectivityMat[byte]); }
+                else        {  setBit(address, this->upConnectivityMat[byte]); }
+            }
+        }
+    }
     return *this;
 }
 
-DirGraph &DirGraph::operator-(const DirGraph &_Right) {
+DirGraph& DirGraph::operator-(const DirGraph &_Right) {
+    ushort minV = this->V < _Right.getV() ? this->V : _Right.getV();
+    for(size_t i = 1; i <= minV; i++){
+        for(size_t j = 1; j <= minV; j++){
+            if(i == j) { break; }
+            if(!this->isConnected(i, j) && _Right.isConnected(i, j)){
+                uint offset = this->V - j - 1;
+                uint compliment = this->V - j;
+                uint base = (i-1) * this->V - ((i-1) * i) / 2 - compliment;
+                uint address = base + offset;
+                uint byte = address / 8;
+                if(i > j)   {  resetBit(address, this->downConnectivityMat[byte]); }
+                else        {  resetBit(address, this->upConnectivityMat[byte]); }
+            }
+        }
+    }
     return *this;
 }
 
-DirGraph &DirGraph::operator-(uint _Vertex) {
+DirGraph& DirGraph::operator-(uint _Vertex) {
     return *this;
 }
 

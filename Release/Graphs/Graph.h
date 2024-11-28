@@ -38,11 +38,11 @@ public:
 **			|				|
 **			|				+ UPseudoGraph
 **			|				|
-**			|				+ UDWGraph -+
-**			|               |           |
-**			|               + Tree -----+ WTree
+**			|				+ UDWGraph -----+
+**			|               |               |
+**			|               + Tree ---------+ WTree
 **			|                           |
-**			|                           + BiTree
+**			|                           +---+ BiTree
 **			|
 **			+ DirGraph -----+
 **							|
