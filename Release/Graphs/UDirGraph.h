@@ -17,7 +17,7 @@ public:
 
 	//===========	ACCESSORS	===========
 	virtual void print(std::fstream& _to) const override;
-    int getDegree(uint _Vertex) const;
+    virtual int getDegree(uint _Vertex) const;
     bool isConnected(uint _in, uint _out) const;
     uint getEdges() const;
 
@@ -27,9 +27,9 @@ public:
     std::stack<uint>& BFS(uint _root = 1) const;
     std::stack<uint>& DFS(uint _root = 1) const;
     std::stack<uint>& EulerCycle(uint _begin = 1) const;
-    UDirGraph& operator+(const UDirGraph& _Right);
+    UDirGraph& operator+=(const UDirGraph& _Right);
     UDirGraph& operator+(std::stack<uint>& _Right);
-    UDirGraph& operator-(const UDirGraph& _Right);
+    UDirGraph& operator-=(const UDirGraph& _Right);
     virtual UDirGraph& operator-(uint _Vertex);
     int operator()(uint _Vertex) const override;
 

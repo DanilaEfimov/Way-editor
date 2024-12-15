@@ -1,4 +1,5 @@
 #include "UDWGraph.h"
+#include "General.h"
 #include<cmath>
 
 static byte setBit(uint pos = 0) {
@@ -37,40 +38,40 @@ UDWGraph::UDWGraph(uint _V, byte** mat, double weight) : UDirGraph(_V, mat){
     }
     this->vWeights = new word[this->V];
     setDefaultWeight(this->vWeights, this->V, weight);
+    this->eWeights = new word[this->V*(this->V+1)/2];
+    this->setNormalEWeights();
 }
 
-UDWGraph::~UDWGraph()
-{
-
+UDWGraph::~UDWGraph() {
+    delete[] this->eWeights;
+    delete[] this->vWeights;
 }
 
-void UDWGraph::print(std::fstream &_to) const
-{
-
+void UDWGraph::print(std::fstream &_to) const { // NOT FIXED!!!
+    this->UDirGraph::print(_to);
+    _to << "weights:\n";
+    _to << "edges:\n";
+    for(size_t i = 0; i < this->V*(this->V+1)/2; i++){
+        _to << this->eWeights[i] << '[' << (i+1)/this->V + 1<< ", " << (i+1)/this->V+(i+1)%this->V + 1 << "]; ";
+        if((i + 1) % OUT_SEED == 0){_to << std::endl;}
+    }
+    if(this->V*(this->V+1)/2 % OUT_SEED != 0){_to << std::endl;}
+    _to << "vertexes:\n";
+    for(size_t i = 0; i < this->V; i++){
+        _to << this->vWeights[i] << '[' << i+1 << "]; ";
+        if((i + 1) % OUT_SEED == 0){_to << std::endl;}
+    }
+    if(this->V % OUT_SEED != 0){_to << std::endl;}
 }
 
 void UDWGraph::setEdge(uint _in, uint _out) {
-    if (_in > this->V || _out > this->V || _in == _out) {
-        return;
-    }
-    if (_in > _out) {													// _in have to be littlest
-        uint temp = _out;
-        _out = _in;
-        _in = temp;
-    }
-    uint complimentIN = this->V - _in;
-    uint baseIN = _in * this->V - _in * (_in + 1) / 2 - complimentIN;	// in bits everywhere!
-    uint offset = _out - _in - 1;
-    uint address = baseIN + offset;
-    uint byte = (address + 7) / 8;
-    uint bit = address % 8;
-    setBit(bit, this->connectivityVector[byte]);
-    this->eWeights;
+    this->UDirGraph::setEdge(_in, _out);
+    this->eWeights[(_out-1) * this->V + _in - 1] = static_cast<double>(1.0);
 }
 
 void UDWGraph::setNormalVWeights() {
     for(size_t i = 0; i < this->V; i++){
-        this->vWeights[i] = 1.0f;
+        this->vWeights[i] = static_cast<double>(1.0);
     }
     // like this->setRandomWeights(0);
     // look at setRandomWeights definition
@@ -95,19 +96,21 @@ void UDWGraph::setMedianVWeights() {
         }
     }
     for(size_t i = 0; i < this->V; i++){
-        this->vWeights[i] = degrees[i] ? double(degreeSum[i] / degrees[i]) : 0.0f;
+        this->vWeights[i] = degrees[i] ? static_cast<double>(degreeSum[i] / degrees[i]) : 0.0f;
     }
     delete[] degreeSum;
     delete[] degrees;
 }
 
-void UDWGraph::setNormalEWeights()
-{
-
+void UDWGraph::setNormalEWeights() {
+    for(size_t i = 0; i < this->V*(this->V+1)/2; i++){
+        this->eWeights[i] = this->isConnected(i/this->V, i%this->V)
+                                ? static_cast<double>(1.0)
+                                : static_cast<double>(0.0);
+    }
 }
 
-void UDWGraph::setMedianEWeights()
-{
+void UDWGraph::setMedianEWeights() {
 
 }
 
@@ -122,17 +125,26 @@ void UDWGraph::setRandomWeights(uint _seedV, uint _seedE, double _begin, double 
     if(_begin > _end){
         return;
     }
+    double median = (_end + _begin)/2.0f;
+    double delta = (_end - _begin)/2.0f;
     for(size_t i = 0; i < this->V; i++){
-        double weight = (_end + _begin)/2.0f;
+        double weight = median;
         double k = sin(2.0f * atan(_seedV));
-        weight += k * (_end - weight)/2.0f;
+        weight += k * delta;
         this->vWeights[i] = weight;
+        k = sin(2.0f * atan(_seedE));
+        weight = median;
+        weight += k * delta;
+        for(size_t j = 0; j < this->V - i; j++){
+            this->eWeights[i*this->V + j] = weight;
+        }
     }
     /*
     * this random weights performd median between _begin & _end
     * plus some value what turns median between _begin & _end
     * by sinusoid sin(2.0f * atan(_seed))
     * [_seed1 = 0, _seed2 = 0, _begin = 0, _end = 100]
+    * setRandomWeights(0,0,0,1) non equals to setNorma@E/V@lWeights()
     */
 }
 

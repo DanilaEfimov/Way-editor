@@ -8,11 +8,11 @@ static byte setBit(uint pos = 0) {
     return res;
 }
 
-static byte setBit(uint pos, byte& value) {		// for change bit
+static byte setBit(uint pos, byte* value) {		// for change bit
     byte res = 0b00000001;
     pos %= 8;
     res <<= pos;	// res *= 2^pos
-    value |= res;
+    *value |= res;
     return res;
 }
 
@@ -95,6 +95,7 @@ void DirGraph::print(std::fstream &_to) const {
             _to << (int)getBit(offset, value);
         }
     }
+    _to << ' ';
     for (size_t base = 0; base < bytes; base++) {
         for (size_t offset = 0;
              offset < 8 && ((base * 8 + offset) < bits);
@@ -134,16 +135,18 @@ int DirGraph::getDegree(uint _Vertex, bool io) const {          // io: in - fals
 
 bool DirGraph::isConnected(uint _in, uint _out) const {                // can't be equals arguments
     bool res = false;
-    if (_in > this->V || _out > this->V || _in == _out) {
+    if (_in > this->V || _out > this->V || _in == _out || _in == 0 || _out == 0) {
         return res;
     }
-    uint complimentIN = this->V - _in;
-    uint baseIN = _in * this->V - _in * (_in + 1) / 2 - complimentIN;	// in bits everywhere!
-    uint offset = _out - _in - 1;
-    uint address = baseIN + offset;
+    bool directionBit = _out > _in;
+    if(directionBit){byte_t temp = _in; _in = _out; _out = temp;}
+    uint compliment = this->V - _out;
+    uint base = _out * this->V - _out * (_out + 1) / 2 - compliment;	// in bits everywhere!
+    uint offset = _in - _out - 1;
+    uint address = base + offset;
     uint byte = address / 8;
     uint bit = address % 8;
-    res = getBit(bit, _in > _out ? this->upConnectivityMat[byte] : this->downConnectivityMat[byte]);
+    res = getBit(bit, !directionBit ? this->upConnectivityMat[byte] : this->downConnectivityMat[byte]);
     return res;
     // here we have not difference between _in and _out. We have't swap it for _in < _out (look at UDirGraph)
     // here if _in > _out then we have to search such field of matrix, where i > j
@@ -159,13 +162,24 @@ void DirGraph::setEdge(uint _in, uint _out) {                          // can't 
     if (_in > this->V || _out > this->V || _in == _out) {
         return;
     }
-    uint complimentIN = this->V - _in;
-    uint baseIN = _in * this->V - _in * (_in + 1) / 2 - complimentIN;	// in bits everywhere!
-    uint offset = _out - _in - 1;
-    uint address = baseIN + offset;
-    uint byte = (address + 7) / 8;
+    bool directionBit = _out > _in;
+    if(directionBit){byte_t temp = _in; _in = _out; _out = temp;}
+    uint compliment = this->V - _out;
+    uint base = _out * this->V - _out * (_out + 1) / 2 - compliment;	// in bits everywhere!
+    uint offset = _in > _out ? _in - _out - 1 : _out - _in - 1;
+    uint address = base + offset;
+    uint byte = address / 8;
     uint bit = address % 8;
-    setBit(bit, _in > _out ? this->upConnectivityMat[byte] : this->downConnectivityMat[byte]);
+    byte_t pos = 1 << bit;
+    bool connected = getBit(bit, !directionBit ? this->upConnectivityMat[byte] : this->downConnectivityMat[byte]);
+    if(connected){ return; }
+    else if(!directionBit){
+        this->upConnectivityMat[byte] |= pos;
+    }
+    else{
+        this->downConnectivityMat[byte] |= pos;
+    }
+    this->E++;
     // here all like in isConnected. Look at DirGraph::isConnected() description
     // only there we return getBit(...) instead setBit(...)
 }
@@ -185,45 +199,32 @@ std::stack<uint>& DirGraph::EulerCycle(uint _begin) const {
     return _EulerCycle;
 }
 
-DirGraph& DirGraph::operator+(const DirGraph &_Right) { // NOT FIXXXED !!!
+DirGraph& DirGraph::operator+=(const DirGraph &_Right) {
     /*
-    * this operator performs submition of graphs
-    * it means that same edges will be deleted at
+    * this operator performs adding of graphs
+    * it means that same edges will be added at
     *  _Left (this) Graph.
     */
     ushort minV = this->V < _Right.getV() ? this->V : _Right.getV();
-    for(size_t i = 1; i <= minV; i++){
-        for(size_t j = 1; j <= minV; j++){
-            if(i == j) { break; }
-            if(!this->isConnected(i, j) && _Right.isConnected(i, j)){
-                uint offset = this->V - j - 1;
-                uint compliment = this->V - j;
-                uint base = (i-1) * this->V - ((i-1) * i) / 2 - compliment;
-                uint address = base + offset;
-                uint byte = address / 8;
-                if(i > j)   {  setBit(address, this->downConnectivityMat[byte]); }
-                else        {  setBit(address, this->upConnectivityMat[byte]); }
-            }
-        }
+    uint bytes = (minV*(minV - 1) / 2 + 7) / 8;
+    for(size_t i = 0; i < bytes; i++){
+        this->upConnectivityMat[i] |= _Right.upConnectivityMat[i];
+        this->downConnectivityMat[i] |= _Right.downConnectivityMat[i];
     }
     return *this;
 }
 
-DirGraph& DirGraph::operator-(const DirGraph &_Right) {
+DirGraph& DirGraph::operator-=(const DirGraph &_Right) {
+    /*
+    * this operator performs adding of graphs
+    * it means that same edges will be added at
+    *  _Left (this) Graph.
+    */
     ushort minV = this->V < _Right.getV() ? this->V : _Right.getV();
-    for(size_t i = 1; i <= minV; i++){
-        for(size_t j = 1; j <= minV; j++){
-            if(i == j) { break; }
-            if(!this->isConnected(i, j) && _Right.isConnected(i, j)){
-                uint offset = this->V - j - 1;
-                uint compliment = this->V - j;
-                uint base = (i-1) * this->V - ((i-1) * i) / 2 - compliment;
-                uint address = base + offset;
-                uint byte = address / 8;
-                if(i > j)   {  resetBit(address, this->downConnectivityMat[byte]); }
-                else        {  resetBit(address, this->upConnectivityMat[byte]); }
-            }
-        }
+    uint bytes = (minV*(minV - 1) / 2 + 7) / 8;
+    for(size_t i = 0; i < bytes; i++){
+        this->upConnectivityMat[i] &= _Right.upConnectivityMat[i];
+        this->downConnectivityMat[i] &= _Right.downConnectivityMat[i];
     }
     return *this;
 }

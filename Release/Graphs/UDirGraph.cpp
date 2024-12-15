@@ -131,21 +131,18 @@ int UDirGraph::getDegree(uint _Vertex) const {
 }
 
 bool UDirGraph::isConnected(uint _in, uint _out) const {                // can't be equals arguments
-	bool res = false;
-    if (_in > this->V || _out > this->V || _in == _out) {
-		return res;
+    bool res = false;
+    if (_in > this->V || _out > this->V || _in == _out || _in == 0 || _out == 0) {
+        return res;
     }
-	if (_in > _out) {													// _in have to be littlest
-		uint temp = _out;
-		_out = _in;
-		_in = temp;
-	}
-	uint complimentIN = this->V - _in;
-	uint baseIN = _in * this->V - _in * (_in + 1) / 2 - complimentIN;	// in bits everywhere!
-	uint offset = _out - _in - 1;
-	uint address = baseIN + offset;
+    bool directionBit = _out > _in;
+    if(directionBit){byte_t temp = _in; _in = _out; _out = temp;}
+    uint compliment = this->V - _out;
+    uint base = _out * this->V - _out * (_out + 1) / 2 - compliment;	// in bits everywhere!
+    uint offset = _in - _out - 1;
+    uint address = base + offset;
     uint byte = address / 8;
-	uint bit = address % 8;
+    uint bit = address % 8;
 	res = getBit(bit, this->connectivityVector[byte]);
 	return res;
 }
@@ -154,22 +151,19 @@ uint UDirGraph::getEdges() const {
 	return this->E;
 }
 
-void UDirGraph::setEdge(uint _in, uint _out) {                          // can't be equals arguments
+void UDirGraph::setEdge(uint _in, uint _out) {                          // O(1)
     if (_in > this->V || _out > this->V || _in == _out) {
-		return;
+        return;
     }
-	if (_in > _out) {													// _in have to be littlest
-		uint temp = _out;
-		_out = _in;
-		_in = temp;
-	}
-	uint complimentIN = this->V - _in;
-	uint baseIN = _in * this->V - _in * (_in + 1) / 2 - complimentIN;	// in bits everywhere!
-	uint offset = _out - _in - 1;
-	uint address = baseIN + offset;
-	uint byte = (address + 7) / 8;
-	uint bit = address % 8;
-    setBit(bit, this->connectivityVector[byte]);
+    bool directionBit = _out > _in;
+    if(directionBit){byte_t temp = _in; _in = _out; _out = temp;}
+    uint compliment = this->V - _out;
+    uint base = _out * this->V - _out * (_out + 1) / 2 - compliment;	// in bits everywhere!
+    uint offset = _in > _out ? _in - _out - 1 : _out - _in - 1;
+    uint address = base + offset;
+    uint byte = address / 8;
+    uint bit = address % 8;
+    this->connectivityVector[byte] |= 1 << bit;
 }
 
 std::stack<uint>& UDirGraph::BFS(uint _root) const {
@@ -332,7 +326,7 @@ std::stack<uint>& UDirGraph::EulerCycle(uint _begin) const {
     return _EulerCycle;
 }
 
-UDirGraph& UDirGraph::operator+(const UDirGraph& _Right) {
+UDirGraph& UDirGraph::operator+=(const UDirGraph& _Right) {
     /*
     * this operator performs submition of graphs
     * it means that same edges will be deleted at
@@ -391,7 +385,7 @@ UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) {
     return *this;
 }
 
-UDirGraph& UDirGraph::operator-(const UDirGraph& _Right) {
+UDirGraph& UDirGraph::operator-=(const UDirGraph& _Right) {
     /*
     * this operator performs submition of graphs
     * it means that same edges will be deleted at
@@ -419,8 +413,10 @@ UDirGraph& UDirGraph::operator-(uint _Vertex) {
 	}
     if(this->V == 1){
         this->V--;
+        this->E = 0;
         delete[] this->connectivityVector;
         this->connectivityVector = nullptr;
+        return *this;
     }
     this->E = 0;
     bool** mat = toMatrix(this->V, this->connectivityVector);

@@ -27,10 +27,12 @@ public:
     void setVWeight(uint _Vertex, double _value);
     void setRandomWeights(uint _seedV = 0, uint _seedE = 0,
                           double _begin = 0.0, double _end = 100.0);
+    double getMaxEweight() const;
+    double getMaxVWeight() const;
 
     // ===========	 MATH	===========
     std::stack<uint>& Dejcstra(uint _in, uint _out) const;
-    UDirGraph& operator-(uint _Vertex) override;
+    virtual UDirGraph& operator-(uint _Vertex) override;
     int operator()(uint _Vertex) const override;
 };
 
