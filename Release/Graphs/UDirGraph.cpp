@@ -80,7 +80,7 @@ UDirGraph::UDirGraph(uint _V, byte** mat) : Graph(_V){
 
 UDirGraph::~UDirGraph() {
 	this->Graph::~Graph();
-	delete this->connectivityVector;
+    delete[] this->connectivityVector;
 }
 
 void UDirGraph::print(std::fstream& _to) const {
@@ -164,6 +164,29 @@ void UDirGraph::setEdge(uint _in, uint _out) {                          // O(1)
     uint byte = address / 8;
     uint bit = address % 8;
     this->connectivityVector[byte] |= 1 << bit;
+}
+
+void UDirGraph::eraseEdge(uint _in, uint _out) {
+    if (_in > this->V || _out > this->V || _in == _out || _in == 0 || _out == 0) {
+        return;
+    }
+    bool directionBit = _out > _in;
+    if(directionBit){byte_t temp = _in; _in = _out; _out = temp;}
+    uint compliment = this->V - _out;
+    uint base = _out * this->V - _out * (_out + 1) / 2 - compliment;	// in bits everywhere!
+    uint offset = _in - _out - 1;
+    uint address = base + offset;
+    uint byte = address / 8;
+    uint bit = address % 8;
+    bool conected = getBit(bit, this->connectivityVector[byte]);
+    if(conected){
+        byte_t& value = this->connectivityVector[byte];
+        value = resetBit(bit, value);
+        this->E--;
+    }
+    // here ever littlest of arguments is 'begin' of edge, greatest - 'end'
+    // operation of deleting edge can be realized as:
+    // value -= 1 << bit;
 }
 
 std::stack<uint>& UDirGraph::BFS(uint _root) const {
@@ -427,10 +450,10 @@ UDirGraph& UDirGraph::operator-(uint _Vertex) {
         if(i + 1 == _Vertex){ continue; }
         for(size_t j = i+1; j < this->V; j++){
             if(mat[i][j]){
+                if(j + 1 == _Vertex){ continue; }
                 uint matBits = i*this->V + j;
                 uint skipped = (i+1)*(i+2)/2;
                 uint bit = matBits - skipped;
-                if(j + 1 == _Vertex){ continue; }
                 if(i+1 >= _Vertex && j+1 >= _Vertex){bit-=this->V-1;}
                 else if(j+1 >= _Vertex) {bit -= i+1;}
                 else if(i+1 >= _Vertex) {bit -= compliment;}
@@ -440,6 +463,10 @@ UDirGraph& UDirGraph::operator-(uint _Vertex) {
             }
         }
     }
+    for(size_t i = 0; i < this->V; i++){
+        delete[] mat[i];
+    }
+    delete[] mat;
     this->V--;
 	return *this;
     /*

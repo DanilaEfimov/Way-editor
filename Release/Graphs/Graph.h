@@ -2,7 +2,6 @@
 #define GRAPH_H
 
 #include<fstream>
-#include<stack>
 
 typedef unsigned int uint;
 typedef unsigned short ushort;

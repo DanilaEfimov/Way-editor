@@ -3,6 +3,7 @@
 #define STATIC_MEMORY 48   // 2 bytes from this->V + 4 bytes from this->E
 
 #include"Graph.h"
+#include<stack>
 
 enum {
     OUT, IN, ALL = 1
@@ -26,6 +27,7 @@ public:
     uint getEdges() const;
 
     virtual void setEdge(uint _in, uint _out);
+    virtual void eraseEdge(uint _in, uint _out);
 
     // ===========	 MATH	===========
     std::stack<uint>& BFS(uint _root = 1) const;

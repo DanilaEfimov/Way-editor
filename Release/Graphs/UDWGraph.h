@@ -24,11 +24,13 @@ public:
     virtual void setMedianEWeights();
     double getWeightV(uint _Vertex) const;
     double getWeightE(uint _in, uint _out) const;
-    void setVWeight(uint _Vertex, double _value);
+    void setVWeight(uint _Vertex, double _value = 0.0);
+    void setEWeight(uint _in, uint _out, double _value = 0.0);
     void setRandomWeights(uint _seedV = 0, uint _seedE = 0,
                           double _begin = 0.0, double _end = 100.0);
     double getMaxEweight() const;
     double getMaxVWeight() const;
+    virtual void eraseEdge(uint _in, uint _out) override;
 
     // ===========	 MATH	===========
     std::stack<uint>& Dejcstra(uint _in, uint _out) const;

@@ -108,17 +108,65 @@ void UDWGraph::setNormalEWeights() {
                                 ? static_cast<double>(1.0)
                                 : static_cast<double>(0.0);
     }
+    // 0 means undefined edge
 }
 
 void UDWGraph::setMedianEWeights() {
+    double weight = 0.0;
+    for(size_t i = 1; i <= this->V; i++){
+        for(size_t j = i+1; j <= this->V; j++){
+            uint compliment = this->V - i;
+            uint skipped = i*(i+1)/2;
+            uint base = this->V*i - skipped - compliment;
+            uint offset = j - i - 1;
+            uint adres = base + offset;
+            uint byte = adres / 8;
+            uint bit = adres % 8;
+            bool conected = getBit(bit, this->connectivityVector[byte]);
+            if(conected){
+                weight = static_cast<double>((this->getDegree(i) + this->getDegree(j)) / 2);
+                this->eWeights[(i-1)*this->V + (j - 1) - 1] = weight;
+            }
+            // here is i-1 and j-1 shift with one more '-1'
+            // because shifts due to array indexation, and last
+            // '-1' due to j initialization j = i+1
+        }
+    }
+}
 
+double UDWGraph::getWeightV(uint _Vertex) const {
+    if(_Vertex > this->V || _Vertex == 0){
+        return -INFINITY;
+    }
+    if(this->vWeights == nullptr) { return -INFINITY; }
+    return this->vWeights[_Vertex-1];
+}
+
+double UDWGraph::getWeightE(uint _in, uint _out) const {
+    if(_in > this->V || _out > this->V ||
+        _in == 0 || _out == 0 || _in == _out){
+        return -INFINITY;
+    }
+    if(_out > _in){ uint temp = _in; _in = _out; _out = temp; }
+    if(this->eWeights == nullptr){ return -INFINITY; }
+    return this->eWeights[(_in-1)*this->V + (_out - 1)];
 }
 
 void UDWGraph::setVWeight(uint _Vertex, double _value) {
     if(_Vertex == 0 || _Vertex > this->V){
         return;
     }
+    if(this->vWeights == nullptr) { return; }
     this->vWeights[_Vertex] = _value;
+}
+
+void UDWGraph::setEWeight(uint _in, uint _out, double _value) {
+    if(_in > this->V || _out > this->V ||
+        _in == 0 || _out == 0 || _in == _out){
+        return;
+    }
+    if(this->eWeights == nullptr) { return; }
+    this->eWeights[this->V*(_out-1) + (_in - 1)] = _value;
 }
 
 void UDWGraph::setRandomWeights(uint _seedV, uint _seedE, double _begin, double _end) {
@@ -148,12 +196,48 @@ void UDWGraph::setRandomWeights(uint _seedV, uint _seedE, double _begin, double 
     */
 }
 
+double UDWGraph::getMaxEweight() const {
+    double maxW = -INFINITY;
+    for(size_t i = 0; i < this->V*(this->V-1)/2; i++){
+        if(this->eWeights[i] > maxW){
+            maxW = this->eWeights[i];
+        }
+    }
+    return maxW;
+}
+
+double UDWGraph::getMaxVWeight() const {
+    double maxW = -INFINITY;
+    for(size_t i = 0; i < this->V; i++){
+        if(this->vWeights[i] > maxW){
+            maxW = this->vWeights[i];
+        }
+    }
+    return maxW;
+}
+
+void UDWGraph::eraseEdge(uint _in, uint _out) {
+    if(_in > this->V || _out > this->V ||
+        _in == 0 || _out == 0 || _in == _out){
+        return;
+    }
+    if(this->isConnected(_in, _out)){
+        this->eWeights[this->V*(_out-1) + (_in - 1)] = 0.0;
+    }
+    this->UDirGraph::eraseEdge(_in, _out);
+}
+
 std::stack<uint>& UDWGraph::Dejcstra(uint _in, uint _out) const {
     static std::stack<uint> _Dejcstra = std::stack<uint>{};
     return _Dejcstra;
 }
 
 UDirGraph& UDWGraph::operator-(uint _Vertex){
+    if(_Vertex > this->V || _Vertex == 0){
+        return *this;
+    }
+    this->UDirGraph::operator-(_Vertex);
+    /*here will be deleting and resizing weights*/
     return *this;
 }
 

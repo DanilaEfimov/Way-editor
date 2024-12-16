@@ -5,6 +5,7 @@
 #define UINT_MAX 0xFFFFFFFF
 
 #include"Graph.h"
+#include<stack>
 
 class UDirGraph : public Graph								// most primitive graph class
 {
@@ -22,6 +23,7 @@ public:
     uint getEdges() const;
 
 	virtual void setEdge(uint _in, uint _out);
+    virtual void eraseEdge(uint _in, uint _out);
 
 	// ===========	 MATH	===========
     std::stack<uint>& BFS(uint _root = 1) const;

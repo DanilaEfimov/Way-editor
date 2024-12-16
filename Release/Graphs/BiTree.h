@@ -3,6 +3,10 @@
 
 #include "Tree.h"
 
+typedef struct {
+
+} node, node_t;
+
 class BiTree : public Tree
 {
 public:
