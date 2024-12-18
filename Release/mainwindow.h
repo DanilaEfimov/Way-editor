@@ -6,7 +6,7 @@
 #include <QRadioButton>
 #include <map>
 #include "Graphs/Graph.h"
-#include "Error.h"
+#include "Parser.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -23,13 +23,15 @@ public:
     virtual ~MainWindow();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow* ui;
     static QIcon* icon;
     static std::map<uint, Graph*> graphs;
     static std::map<uint, QTextEdit*> fields;
 
     static QRadioButton* ErrorReturned;
     static QRadioButton* WarningReturned;
+
+    static Parser parser;
 
     // INITIALIZE
     void initMenu();

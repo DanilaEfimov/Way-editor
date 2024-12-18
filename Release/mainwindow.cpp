@@ -1,8 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QPalette>
+#include <Qstring>
+#include<QFileDialog>
+#include<QDir>
 #include "General.h"
+#include "Error.h"
 
+Parser MainWindow::parser = Parser();
 QRadioButton* MainWindow::ErrorReturned = nullptr;
 QRadioButton* MainWindow::WarningReturned = nullptr;
 std::map<uint, Graph*> MainWindow::graphs = std::map<uint, Graph*>{};
@@ -102,8 +107,22 @@ void MainWindow::bindInfoMenu()
 
 }
 
-void MainWindow::newFile() {
+void MainWindow::newFile() {    // not Fixed
+    QString path = QFileDialog::getOpenFileName(this, QObject::tr("Choose graph file"), QDir::homePath(), NULL);
+    bool choosed = path.length() > 0;
+    if(choosed){
+        QTextEdit* newField = new QTextEdit(this);
+        newField->setText(_CONSOLE_START_);
+        int type = parser.getType(path.toStdString());
+        ui->inputArea->addTab(newField, path);
 
+        uint index = this->fields.size() + 1;
+        std::pair<uint, QTextEdit*> item(index, newField);
+
+        this->fields.emplace(item);
+        return;
+    }
+    Error(_FILE_NOT_CHOOSED_);
 }
 
 void MainWindow::saveFile() const {

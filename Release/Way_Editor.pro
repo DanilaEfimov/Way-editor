@@ -10,13 +10,16 @@ CONFIG += c++17
 
 SOURCES += \
     Error.cpp \
+    Graphs/BiTree.cpp \
     Graphs/DPseudoGraph.cpp \
     Graphs/DirGraph.cpp \
     Graphs/Graph.cpp \
+    Graphs/Tree.cpp \
     Graphs/UDirGraph.cpp \
     Graphs/UDWGraph.cpp \
     Graphs/UPseudoGraph.cpp \
     Graphs/WDGraph.cpp \
+    Graphs/WTree.cpp \
     Parser.cpp \
     main.cpp \
     mainwindow.cpp
@@ -24,13 +27,16 @@ SOURCES += \
 HEADERS += \
     Error.h \
     General.h \
+    Graphs/BiTree.h \
     Graphs/DPseudoGraph.h \
     Graphs/DirGraph.h \
     Graphs/Graph.h \
+    Graphs/Tree.h \
     Graphs/UDirGraph.h \
     Graphs/UDWGraph.h \
     Graphs/UPseudoGraph.h \
     Graphs/WDGraph.h \
+    Graphs/WTree.h \
     Parser.h \
     mainwindow.h
 
@@ -43,4 +49,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
+    README.txt \
     way_editor_icon.png

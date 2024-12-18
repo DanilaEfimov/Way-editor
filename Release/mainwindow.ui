@@ -31,6 +31,9 @@
      <layout class="QHBoxLayout" name="Console">
       <item>
        <widget class="QTabWidget" name="inputArea">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
         <widget class="QWidget" name="workArea">
          <attribute name="title">
           <string>Tab 1</string>
