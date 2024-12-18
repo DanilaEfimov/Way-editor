@@ -1,6 +1,8 @@
 #include "DPseudoGraph.h"
 
-DPseudoGraph::DPseudoGraph() {}
+DPseudoGraph::DPseudoGraph(uint V, byte** mat) : DirGraph(V, mat) {
+
+}
 
 DPseudoGraph::~DPseudoGraph()
 {

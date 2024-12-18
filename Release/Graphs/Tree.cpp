@@ -1,6 +1,6 @@
 #include "Tree.h"
 
-Tree::Tree() {}
+Tree::Tree(uint V, byte** mat) : UDirGraph(V, mat) {}
 
 Tree::~Tree()
 {

@@ -6,7 +6,7 @@
 class UPseudoGraph : public UDirGraph
 {
 public:
-    UPseudoGraph();
+    UPseudoGraph(uint V, byte** mat);
     virtual ~UPseudoGraph();
 };
 

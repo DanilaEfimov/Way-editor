@@ -6,7 +6,7 @@
 class WDGraph : public DirGraph
 {
 public:
-    WDGraph();
+    WDGraph(uint V = 0, byte** mat = nullptr, double weight = 0.0);
     virtual ~WDGraph();
 };
 

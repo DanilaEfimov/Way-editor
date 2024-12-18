@@ -1,6 +1,6 @@
 #include "BiTree.h"
 
-BiTree::BiTree() {}
+BiTree::BiTree(uint V, byte** mat) : Tree(V, mat) {}
 
 BiTree::~BiTree()
 {

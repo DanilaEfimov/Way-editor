@@ -1,6 +1,6 @@
 #include "UPseudoGraph.h"
 
-UPseudoGraph::UPseudoGraph() {}
+UPseudoGraph::UPseudoGraph(uint V, byte** mat) : UDirGraph(V, mat) {}
 
 UPseudoGraph::~UPseudoGraph()
 {

@@ -3,14 +3,15 @@
 
 #include "Tree.h"
 
-typedef struct {
-
+typedef struct Node {
+    Node* left;
+    Node* right;
 } node, node_t;
 
 class BiTree : public Tree
 {
 public:
-    BiTree();
+    BiTree(uint V = 0, byte** mat = nullptr);
     virtual ~BiTree();
 };
 

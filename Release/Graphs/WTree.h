@@ -2,12 +2,11 @@
 #define WTREE_H
 
 #include"Tree.h"
-#include"UDWGraph.h"
 
-class WTree : public Tree, UDWGraph
+class WTree : public Tree
 {
 public:
-    WTree();
+    WTree(uint V = 0, byte** mat = nullptr, double weight = 0.0);
     virtual ~WTree();
 };
 

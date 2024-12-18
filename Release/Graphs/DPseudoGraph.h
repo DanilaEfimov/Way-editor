@@ -6,7 +6,7 @@
 class DPseudoGraph : public DirGraph
 {
 public:
-    DPseudoGraph();
+    DPseudoGraph(uint V, byte** mat);
     virtual ~DPseudoGraph();
 };
 

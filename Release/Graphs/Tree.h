@@ -9,7 +9,7 @@ private:
     uint base;  // max child count
     uint root;
 public:
-    Tree();
+    Tree(uint V, byte** mat);
     virtual ~Tree() override;
 
     virtual void print(std::fstream& _to) const override;
