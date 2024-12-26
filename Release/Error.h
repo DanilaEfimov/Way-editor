@@ -12,10 +12,8 @@ private:
     QString infoText;
 public:
     Error(const QString message);
+    int Warning(const QString message);
     virtual ~Error();
-
-    inline QString what();
-    int code() const;
 };
 
 #endif // ERROR_H

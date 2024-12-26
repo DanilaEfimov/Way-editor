@@ -3,10 +3,11 @@
 
 #include <QMainWindow>
 #include <QTextEdit>
-#include <QRadioButton>
+#include <QCheckBox>
 #include <map>
 #include "Graphs/Graph.h"
 #include "Parser.h"
+#include "Error.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -23,13 +24,16 @@ public:
     virtual ~MainWindow();
 
 private:
+    friend class Error;
+    friend class Parser;
+
     Ui::MainWindow* ui;
     static QIcon* icon;
     static std::map<uint, Graph*> graphs;
     static std::map<uint, QTextEdit*> fields;
 
-    static QRadioButton* ErrorReturned;
-    static QRadioButton* WarningReturned;
+    static QCheckBox* ErrorReturned;
+    static QCheckBox* WarningReturned;
 
     static Parser parser;
 

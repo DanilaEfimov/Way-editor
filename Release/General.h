@@ -16,11 +16,13 @@
 #define ERROR_BUTTON_THEME {190, 40, 40}
 #define WARNING_BUTTON_THEME {170, 190, 40}
 
-#define _ERROR_ "ERROR"
-#define _WARNING_ "WARNING"
-#define _ERROR_BOX_ "Error message"
-#define _FILE_NOT_CHOOSED_ "File was not choosed"
-#define _CONSOLE_START_ "You have created a new graph!"
+#define _ERROR_ "ERROR\n"
+#define _WARNING_ "WARNING\n"
+#define _ERROR_BOX_ "Error message\n"
+#define _FAILED_TO_OPEN_ "Failed to open file\n"
+#define _FILE_NOT_CHOOSED_ "File was not choosed\n"
+#define _ERROR_FILE_TYPE_ "Undefined file extention or graph\n"
+#define _CONSOLE_START_ "You have created a new graph!\n"
 
 #define OUT_SEED 10 /* it means count of double numbers in string, which will be printed */
 #define _HELLO_ " Hello, Way Editor! \n \
@@ -38,18 +40,28 @@ for start push, please, 'file menu' -> 'new file' and choose \n \
 Your graph file (not .txt)."
 
 typedef unsigned int uint;
-typedef std::pair<std::string, int> graphKey;
+typedef std::pair<std::string, int> graphKey, extKey;
 
 enum names {
-    udirgraph, dirgraph, udwgraph, wdgraph,
+    udirgraph = 1, dirgraph, udwgraph, wdgraph,
     upseudograph, dpseudograph, tree,
     wtree, bitree
+};
+
+enum exts {
+    MAT = 1, VL, EL     // VL - vertex list, EL - edge list
 };
 
 const std::map<std::string, int> types {
     graphKey("UDirGraph", udirgraph), graphKey("DirGraph", dirgraph), graphKey("UDWGraph", udwgraph),
     graphKey("WDGraph", wdgraph), graphKey("UPseudoGraph", upseudograph), graphKey("DPseudoGraph", dpseudograph),
     graphKey("Tree", tree), graphKey("WTree", wtree), graphKey("BiTree", bitree),
+};
+
+const std::map<std::string, int> extentions {
+    extKey(".mat", MAT), extKey(".MAT", MAT), extKey(".Mat", MAT),
+    extKey(".vl", VL), extKey(".VL", VL), extKey(".Vl", VL),
+    extKey(".el", EL), extKey(".EL", EL), extKey(".El", EL),
 };
 
 #endif // GENERAL_H

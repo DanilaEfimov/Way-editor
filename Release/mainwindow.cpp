@@ -4,12 +4,12 @@
 #include <Qstring>
 #include<QFileDialog>
 #include<QDir>
+#include <fstream>
 #include "General.h"
-#include "Error.h"
 
 Parser MainWindow::parser = Parser();
-QRadioButton* MainWindow::ErrorReturned = nullptr;
-QRadioButton* MainWindow::WarningReturned = nullptr;
+QCheckBox* MainWindow::ErrorReturned = nullptr;
+QCheckBox* MainWindow::WarningReturned = nullptr;
 std::map<uint, Graph*> MainWindow::graphs = std::map<uint, Graph*>{};
 std::map<uint, QTextEdit*> MainWindow::fields = std::map<uint, QTextEdit*>{};
 QIcon* MainWindow::icon = nullptr;
@@ -61,16 +61,16 @@ void MainWindow::initOutputArea() {
 }
 
 void MainWindow::initStatusBar() {
-    ErrorReturned =  new QRadioButton(ui->returns);
-    WarningReturned = new QRadioButton(ui->returns);
+    ErrorReturned =  new QCheckBox(ui->returns);
+    WarningReturned = new QCheckBox(ui->returns);
     ErrorReturned->setText(_ERROR_);
     ErrorReturned->setChecked(false);
-    ErrorReturned->setCheckable(false);
+    ErrorReturned->setCheckable(true);
     const QPalette errorTheme(ERROR_BUTTON_THEME);
     ErrorReturned->setPalette(errorTheme);
     WarningReturned->setText(_WARNING_);
     WarningReturned->setChecked(false);
-    WarningReturned->setCheckable(false);
+    WarningReturned->setCheckable(true);
     const QPalette warningTheme(WARNING_BUTTON_THEME);
     WarningReturned->setPalette(warningTheme);
     ui->returns->addWidget(ErrorReturned);
@@ -102,23 +102,31 @@ void MainWindow::bindViewMenu() {
     connect(ui->Left_mode,  SIGNAL(triggered(bool)), this, SLOT(setLeftMode()));
 }
 
-void MainWindow::bindInfoMenu()
-{
+void MainWindow::bindInfoMenu() {
 
 }
 
 void MainWindow::newFile() {    // not Fixed
     QString path = QFileDialog::getOpenFileName(this, QObject::tr("Choose graph file"), QDir::homePath(), NULL);
     bool choosed = path.length() > 0;
+    std::string stdpath = path.toStdString();
     if(choosed){
         QTextEdit* newField = new QTextEdit(this);
         newField->setText(_CONSOLE_START_);
-        int type = parser.getType(path.toStdString());
-        ui->inputArea->addTab(newField, path);
-
+        int fileType = parser.getExtention(stdpath);
+        int type = parser.getType(stdpath);
+        if(fileType == -1 || type == -1){
+            Error(_ERROR_FILE_TYPE_);
+            return;
+        }
+        ushort V = parser.getVertexCount(fileType, stdpath);
+        byte** mat = parser.initMatrix(fileType, stdpath);
+        Graph* graph = parser.initGraph(type, V, mat);
         uint index = this->fields.size() + 1;
+        std::pair<uint, Graph*> graphItem(index, graph);
+        this->graphs.emplace(graphItem);
         std::pair<uint, QTextEdit*> item(index, newField);
-
+        ui->inputArea->addTab(newField, path);
         this->fields.emplace(item);
         return;
     }
@@ -126,7 +134,9 @@ void MainWindow::newFile() {    // not Fixed
 }
 
 void MainWindow::saveFile() const {
-
+    uint id = ui->inputArea->currentIndex();
+    //std::string path =
+    Graph* temp = graphs[id];
 }
 
 void MainWindow::setBlackTheme() {
