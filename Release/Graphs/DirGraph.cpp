@@ -120,6 +120,28 @@ void DirGraph::print(std::fstream &_to) const {
     _to << "\n" << size << std::endl;
 }
 
+std::string DirGraph::show() const {
+    std::string conectList = "\n";    // connectivity lists
+    for(size_t i = 1; i <= this->V; i++){
+        conectList += std::to_string(i);
+        conectList += ": ";
+        for(size_t j = 1; j <= this->V; j++){
+            if(this->isConnected(i, j)){
+                conectList += std::to_string(j);
+                conectList += ", ";
+            }
+        }
+        conectList += "\n";
+    }
+    conectList += "\n";
+    return conectList;
+    /*
+    *   this function will be rarely used, so
+    *   we can don't worry for performance.
+    *   it will be called when user updated graph
+    */
+}
+
 int DirGraph::getDegree(uint _Vertex, bool io) const {          // io: in - false; out - true;
     if(_Vertex > this->V || _Vertex == 0){
         return -1;                                              // invalid argument

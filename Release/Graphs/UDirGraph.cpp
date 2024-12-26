@@ -1,6 +1,6 @@
 #include "UDirGraph.h"
-#include<bitset>
-#include<queue>
+#include <bitset>
+#include <queue>
 
 static byte setBit(uint pos = 0) {
 	byte res = 0b00000001;
@@ -103,6 +103,27 @@ void UDirGraph::print(std::fstream& _to) const {
 	}
     uint size = STATIC_MEMORY + ((this->V*(this->V-1)/2+7)/8)*8;// in bits everywhere!
     _to << "\n" << size << std::endl;
+}
+
+std::string UDirGraph::show() const {
+    std::string conectList = "\n";    // connectivity lists
+    for(size_t i = 1; i <= this->V; i++){
+        conectList += std::to_string(i);
+        conectList += ": ";
+        for(size_t j = i + 1; j <= this->V; j++){
+            if(this->isConnected(i, j)){
+                conectList += std::to_string(j);
+                conectList += ", ";
+            }
+        }
+        conectList += "\n";
+    }
+    conectList += "\n";
+    return conectList;
+    /*
+    *   this function will be rarely used, so we can
+    *   don't worry for performance. O(V^2)
+    */
 }
 
 int UDirGraph::getDegree(uint _Vertex) const {

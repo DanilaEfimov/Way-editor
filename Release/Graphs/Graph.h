@@ -19,6 +19,7 @@ public:
 
 	//===========	ACCESSORS	===========
     virtual void print(std::fstream& _to) const = 0;
+    virtual std::string show() const = 0;
     ushort getV() const {return this->V;};
 
     // ===========	 MATH	===========
@@ -37,8 +38,8 @@ public:
 **			|				|
 **			|				+ UPseudoGraph
 **			|				|
-**			|				+ UDWGraph -----+
-**			|               |               |
+**			|				+ UDWGraph
+**			|               |
 **			|               + Tree ---------+ WTree
 **			|                           |
 **			|                           +---+ BiTree

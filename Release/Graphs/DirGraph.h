@@ -22,6 +22,7 @@ public:
 
     //===========	ACCESSORS	===========
     virtual void print(std::fstream& _to) const override;
+    virtual std::string show() const override;
     virtual int getDegree(uint _Vertex, bool io) const;
     virtual bool isConnected(uint _in, uint _out) const;
     uint getEdges() const;
