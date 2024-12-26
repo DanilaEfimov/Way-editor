@@ -56,7 +56,7 @@ static bool** toMatrix(ushort V, byte* cv, uint size = 0){
 
 UDirGraph::UDirGraph(uint _V, byte** mat) : Graph(_V){
 	this->E = 0;
-	if (mat == nullptr) {
+    if (mat == nullptr) {
 		this->V = 0;
         this->connectivityVector = nullptr;     // empty graph branch
         return;

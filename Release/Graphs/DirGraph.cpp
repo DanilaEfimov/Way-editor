@@ -126,7 +126,7 @@ std::string DirGraph::show() const {
         conectList += std::to_string(i);
         conectList += ": ";
         for(size_t j = 1; j <= this->V; j++){
-            if(this->isConnected(i, j)){
+            if(this->isConnected(i, j) || isConnected(j, i)){
                 conectList += std::to_string(j);
                 conectList += ", ";
             }

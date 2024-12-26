@@ -1,7 +1,7 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include<fstream>
+#include <fstream>
 
 typedef unsigned int uint;
 typedef unsigned short ushort;

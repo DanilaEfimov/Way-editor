@@ -1,11 +1,11 @@
 #ifndef UDIRGRAPH_H
 #define UDIRGRAPH_H
-#define STATIC_MEMORY 48U   // 2 bytes from this->V + 4 bytes from this->E
+#define STATIC_MEMORY 48    // 2 bytes from this->V + 4 bytes from this->E
 #define USHORT_MAX 0xFFFF
 #define UINT_MAX 0xFFFFFFFF
 
-#include"Graph.h"
-#include<stack>
+#include "Graph.h"
+#include <stack>
 
 class UDirGraph : public Graph								// most primitive graph class
 {
