@@ -12,7 +12,7 @@ private:
     QString infoText;
 public:
     Error(const QString message);
-    int Warning(const QString message);
+    Error(const QString message, bool isWarning);
     virtual ~Error();
 };
 

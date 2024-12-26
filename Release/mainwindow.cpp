@@ -122,12 +122,20 @@ void MainWindow::newFile() {    // not Fixed
         ushort V = parser.getVertexCount(fileType, stdpath);
         byte** mat = parser.initMatrix(fileType, stdpath);
         Graph* graph = parser.initGraph(type, V, mat);
+        if(graph->getV() == 0){
+            Error(__EMPTY_GRAPH_SETTED__, true);
+            newField->setText(_NEW_EMPTY_GRAPH_);
+        }
         uint index = this->fields.size() + 1;
+        // input settings
         std::pair<uint, Graph*> graphItem(index, graph);
         this->graphs.emplace(graphItem);
         std::pair<uint, QTextEdit*> item(index, newField);
         ui->inputArea->addTab(newField, path);
+        // output area settings
         this->fields.emplace(item);
+        QString graphConectList = QString::fromStdString(graph->show());
+        ui->outputArea->setText(graphConectList);
         return;
     }
     Error(_FILE_NOT_CHOOSED_);

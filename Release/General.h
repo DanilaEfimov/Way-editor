@@ -19,10 +19,18 @@
 #define _ERROR_ "ERROR\n"
 #define _WARNING_ "WARNING\n"
 #define _ERROR_BOX_ "Error message\n"
+#define _WARNING_BOX_ "Warning message\n"
 #define _FAILED_TO_OPEN_ "Failed to open file\n"
 #define _FILE_NOT_CHOOSED_ "File was not choosed\n"
+#define _UNCORRECT_FILE_NAME_ "Uncorrect file name\n"
 #define _ERROR_FILE_TYPE_ "Undefined file extention or graph\n"
+#define _ERROR_GRAPH_TYPE_ "Undefined graph type\n"
+
+#define __UNCORRECT_INPUT_FILE__ "File contains mistakes\n"
+#define __EMPTY_GRAPH_SETTED__ "Was created empty graph\n"
+
 #define _CONSOLE_START_ "You have created a new graph!\n"
+#define _NEW_EMPTY_GRAPH_ "You have create an empty graph!\n"
 
 #define OUT_SEED 10 /* it means count of double numbers in string, which will be printed */
 #define _HELLO_ " Hello, Way Editor! \n \
@@ -62,6 +70,14 @@ const std::map<std::string, int> extentions {
     extKey(".mat", MAT), extKey(".MAT", MAT), extKey(".Mat", MAT),
     extKey(".vl", VL), extKey(".VL", VL), extKey(".Vl", VL),
     extKey(".el", EL), extKey(".EL", EL), extKey(".El", EL),
+};
+
+const std::map<std::string, int> commands {
+
+};
+
+const std::map<int, int> argcount {
+
 };
 
 #endif // GENERAL_H

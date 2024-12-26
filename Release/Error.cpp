@@ -9,16 +9,17 @@ Error::Error(const QString message) {
     this->ErrorBox->setWindowTitle(_ERROR_BOX_);
     this->ErrorBox->setInformativeText(message);
     this->ErrorBox->exec();
+    MainWindow::ErrorReturned->setChecked(false);
 }
 
-int Error::Warning(const QString message) {
+Error::Error(const QString message, bool isWarning) {
     MainWindow::WarningReturned->setChecked(true);
     this->ErrorBox = new QMessageBox();
     this->infoText = message;
-    this->ErrorBox->setWindowTitle(_ERROR_BOX_);
+    this->ErrorBox->setWindowTitle(_WARNING_BOX_);
     this->ErrorBox->setInformativeText(message);
-    int _code = this->ErrorBox->exec();
-    return _code;
+    this->ErrorBox->exec();
+    MainWindow::WarningReturned->setChecked(false);
 }
 
 Error::~Error() {

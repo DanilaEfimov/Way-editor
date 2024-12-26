@@ -1,7 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include"General.h"
+#include "General.h"
 #include "Graphs/Graph.h"
 
 typedef unsigned char byte, byte_t;

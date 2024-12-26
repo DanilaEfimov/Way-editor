@@ -71,7 +71,10 @@ ushort Parser::getVertexCount(int fileType, std::string path) {
 }
 
 int Parser::getExtention(std::string fileName) {
-    if(fileName.size() == 0){ return -1; }
+    if(fileName.size() == 0){
+        Error(_UNCORRECT_FILE_NAME_);
+        return -1;
+    }
     size_t pos = fileName.find_last_of('.');
     size_t size = fileName.size();
     std::string extention = "";
@@ -115,7 +118,7 @@ byte** Parser::writeMatrixMat(ushort V, std::string path) {
     return mat;
 }
 
-byte** Parser::writeMatrixVL(ushort V, std::string path) {
+byte** Parser::writeMatrixVL(ushort V, std::string path) {  // NOT fixed
     byte** mat = nullptr;
     mat = new byte*[V];
     for(size_t i = 0; i < V; i++){
@@ -124,17 +127,20 @@ byte** Parser::writeMatrixVL(ushort V, std::string path) {
     std::fstream file(path);
     std::string line = "";
     ushort i = 0;
-    while(!file.eof()){
-        ushort j = 0;
+    std::getline(file, line);   // ignore graph type string
+    while(!file.eof() && i < V){
         std::getline(file, line);
         std::stringstream ss(line);
-        byte val = '\0';
-        while(!ss.eof() && j != V){
-            ss >> val;
-            mat[i][j] = val == '0' ? 0b00000000 : 0b00000001;
-            j++;
+        ushort j = 0;
+        while(!ss.eof()){
+            ss >> j;
+            if(j > V){
+                Error(__UNCORRECT_INPUT_FILE__, true);
+                continue;
+            }
+            mat[i][j-1] = 0b00000001;
         }
-        if(j != V){ break; }
+        i++;
     }
     file.close();
     return mat;
@@ -155,8 +161,8 @@ byte** Parser::writeMatrixEL(ushort V, std::string path) {
     while(!file.eof()){
         std::getline(file, line);
         std::stringstream ss(line);
-        byte _out;
-        byte _in;
+        ushort _out;
+        ushort _in;
         ss >> _out >> _in;
         mat[_out - 1][_in - 1] = 0b00000001;
     }
@@ -167,7 +173,10 @@ byte** Parser::writeMatrixEL(ushort V, std::string path) {
 byte** Parser::initMatrix(int fileType, std::string path) {
     byte** mat = nullptr;
     ushort V = getVertexCount(fileType, path);
-    if(fileType == -1){ return mat; }
+    if(fileType == -1){
+        Error(_ERROR_FILE_TYPE_);
+        return mat;
+    }
     switch(fileType){
     case MAT:
         mat = writeMatrixMat(V, path);
@@ -187,7 +196,7 @@ byte** Parser::initMatrix(int fileType, std::string path) {
 Graph* Parser::initGraph(int graphType, ushort V, byte** mat) {
     switch(graphType){
     case udirgraph: return new UDirGraph(V, mat);
-    case dirgraph: return new UDirGraph(V, mat);
+    case dirgraph: return new DirGraph(V, mat);
     case udwgraph: return new UDWGraph(V, mat);
     case wdgraph: return new WDGraph(V, mat);
     case upseudograph: return new UPseudoGraph(V, mat);
@@ -196,6 +205,7 @@ Graph* Parser::initGraph(int graphType, ushort V, byte** mat) {
     case wtree: return new WTree(V, mat);
     case bitree: return new BiTree(V, mat);
     default:
+        Error(_ERROR_GRAPH_TYPE_);
         return nullptr;
     }
     return nullptr;
