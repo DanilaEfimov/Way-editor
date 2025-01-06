@@ -1,5 +1,6 @@
 #include "DirGraph.h"
-#include<bitset>
+#include "General.h"
+#include <bitset>
 
 static byte setBit(uint pos = 0) {
     byte res = 0b00000001;
@@ -165,6 +166,10 @@ int DirGraph::getDegree(uint _Vertex, bool io) const {          // io: in - fals
         degree += getBit(i, field);								// look at definition of 'getBit()': there i %= 8 too
     }
     return degree;
+}
+
+int DirGraph::getType() const {
+    return dirgraph;
 }
 
 bool DirGraph::isConnected(uint _in, uint _out) const {                // can't be equals arguments

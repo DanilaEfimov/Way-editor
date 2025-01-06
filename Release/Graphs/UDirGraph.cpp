@@ -1,4 +1,5 @@
 #include "UDirGraph.h"
+#include "General.h"
 #include <bitset>
 #include <queue>
 
@@ -149,6 +150,10 @@ int UDirGraph::getDegree(uint _Vertex) const {
 		res += getBit(i, field);								// look at definition of 'getBit()': there i %= 8 too
 	}
 	return res;
+}
+
+int UDirGraph::getType() const {
+    return udirgraph;
 }
 
 bool UDirGraph::isConnected(uint _in, uint _out) const {                // can't be equals arguments

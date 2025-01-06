@@ -18,6 +18,7 @@ public:
     //===========	ACCESSORS	===========
     virtual void print(std::fstream& _to) const override;
     virtual void setEdge(uint _in, uint _out) override;
+    virtual int  getType() const override;
     virtual void setNormalVWeights();
     virtual void setMedianVWeights();
     virtual void setNormalEWeights();
@@ -39,3 +40,10 @@ public:
 };
 
 #endif // UDWGRAPH_H
+
+// some about weights:
+/*
+*   eWeights:   [1,2],[1,3],[1,4],[1,5]..,[2,3],[2,4],[2,5]..,[3,4],[3,5],[...]
+*   so weight of edge between i and j vertex placed at (i * V + j) place in
+*   bit vector
+*/

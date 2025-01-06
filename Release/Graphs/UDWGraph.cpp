@@ -1,6 +1,6 @@
 #include "UDWGraph.h"
 #include "General.h"
-#include<cmath>
+#include <cmath>
 
 static byte setBit(uint pos = 0) {
     byte res = 0b00000001;
@@ -38,7 +38,7 @@ UDWGraph::UDWGraph(uint _V, byte** mat, double weight) : UDirGraph(_V, mat){
     }
     this->vWeights = new word[this->V];
     setDefaultWeight(this->vWeights, this->V, weight);
-    this->eWeights = new word[this->V*(this->V+1)/2];
+    this->eWeights = new word[this->V*(this->V-1)/2];
     this->setNormalEWeights();
 }
 
@@ -51,7 +51,7 @@ void UDWGraph::print(std::fstream &_to) const { // NOT FIXED!!!
     this->UDirGraph::print(_to);
     _to << "weights:\n";
     _to << "edges:\n";
-    for(size_t i = 0; i < this->V*(this->V+1)/2; i++){
+    for(size_t i = 0; i < this->V*(this->V-1)/2; i++){
         _to << this->eWeights[i] << '[' << (i+1)/this->V + 1<< ", " << (i+1)/this->V+(i+1)%this->V + 1 << "]; ";
         if((i + 1) % OUT_SEED == 0){_to << std::endl;}
     }
@@ -66,7 +66,11 @@ void UDWGraph::print(std::fstream &_to) const { // NOT FIXED!!!
 
 void UDWGraph::setEdge(uint _in, uint _out) {
     this->UDirGraph::setEdge(_in, _out);
-    this->eWeights[(_out-1) * this->V + _in - 1] = static_cast<double>(1.0);
+    this->eWeights[(_out-1) * this->V + (_in-1) - 1] = static_cast<double>(1.0);
+}
+
+int UDWGraph::getType() const {
+    return udwgraph;
 }
 
 void UDWGraph::setNormalVWeights() {
@@ -103,8 +107,8 @@ void UDWGraph::setMedianVWeights() {
 }
 
 void UDWGraph::setNormalEWeights() {
-    for(size_t i = 0; i < this->V*(this->V+1)/2; i++){
-        this->eWeights[i] = this->isConnected(i/this->V, i%this->V)
+    for(size_t i = 0; i < this->V*(this->V-1)/2; i++){
+        this->eWeights[i] = this->isConnected((i+1)/this->V, (i+1)%this->V)
                                 ? static_cast<double>(1.0)
                                 : static_cast<double>(0.0);
     }
@@ -113,6 +117,8 @@ void UDWGraph::setNormalEWeights() {
 
 void UDWGraph::setMedianEWeights() {
     double weight = 0.0;
+    uint* degrees = new uint[this->V];
+    for(size_t i = 1; i <= this->V; i++){degrees[i-1] = this->getDegree(i);};
     for(size_t i = 1; i <= this->V; i++){
         for(size_t j = i+1; j <= this->V; j++){
             uint compliment = this->V - i;
@@ -124,7 +130,7 @@ void UDWGraph::setMedianEWeights() {
             uint bit = adres % 8;
             bool conected = getBit(bit, this->connectivityVector[byte]);
             if(conected){
-                weight = static_cast<double>((this->getDegree(i) + this->getDegree(j)) / 2);
+                weight = static_cast<double>((degrees[i-1] + degrees[j-1]) / 2.0);
                 this->eWeights[(i-1)*this->V + (j - 1) - 1] = weight;
             }
             // here is i-1 and j-1 shift with one more '-1'
@@ -183,7 +189,7 @@ void UDWGraph::setRandomWeights(uint _seedV, uint _seedE, double _begin, double 
         k = sin(2.0f * atan(_seedE));
         weight = median;
         weight += k * delta;
-        for(size_t j = 0; j < this->V - i; j++){
+        for(size_t j = 0; j < this->V - i - 1; j++){
             this->eWeights[i*this->V + j] = weight;
         }
     }
@@ -232,13 +238,45 @@ std::stack<uint>& UDWGraph::Dejcstra(uint _in, uint _out) const {
     return _Dejcstra;
 }
 
-UDirGraph& UDWGraph::operator-(uint _Vertex){
+UDirGraph& UDWGraph::operator-(uint _Vertex) {
     if(_Vertex > this->V || _Vertex == 0){
         return *this;
     }
-    this->UDirGraph::operator-(_Vertex);
+    //this->UDirGraph::operator-(_Vertex);
     /*here will be deleting and resizing weights*/
+    double* lastEWeights = this->eWeights;
+    this->eWeights = new double[(this->V-1)*(this->V - 2)/2];
+    uint compliment = this->V - _Vertex;
+    for(size_t i = 0; i < this->V; i++){
+        if(i + 1 == _Vertex){continue;}
+        uint skipped = (i + 1) * (i + 2) / 2;
+        if(i + 1 >= _Vertex){skipped += compliment;}
+        for(size_t j = i + 1; j < this->V - i; j++){
+            if(j + 1 == _Vertex){continue;}
+            if(j + 1 >= _Vertex){skipped += i + 1;}
+            uint matBits = i * this->V + j;
+            uint base = matBits - skipped;
+
+        }
+    }
     return *this;
+    /*
+    *   for example G - 2: (deleting of second vertex)
+    *   matrix of some UDirGraph:
+    *   0 1 0 0 1   or  * 1 0 0 1
+    *   1 0 0 1 0       * * 0 1 0
+    *   0 0 0 0 0       * * * 0 0
+    *   0 1 0 0 1       * * * * 1
+    *   1 0 0 1 0       * * * * *
+    *   how must looks returned graph mat:
+    *   * * 0 0 1   there isn't all i = 1 || j = 1 places
+    *   * * * * *   (vertexes id: 0, 1, 2 ... second have id = 1)
+    *   * * * 0 0
+    *   * * * * 1
+    *   * * * * *
+    *   so every vertex in mat deals with this->V - 1 places
+    *   it's used in conditions after 'bit' calculations
+    */
 }
 
 int UDWGraph::operator()(uint _Vertex) const {
