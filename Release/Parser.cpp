@@ -1,20 +1,22 @@
 #include "Parser.h"
 #include "Error.h"
+#include "General.h"
 #include "Graphs/WTree.h"
 #include "Graphs/DPseudoGraph.h"
 #include "Graphs/UDWGraph.h"
 #include "Graphs/UPseudoGraph.h"
 #include "Graphs/WDGraph.h"
 #include "Graphs/BiTree.h"
-#include<fstream>
-#include<sstream>
+#include "mainwindow.h"
+#include <fstream>
+#include <sstream>
+
+std::string Parser::answer = "";
 
 Parser::Parser() {}
 
-Parser::~Parser() {}
-
-uint Parser::getType(std::string path) {
-    std::fstream file(path);
+uint Parser::getType(std::string cmd) {
+    std::fstream file(cmd);
     std::string typeName = "";
     std::getline(file, typeName);
     if(types.find(typeName) == types.end()){
@@ -97,22 +99,31 @@ byte** Parser::writeMatrixMat(ushort V, std::string path) {
     }
     std::fstream file(path);
     std::string line = "";
+    std::getline(file, line);   // ignore type of graph
+    std::getline(file, line);   // ignore count of vertexes
     ushort i = 0;
-    while(!file.eof()){
+    bool mistake = false;
+    while(!file.eof() && i != V){
         std::getline(file, line);
         std::stringstream ss(line);
-        char corner;
-        ss >> corner;
-        if(corner != '0' && corner != '1'){ continue; }
         ushort j = 0;
         while(!ss.eof() && j != V){
-            byte temp;
-            ss >> temp;
-            temp = temp == '0' ? 0b00000000 : 0b00000001;
-            mat[i][j] = temp;
+            ushort item = 0;
+            ss >> item;
+            if(item > 1 && !mistake){
+                mistake = true;
+                Error(_UNCORRECT_FILE_NAME_, true);
+                break;
+            }
+            mat[i][j] = item;
             j++;
         }
-        if(j != V){ return nullptr; }
+        i++;
+    }
+    if(i != V){
+        Error(_UNCORRECT_FILE_NAME_);
+        file.close();
+        return nullptr;
     }
     file.close();
     return mat;
@@ -126,15 +137,17 @@ byte** Parser::writeMatrixVL(ushort V, std::string path) {  // NOT fixed
     }
     std::fstream file(path);
     std::string line = "";
-    ushort i = 0;
     std::getline(file, line);   // ignore graph type string
+    ushort i = 0;
+    bool mistake = false;
     while(!file.eof() && i < V){
         std::getline(file, line);
         std::stringstream ss(line);
         ushort j = 0;
         while(!ss.eof()){
             ss >> j;
-            if(j > V){
+            if(j > V && !mistake){
+                mistake = true;
                 Error(__UNCORRECT_INPUT_FILE__, true);
                 continue;
             }
@@ -191,6 +204,136 @@ byte** Parser::initMatrix(int fileType, std::string path) {
         return nullptr;
     }
     return mat;
+}
+
+bool Parser::lastLineIsEmpty(uint index) {
+    QTextEdit* current = MainWindow::fields[index];
+    QString line = current->toPlainText();
+    std::string lastLine = "";
+    std::stringstream ss(line.toStdString());
+    while(!ss.eof()){
+        std::getline(ss, lastLine);
+    }
+    return lastLine.size() == 0 || lastLine == "";
+}
+
+QString Parser::getLastLine(uint index) {
+    QTextEdit* current = MainWindow::fields[index];
+    QString line = current->toPlainText();
+    std::string lastLine = "";
+    std::stringstream ss(line.toStdString());
+    while(!ss.eof()){
+        std::getline(ss, lastLine);
+    }
+    return QString::fromStdString(lastLine);
+}
+
+int Parser::commandCode(std::string command) {
+    std::string functionName;
+    size_t left = 0, right = command.find_first_of(' ');
+    functionName = command.substr(left, right);
+    if(commands.find(functionName) == commands.end()){
+        Error(__SYNTAX_ERROR__, true);
+        return -1;
+    }
+    else{
+        int _code = (commands.find(functionName))->second;
+        return _code;
+    }
+}
+
+int Parser::argc(int commandCode) {
+    if(argcount.find(commandCode) == argcount.end()){
+        Error(__SYNTAX_ERROR__, true);
+        return -1;
+    }
+    else{
+        int _code = (argcount.find(commandCode))->second;
+        return _code;
+    }
+}
+
+std::string Parser::argv(std::string cmd) {
+    std::string argv;
+    size_t left = cmd.find_first_of(' '), right = cmd.size() - 1;
+    argv = cmd.substr(left, right);
+    return argv;
+}
+
+std::string Parser::rewriteMat(ushort V, byte** mat) {
+    if(mat == nullptr){
+        Error(_UNDEFINED_ERROR_);
+        return "";
+    }
+    answer += "\n";
+    answer = std::to_string(V);
+    answer += "\n";
+    for(size_t i = 0; i < V; i++){
+        for(size_t j = 0; j < V; j++){
+            answer += mat[i][j] ? "1 " : "0 ";
+        }
+        answer += "\n";
+    }
+    answer += _MAT_HELLO_;
+    return answer;
+}
+
+std::string Parser::rewriteVL(ushort V, byte** mat) {
+    if(mat == nullptr){
+        Error(_UNDEFINED_ERROR_);
+        return "";
+    }
+    answer = std::to_string(V);
+    answer += "\n";
+    for(size_t i = 0; i < V; i++){
+        for(size_t j = 0; j < V; j++){
+            std::string id = std::to_string(j + 1) + " ";
+            if(mat[i][j]){
+                answer += id;
+            }
+        }
+        answer += "\n";
+    }
+    return answer;
+}
+
+std::string Parser::rewriteEL(ushort V, byte** mat) {
+    if(mat == nullptr){
+        Error(_UNDEFINED_ERROR_);
+        return "";
+    }
+    answer += "\n";
+    for(size_t i = 0; i < V; i++){
+        for(size_t j = 0; j < V; j++){
+            std::string id = std::to_string(j + 1) + " ";
+            if(mat[i][j]){
+                answer += std::to_string(i+1) + " " + std::to_string(j+1) + "\n";
+            }
+        }
+        answer += "\n";
+    }
+    return answer;
+}
+
+std::string Parser::graphType(int code) {
+    switch(code){
+    case udirgraph: return "UDirGraph";
+    case dirgraph: return "DirGraph";
+    case udwgraph: return "UDWGraph";
+    case wdgraph: return "DWGraph";
+    case upseudograph: return "UPseudoGraph";
+    case dpseudograph: return "DPseudoGraph";
+    case tree: return "Tree";
+    case wtree: return "WTree";
+    case bitree: return "BiTree";
+    default:
+        Error(_ERROR_GRAPH_TYPE_);
+        return "Graph";
+    }
+}
+
+std::string Parser::readeableGraph(Graph* G) {
+    return graphType(G->getType()) + G->show() + "\n" + _HELLO_;
 }
 
 Graph* Parser::initGraph(int graphType, ushort V, byte** mat) {

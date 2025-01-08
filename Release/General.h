@@ -23,16 +23,25 @@
 #define _FAILED_TO_OPEN_ "Failed to open file\n"
 #define _FILE_NOT_CHOOSED_ "File was not choosed\n"
 #define _UNCORRECT_FILE_NAME_ "Uncorrect file name\n"
+#define _UNDEFINED_ERROR_ "Something went wrong...\n"
 #define _ERROR_FILE_TYPE_ "Undefined file extention or graph\n"
 #define _ERROR_GRAPH_TYPE_ "Undefined graph type\n"
+#define _INVALID_ARGUMENT_ "Was inputed invalid argument\n"
 
 #define __UNCORRECT_INPUT_FILE__ "File contains mistakes\n"
 #define __EMPTY_GRAPH_SETTED__ "Was created empty graph\n"
+#define __SYNTAX_ERROR__ "Syntax error\n"
+#define __EMPTY_INPUT__ "Line is empty\n"
+#define __UNDEFINED_BAHAVIOUR__ "Undefined bahaviour\ncheck Your input\n"
 
 #define _CONSOLE_START_ "You have created a new graph!\n"
 #define _NEW_EMPTY_GRAPH_ "You have create an empty graph!\n"
 
 #define OUT_SEED 10 /* it means count of double numbers in string, which will be printed */
+#define FONT_SIZE 12 /* in points */
+#define _MAT_HELLO_ "\nhere writen matrix of graph\n"
+#define _VL_HELLO_ "\nhere writen vertex list of graph\n"
+#define _CHOOSE_ "Choose graph file (.mat/.vl/.el)\n"
 #define _HELLO_ " Hello, Way Editor! \n \
 It's little framework for working \n \
 with math graph. \n \
@@ -48,9 +57,11 @@ for start push, please, 'file menu' -> 'new file' and choose \n \
 Your graph file (not .txt)."
 
 typedef unsigned int uint;
-typedef std::pair<std::string, int> graphKey, extKey;
+typedef std::pair<std::string, int> graphKey, extKey, cmdKey;
+typedef std::pair<int, int> countKey;
 
 enum names {
+    graph = 0,
     udirgraph = 1, dirgraph, udwgraph, wdgraph,
     upseudograph, dpseudograph, tree,
     wtree, bitree
@@ -60,6 +71,20 @@ enum exts {
     MAT = 1, VL, EL     // VL - vertex list, EL - edge list
 };
 
+enum count {
+    ZERO, ONE, TWO, THREE,
+    LIMITLESS,
+};
+
+enum functions { // names of functions & their id
+    weight = 0x00,
+    addV = 0x10, addE, eraseV, eraseE,
+    EulerCycle = 0x20, CycleBase, Blocks,
+    MaxV, MaxE, Degree, Weight, // Weight means 'getWeight'
+    VW = 0x30, EW, // set vertexes weights; set edges weights
+    computeDFS = 0x40, computeBFS, computePrima, Dejcstra
+};
+
 const std::map<std::string, int> types {
     graphKey("UDirGraph", udirgraph), graphKey("DirGraph", dirgraph), graphKey("UDWGraph", udwgraph),
     graphKey("WDGraph", wdgraph), graphKey("UPseudoGraph", upseudograph), graphKey("DPseudoGraph", dpseudograph),
@@ -67,17 +92,29 @@ const std::map<std::string, int> types {
 };
 
 const std::map<std::string, int> extentions {
-    extKey(".mat", MAT), extKey(".MAT", MAT), extKey(".Mat", MAT),
-    extKey(".vl", VL), extKey(".VL", VL), extKey(".Vl", VL),
-    extKey(".el", EL), extKey(".EL", EL), extKey(".El", EL),
+    extKey(".mat", MAT),    extKey(".MAT", MAT),    extKey(".Mat", MAT),
+    extKey(".vl", VL),      extKey(".VL", VL),      extKey(".Vl", VL),
+    extKey(".el", EL),      extKey(".EL", EL),      extKey(".El", EL),
 };
 
 const std::map<std::string, int> commands {
-
+    cmdKey("weight", weight), cmdKey("addV", addV), cmdKey("addE", addE),
+    cmdKey("eraseV", eraseV), cmdKey("eraseE", eraseE), cmdKey("EulerCycle", EulerCycle),
+    cmdKey("CycleBase", CycleBase), cmdKey("Blocks", Blocks), cmdKey("MaxV", MaxV),
+    cmdKey("MaxE", MaxE), cmdKey("Degree", Degree), cmdKey("Weight", Weight),
+    cmdKey("VW", VW), cmdKey("EW", EW), cmdKey("computeDFS", computeDFS),
+    cmdKey("computeBFS", computeBFS), cmdKey("computePrima", computePrima),
+    cmdKey("Dejcstra", Dejcstra),
 };
 
 const std::map<int, int> argcount {
-
+    countKey(weight, TWO), countKey(addV, LIMITLESS), countKey(addE, LIMITLESS),
+    countKey(eraseV, ONE), countKey(eraseE, TWO), countKey(EulerCycle, ONE),
+    countKey(CycleBase, ZERO), countKey(Blocks, ZERO), countKey(MaxV, ZERO),
+    countKey(MaxE, ZERO), countKey(Degree, ONE), countKey(Weight, TWO),
+    countKey(VW, ONE), countKey(EW, THREE), countKey(computeDFS, ONE),
+    countKey(computeBFS, ONE), countKey(computePrima, ONE),
+    countKey(Dejcstra, TWO),
 };
 
 #endif // GENERAL_H

@@ -4,10 +4,10 @@
 #include <QMainWindow>
 #include <QTextEdit>
 #include <QCheckBox>
+#include <QKeyEvent>
 #include <map>
 #include "Graphs/Graph.h"
-#include "Parser.h"
-#include "Error.h"
+#include "PerformanceManager.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -26,16 +26,15 @@ public:
 private:
     friend class Error;
     friend class Parser;
+    friend class PerformanceManager;
 
-    Ui::MainWindow* ui;
+    static Ui::MainWindow* ui;
     static QIcon* icon;
     static std::map<uint, Graph*> graphs;
     static std::map<uint, QTextEdit*> fields;
 
     static QCheckBox* ErrorReturned;
     static QCheckBox* WarningReturned;
-
-    static Parser parser;
 
     // INITIALIZE
     void initMenu();
@@ -49,9 +48,8 @@ private:
     void bindFileMenu();
     void bindViewMenu();
     void bindInfoMenu();
-    // it's about Console line menu
-private slots:
-    // MENUES
+
+private slots:      /* MENUES */
     // FILE MENU
     void newFile();
     void saveFile() const;
@@ -63,6 +61,9 @@ private slots:
     // COMMAND LINE MENU
     void help();
     void hystory();
+
+    // input settings
+    virtual void keyPressEvent(QKeyEvent* e) override;
 };
 
 #endif // MAINWINDOW_H

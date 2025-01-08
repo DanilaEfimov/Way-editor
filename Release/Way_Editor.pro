@@ -21,6 +21,7 @@ SOURCES += \
     Graphs/WDGraph.cpp \
     Graphs/WTree.cpp \
     Parser.cpp \
+    PerformanceManager.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -38,6 +39,7 @@ HEADERS += \
     Graphs/WDGraph.h \
     Graphs/WTree.h \
     Parser.h \
+    PerformanceManager.h \
     mainwindow.h
 
 FORMS += \

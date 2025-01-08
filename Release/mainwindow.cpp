@@ -1,13 +1,14 @@
 #include "mainwindow.h"
+#include "Graphs/UDirGraph.h"
 #include "ui_mainwindow.h"
-#include <QPalette>
-#include <Qstring>
-#include<QFileDialog>
-#include<QDir>
-#include <fstream>
 #include "General.h"
+#include "Parser.h"
+#include "Error.h"
+#include <QPalette>
+#include <QFileDialog>
+#include <QDir>
 
-Parser MainWindow::parser = Parser();
+Ui::MainWindow* MainWindow::ui = new Ui::MainWindow;
 QCheckBox* MainWindow::ErrorReturned = nullptr;
 QCheckBox* MainWindow::WarningReturned = nullptr;
 std::map<uint, Graph*> MainWindow::graphs = std::map<uint, Graph*>{};
@@ -17,8 +18,7 @@ QIcon* MainWindow::icon = nullptr;
 // BINDIG SPECIAL FOR EVERY MENU
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow) {
+    : QMainWindow(parent) {
     ui->setupUi(this);
     this->initWindow();
     this->initMenu();
@@ -54,10 +54,12 @@ void MainWindow::initWidgetsView() {
 
 void MainWindow::initInputArea() {
     ui->notes->setReadOnly(true);
+    ui->notes->setFontPointSize(FONT_SIZE);
 }
 
 void MainWindow::initOutputArea() {
     ui->outputArea->setReadOnly(true);
+    ui->outputArea->setFontPointSize(FONT_SIZE);
 }
 
 void MainWindow::initStatusBar() {
@@ -65,12 +67,12 @@ void MainWindow::initStatusBar() {
     WarningReturned = new QCheckBox(ui->returns);
     ErrorReturned->setText(_ERROR_);
     ErrorReturned->setChecked(false);
-    ErrorReturned->setCheckable(true);
+    ErrorReturned->setCheckable(false);
     const QPalette errorTheme(ERROR_BUTTON_THEME);
     ErrorReturned->setPalette(errorTheme);
     WarningReturned->setText(_WARNING_);
     WarningReturned->setChecked(false);
-    WarningReturned->setCheckable(true);
+    WarningReturned->setCheckable(false);
     const QPalette warningTheme(WARNING_BUTTON_THEME);
     WarningReturned->setPalette(warningTheme);
     ui->returns->addWidget(ErrorReturned);
@@ -106,22 +108,24 @@ void MainWindow::bindInfoMenu() {
 
 }
 
-void MainWindow::newFile() {    // not Fixed
-    QString path = QFileDialog::getOpenFileName(this, QObject::tr("Choose graph file"), QDir::homePath(), NULL);
+void MainWindow::newFile() {
+    QString path = QFileDialog::getOpenFileName(this, QObject::tr(_CHOOSE_), QDir::homePath(), NULL);
     bool choosed = path.length() > 0;
     std::string stdpath = path.toStdString();
     if(choosed){
         QTextEdit* newField = new QTextEdit(this);
+        newField->setFontPointSize(FONT_SIZE);
+        newField->setReadOnly(true);
         newField->setText(_CONSOLE_START_);
-        int fileType = parser.getExtention(stdpath);
-        int type = parser.getType(stdpath);
+        int fileType = Parser::getExtention(stdpath);
+        int type = Parser::getType(stdpath);
         if(fileType == -1 || type == -1){
             Error(_ERROR_FILE_TYPE_);
             return;
         }
-        ushort V = parser.getVertexCount(fileType, stdpath);
-        byte** mat = parser.initMatrix(fileType, stdpath);
-        Graph* graph = parser.initGraph(type, V, mat);
+        ushort V = Parser::getVertexCount(fileType, stdpath);
+        byte** mat = Parser::initMatrix(fileType, stdpath);
+        Graph* graph = Parser::initGraph(type, V, mat);
         if(graph->getV() == 0){
             Error(__EMPTY_GRAPH_SETTED__, true);
             newField->setText(_NEW_EMPTY_GRAPH_);
@@ -136,6 +140,9 @@ void MainWindow::newFile() {    // not Fixed
         this->fields.emplace(item);
         QString graphConectList = QString::fromStdString(graph->show());
         ui->outputArea->setText(graphConectList);
+        // view update
+        index = this->fields.size();
+        ui->inputArea->setCurrentIndex(index);
         return;
     }
     Error(_FILE_NOT_CHOOSED_);
@@ -143,7 +150,6 @@ void MainWindow::newFile() {    // not Fixed
 
 void MainWindow::saveFile() const {
     uint id = ui->inputArea->currentIndex();
-    //std::string path =
     Graph* temp = graphs[id];
 }
 
@@ -180,4 +186,58 @@ void MainWindow::help() {
 
 void MainWindow::hystory() {
 
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* e) {
+    qDebug() << e->key() << '\n';
+    if(!e){return;};
+    QMainWindow::keyPressEvent(e);
+    uint currentTab = ui->inputArea->currentIndex();
+    if(currentTab == 0){return;}
+    int argc = -1;
+    std::string argv;
+    int functionType = -1;
+    switch(e->key()){
+    case Qt::Key_Backspace:
+        if(Parser::lastLineIsEmpty(currentTab)){
+            Error(__EMPTY_INPUT__, true);
+            return;
+        }
+        else{
+            QString text = fields[currentTab]->toPlainText();
+            QString::Iterator it = text.end() - 1;
+            text.erase(it);
+            fields[currentTab]->setText(text);
+            return;
+        }
+        break;
+    case Qt::Key_Return:    // you can convert rather graph pointer types
+        {
+            int res = 0;
+            QString cmd = Parser::getLastLine(currentTab);
+            functionType = Parser::commandCode(cmd.toStdString());
+            argc = Parser::argc(functionType);
+            argv = Parser::argv(cmd.toStdString());
+            res = PerformanceManager::operation(functionType, argc, argv, graphs[currentTab]);
+            if(res != 0){ Error(_UNDEFINED_ERROR_); return;}
+            QString graphConectList = QString::fromStdString(graphs[currentTab]->show());
+            ui->outputArea->setText(graphConectList);
+            std::string lastText = fields[currentTab]->toPlainText().toStdString();
+            std::string newText = e->text().toStdString();
+            std::string text = lastText + '\n';
+            fields[currentTab]->setText(QString::fromStdString(text));
+        }
+    break;
+    //case Qt::CTRL:  // ctrl + S = save, ctrl + E = exit, ctrl + LShift = decrement tab index ...
+    //   break;
+    default:
+        {
+            std::string lastText = fields[currentTab]->toPlainText().toStdString();
+            std::string newText = e->text().toStdString();
+            std::string text = lastText + newText;
+            fields[currentTab]->setText(QString::fromStdString(text));
+        }
+        break;
+    }
+    this->setFocus();
 }
