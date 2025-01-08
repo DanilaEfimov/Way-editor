@@ -1,5 +1,6 @@
 #include "UDirGraph.h"
 #include "General.h"
+#include "Error.h"
 #include <bitset>
 #include <queue>
 
@@ -39,7 +40,7 @@ static bool** toMatrix(ushort V, byte* cv, uint size = 0){
     size = size ? size : V; // in operator+(std::stack<uint>) we need make mat one row more
     bool** mat = new bool*[size];
     for(size_t i = 0; i < size; i++){
-        mat[i] = new bool[size];
+        mat[i] = new bool[size]{0};
     }
     for(size_t i = 0; i < V; i++){
         mat[i][i] = false;
@@ -51,6 +52,9 @@ static bool** toMatrix(ushort V, byte* cv, uint size = 0){
             bool connected = getBit(bit, cv[byte]);
             mat[i][j] = mat[j][i] = connected;
         }
+    }
+    for(size_t i = 0; i < size; i++){
+        mat[i][size-1] = mat[size-1][i] = false;
     }
     return mat;
 }
@@ -80,8 +84,9 @@ UDirGraph::UDirGraph(uint _V, byte** mat) : Graph(_V){
 }
 
 UDirGraph::~UDirGraph() {
-	this->Graph::~Graph();
-    delete[] this->connectivityVector;
+    if(this->connectivityVector != nullptr){
+        delete[] this->connectivityVector;
+    }
 }
 
 void UDirGraph::print(std::fstream& _to) const {
@@ -409,15 +414,16 @@ UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) {
     */
     while(!_Right.empty()){
         uint _Vertex = _Right.top();
-        if(_Vertex != 0 && _Vertex < this->V){
+        if(_Vertex != 0 && _Vertex < this->V + 1){
             mat[_Vertex-1][this->V] = true; // setEdge
             this->E++;
         }
+        else {Error(_INVALID_ARGUMENT_);}
         _Right.pop();
     }
     this->V++;
     delete[] this->connectivityVector;
-    this->connectivityVector = new byte[(this->V * (this->V - 1) / 2 + 7) / 8];
+    this->connectivityVector = new byte[(this->V * (this->V - 1) / 2 + 7) / 8]{0};
     for (size_t i = 0; i < this->V; i++) {
         uint skippedBits = (i + 1) * (i + 2) / 2;
         for (size_t j = i + 1; j < this->V; j++) {
@@ -426,6 +432,9 @@ UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) {
             uint byte = bit / 8;
             if (mat[i][j]) {
                 this->connectivityVector[byte] |= setBit(bit);
+            }
+            else{
+                this->connectivityVector[byte] &= ~setBit(bit);
             }
         }
     }

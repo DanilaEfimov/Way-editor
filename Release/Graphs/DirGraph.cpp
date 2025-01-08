@@ -85,9 +85,8 @@ DirGraph::DirGraph(uint _V, byte **mat) : Graph(_V) {
 }
 
 DirGraph::~DirGraph() {
-    this->Graph::~Graph();
-    delete this->upConnectivityMat;
-    delete this->downConnectivityMat;
+    delete[] this->upConnectivityMat;
+    delete[] this->downConnectivityMat;
 }
 
 void DirGraph::print(std::fstream &_to) const {
@@ -277,6 +276,11 @@ DirGraph& DirGraph::operator+=(const DirGraph &_Right) {    // not fixed (only s
             }
         }
     }
+    return *this;
+}
+
+DirGraph& DirGraph::operator+(std::stack<uint> &_Right)
+{
     return *this;
 }
 

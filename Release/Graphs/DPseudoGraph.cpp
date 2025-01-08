@@ -24,7 +24,6 @@ DPseudoGraph::DPseudoGraph(uint V, byte** mat) : DirGraph(V, mat) {
 }
 
 DPseudoGraph::~DPseudoGraph() {
-    this->DirGraph::~DirGraph();
     delete[] this->loops;
 }
 

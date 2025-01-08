@@ -2,6 +2,7 @@
 #define GRAPH_H
 
 #include <fstream>
+#include <stack>
 
 typedef unsigned int uint;
 typedef unsigned short ushort;
@@ -18,13 +19,13 @@ public:
     bool empty() const { return this->V == 0; };
 
 	//===========	ACCESSORS	===========
-    virtual void print(std::fstream& _to) const = 0;
+    virtual void print(std::fstream&) const = 0;
     virtual std::string show() const = 0;
     virtual int getType() const = 0;
     ushort getV() const {return this->V;};
 
     // ===========	 MATH	===========
-    virtual int operator()(uint _Vertex) const = 0;				// degree of _Vertex (-1 for undefined _V)
+    virtual int operator()(uint) const = 0;				// degree of _Vertex (-1 for undefined _V)
 };
 
 #endif

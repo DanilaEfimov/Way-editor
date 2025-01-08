@@ -40,7 +40,6 @@ UPseudoGraph::UPseudoGraph(uint V, byte** mat) : UDirGraph(V, mat) {
 }
 
 UPseudoGraph::~UPseudoGraph() {
-    this->UDirGraph::~UDirGraph();
     delete[] this->loops;
 }
 
@@ -120,6 +119,36 @@ bool UPseudoGraph::isConnected(uint _in, uint _out) const {
         return getBit(bit, this->loops[byte]);
     }
     return false;
+}
+
+void UPseudoGraph::setEdge(uint _in, uint _out) {
+    if(_in == 0 || _out == 0 || _in > this->V || _out > this->V){
+        return;
+    }
+    if(_in == _out){
+        if(!getBit(_in-1, this->loops[(_in-1)/8])){
+            this->E++;
+            setBit(_in-1, this->loops[(_in-1)/8]);
+        }
+    }
+    else{
+        this->UDirGraph::setEdge(_in, _out);
+    }
+}
+
+void UPseudoGraph::eraseEdge(uint _in, uint _out) {
+    if(_in == 0 || _out == 0 || _in > this->V || _out > this->V){
+        return;
+    }
+    if(_in == _out){
+        if(getBit(_in-1, this->loops[(_in-1)/8])){
+            this->E--;
+            resetBit(_in-1, this->loops[(_in-1)/8]);
+        }
+    }
+    else{
+        this->UDirGraph::setEdge(_in, _out);
+    }
 }
 
 UDirGraph &UPseudoGraph::operator-(uint _Vertex) {

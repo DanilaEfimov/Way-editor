@@ -17,6 +17,9 @@ public:
     virtual int getDegree(uint _Vertex) const override;
     virtual bool isConnected(uint _in, uint _out) const override;
 
+    virtual void setEdge(uint _in, uint _out) override;
+    virtual void eraseEdge(uint _in, uint _out) override;
+
     virtual UDirGraph& operator-(uint _Vertex) override;
 };
 

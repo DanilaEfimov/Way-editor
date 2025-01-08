@@ -12,6 +12,7 @@ class UDirGraph : public Graph								// most primitive graph class
 protected:
     uint E;
     byte_t* connectivityVector;                             // byte-vector of connectivity matrix
+
 public:
     UDirGraph(uint _V = 0, byte** mat = nullptr);
 	virtual ~UDirGraph() override;
@@ -24,7 +25,7 @@ public:
     virtual bool isConnected(uint _in, uint _out) const;
     uint getEdges() const;
 
-	virtual void setEdge(uint _in, uint _out);
+    virtual void setEdge(uint _in, uint _out);
     virtual void eraseEdge(uint _in, uint _out);
 
 	// ===========	 MATH	===========
