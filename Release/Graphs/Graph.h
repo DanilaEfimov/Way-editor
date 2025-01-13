@@ -2,7 +2,6 @@
 #define GRAPH_H
 
 #include <fstream>
-#include <stack>
 
 typedef unsigned int uint;
 typedef unsigned short ushort;
@@ -20,7 +19,7 @@ public:
 
 	//===========	ACCESSORS	===========
     virtual void print(std::fstream&) const = 0;
-    virtual std::string show() const = 0;
+    virtual std::string& show() const = 0;
     virtual int getType() const = 0;
     ushort getV() const {return this->V;};
 

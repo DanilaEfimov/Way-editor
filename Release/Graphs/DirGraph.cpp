@@ -1,5 +1,6 @@
 #include "DirGraph.h"
 #include "General.h"
+#include "Parser.h"
 #include <bitset>
 
 static byte setBit(uint pos = 0) {
@@ -120,13 +121,14 @@ void DirGraph::print(std::fstream &_to) const {
     _to << "\n" << size << std::endl;
 }
 
-std::string DirGraph::show() const {
-    std::string conectList = "\n";    // connectivity lists
+std::string& DirGraph::show() const {
+    static std::string conectList;    // connectivity lists
+    conectList = Parser::sType(this->getType()) + "\n";
     for(size_t i = 1; i <= this->V; i++){
         conectList += std::to_string(i);
         conectList += ": ";
-        for(size_t j = 1; j <= this->V; j++){
-            if(this->isConnected(i, j) || isConnected(j, i)){
+        for(size_t j = i + 1; j <= this->V; j++){
+            if(this->isConnected(i, j)){
                 conectList += std::to_string(j);
                 conectList += ", ";
             }

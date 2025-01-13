@@ -1,5 +1,6 @@
 #include "UPseudoGraph.h"
 #include "General.h"
+#include "Parser.h"
 #include <bitset>
 
 static byte setBit(uint pos = 0) {
@@ -77,8 +78,9 @@ void UPseudoGraph::print(std::fstream &_to) const {
     _to << "\n" << size << std::endl;
 }
 
-std::string UPseudoGraph::show() const {
-    std::string conectList = "\n";    // connectivity lists
+std::string& UPseudoGraph::show() const {
+    static std::string conectList;    // connectivity lists
+    conectList = Parser::sType(this->getType()) + "\n";
     for(size_t i = 1; i <= this->V; i++){
         conectList += std::to_string(i);
         conectList += ": ";
@@ -151,7 +153,7 @@ void UPseudoGraph::eraseEdge(uint _in, uint _out) {
     }
 }
 
-UDirGraph &UPseudoGraph::operator-(uint _Vertex) {
+UDirGraph& UPseudoGraph::operator-(uint _Vertex) {
     if(_Vertex == 0 || _Vertex > this->V){return *this;}
     byte* lastLoops = this->loops;
     this->loops = new byte[(this->V + 6)/8]{0};

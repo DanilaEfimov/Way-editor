@@ -1,5 +1,6 @@
 #include "UDirGraph.h"
 #include "General.h"
+#include "Parser.h"
 #include "Error.h"
 #include <bitset>
 #include <queue>
@@ -93,6 +94,7 @@ void UDirGraph::print(std::fstream& _to) const {
 	if (!_to.is_open()) {
 		return;
 	}
+    _to << Parser::sType(this->getType());
     _to << "\nbit descriptor:\n";
     std::bitset<32> edges(this->E);
     std::bitset<16> vertexes(this->V);
@@ -111,12 +113,13 @@ void UDirGraph::print(std::fstream& _to) const {
     _to << "\n" << size << std::endl;
 }
 
-std::string UDirGraph::show() const {
-    std::string conectList = "\n";    // connectivity lists
+std::string& UDirGraph::show() const {
+    static std::string conectList;    // connectivity lists
+    conectList = Parser::sType(this->getType()) + "\n";
     for(size_t i = 1; i <= this->V; i++){
         conectList += std::to_string(i);
         conectList += ": ";
-        for(size_t j = i + 1; j <= this->V; j++){
+        for(size_t j = 1; j <= this->V; j++){
             if(this->isConnected(i, j)){
                 conectList += std::to_string(j);
                 conectList += ", ";
@@ -418,6 +421,7 @@ UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) {
             mat[_Vertex-1][this->V] = true; // setEdge
             this->E++;
         }
+        else if(_Vertex == 0){ break; }
         else {Error(_INVALID_ARGUMENT_);}
         _Right.pop();
     }
