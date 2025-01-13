@@ -1,0 +1,5 @@
+addV 0
+addV 0 eggs
+addE 17 16
+addE 17 15 17 14
+addE 17 16

@@ -1,0 +1,26 @@
+about commands:
+
+1) addV [adjacent vertices numbers]
+limitless argument operator.
+Syntax: You have to input name of function "addV" (have not synonyms),
+after put all adjacent vertices numbers separated by a space. Last
+symbol should be a digit. If You want to add non adjacent vertex, You
+have to input "addV 0". ( 0 used like stopper )
+Also You can input same vertices like argument, it will not an
+undefined behavior.
+Example:
+[not error] "addV 1 2 3", "addV 1 1 2 2", "addV 1 0", "addV 0 1"
+[error] "addV 1 0", "addV"
+Advice: You can write comments after "0"
+
+2) addE [pairs of incident vertices] (even count)
+limitless argument operator.
+Syntax: You have to input name of functions "addE" (have not synonyms),
+after put all pairs of incident vertices numbers separated by a space.
+Last symbol should be a digit. You can't add "empty" edge.
+Also You can add existing edge. Recommended to specify the vertices
+in descending order (in every pair).
+Example:
+[recommended] "addE 9 8 8 7", "addE 2 1 2 1 3 2"
+[error] "addE 8 0", "addE 8 7 8"
+Advice: You can use this command to reprint graph by "addE @existingEDGE@"
