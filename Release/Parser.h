@@ -14,6 +14,8 @@ private:
 public:
     Parser();
 
+    static const std::string getTempDirectory(const std::string& path);
+    static const std::string sType(uint code);
     static uint getType(std::string cmd);
     static ushort getVertexCount(int fileType, std::string path);
 

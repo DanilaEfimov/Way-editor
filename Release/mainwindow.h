@@ -36,6 +36,10 @@ private:
     static QCheckBox* ErrorReturned;
     static QCheckBox* WarningReturned;
 
+    void updateHystoru(std::string& cmd);
+    void clearHystory();
+    void clearInput();
+
     // INITIALIZE
     void initMenu();
     void initWidgetsView();
@@ -47,7 +51,7 @@ private:
     void binding();
     void bindFileMenu();
     void bindViewMenu();
-    void bindInfoMenu();
+    void bindLineMenu();
 
 private slots:      /* MENUES */
     // FILE MENU

@@ -1,12 +1,6 @@
 #include "Parser.h"
-#include "Error.h"
 #include "General.h"
-#include "Graphs/WTree.h"
-#include "Graphs/DPseudoGraph.h"
-#include "Graphs/UDWGraph.h"
-#include "Graphs/UPseudoGraph.h"
-#include "Graphs/WDGraph.h"
-#include "Graphs/BiTree.h"
+#include "Error.h"
 #include "mainwindow.h"
 #include <fstream>
 #include <sstream>
@@ -14,6 +8,33 @@
 std::string Parser::answer = "";
 
 Parser::Parser() {}
+
+const std::string Parser::getTempDirectory(const std::string &path) {
+    static std::string res;
+    res = "";
+    size_t left = 0;
+    size_t right = path.find_last_of('/');
+    if(right == std::string::npos){ Error(_FAILED_TO_OPEND_); return res; }
+    res = path.substr(left, right);
+    return res;
+}
+
+const std::string Parser::sType(uint code) {
+    switch(code){
+    case names::udirgraph:      return "UDirGraph";     break;
+    case names::dirgraph:       return "DirGraph";      break;
+    case names::udwgraph:       return "UDWGraph";      break;
+    case names::wdgraph:        return "DWGraph";       break;
+    case names::upseudograph:   return "UPseudoGraph";  break;
+    case names::dpseudograph:   return "DPseudoGraph";  break;
+    case names::tree:           return "Tree";          break;
+    case names::wtree:          return "WTree";         break;
+    case names::bitree:         return "BiTree";        break;
+    default:
+        return "Graph";
+    }
+    return "";
+}
 
 uint Parser::getType(std::string cmd) {
     std::fstream file(cmd);

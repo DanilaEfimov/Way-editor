@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "Graphs/UDirGraph.h"
 #include "ui_mainwindow.h"
 #include "General.h"
 #include "Parser.h"
@@ -25,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->initInputArea();
     this->initOutputArea();
     this->initWidgetsView();
+    this->clearHystory();
 }
 
 MainWindow::~MainWindow() {
@@ -39,13 +39,33 @@ MainWindow::~MainWindow() {
     }
 }
 
+void MainWindow::updateHystoru(std::string &cmd) {
+    static const std::string filename = HYSTORY_NAME;
+    std::fstream file(filename, std::ios_base::app);
+    if(!file.is_open()){
+        Error(_FAILED_TO_OPEN_);
+        return;
+    }
+    file << cmd << "\n";
+}
+
+void MainWindow::clearHystory() {
+    std::fstream file(HYSTORY_NAME, std::ios_base::out);
+    file.close();
+}
+
+void MainWindow::clearInput() {
+    uint currentTab = ui->inputArea->currentIndex();
+    fields[currentTab]->setText(_CLEAN_);
+}
+
 void MainWindow::initMenu() {
     this->binding();
 }
 
 void MainWindow::initWidgetsView() {
     // Tab Widget "input Area"
-    ui->inputArea->setTabText(0, "Hello, Way Editor!");
+    ui->inputArea->setTabText(0, NOTE_TAB);
     ui->inputArea->removeTab(1);
     ui->notes->insertPlainText(_HELLO_);
     this->setBlackTheme();
@@ -89,7 +109,7 @@ void MainWindow::initWindow() {
 void MainWindow::binding() {
     this->bindFileMenu();
     this->bindViewMenu();
-    this->bindInfoMenu();
+    this->bindLineMenu();
 }
 
 void MainWindow::bindFileMenu() {
@@ -104,8 +124,9 @@ void MainWindow::bindViewMenu() {
     connect(ui->Left_mode,  SIGNAL(triggered(bool)), this, SLOT(setLeftMode()));
 }
 
-void MainWindow::bindInfoMenu() {
-
+void MainWindow::bindLineMenu() {
+    connect(ui->Help,       SIGNAL(triggered(bool)), this, SLOT(help()));
+    connect(ui->Hystory,    SIGNAL(triggered(bool)), this, SLOT(hystory()));
 }
 
 void MainWindow::newFile() {
@@ -181,15 +202,48 @@ void MainWindow::setLeftMode() {
 
 
 void MainWindow::help() {
-
+    static bool opened = false;
+    static const std::string filename = HELP_NAME;
+    std::fstream file(filename);
+    static std::string info; info = "";
+    static std::string line; line = "";
+    if(!opened){
+        if(!file.is_open()){
+            Error(_FAILED_TO_OPEN_);
+            return;
+        }
+        while(!file.eof()){
+            std::getline(file, line);
+            info += line + "\n";
+        }
+        opened = true;
+    }
+    ui->outputArea->setText(QString::fromStdString(info));
 }
 
 void MainWindow::hystory() {
-
+    static const std::string filename = HYSTORY_NAME;
+    std::fstream file(filename, std::ios_base::in);
+    static std::string info; info = "";
+    static std::string line; line = "";
+    if(!file.is_open()){
+        Error(_FAILED_TO_OPEN_);
+        return;
+    }
+    while(!file.eof()){
+        std::getline(file, line);
+        info += line + "\n";
+    }
+    ui->outputArea->setText(QString::fromStdString(info));
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* e) {
-    qDebug() << e->key() << '\n';
+    static QString cmd;
+    static QString graphConectList;
+    static std::string stdcmd;
+    static std::string lastText;
+    static std::string newText;
+    static std::string text;
     if(!e){return;};
     QMainWindow::keyPressEvent(e);
     uint currentTab = ui->inputArea->currentIndex();
@@ -214,17 +268,21 @@ void MainWindow::keyPressEvent(QKeyEvent* e) {
     case Qt::Key_Return:    // you can convert rather graph pointer types
         {
             int res = 0;
-            QString cmd = Parser::getLastLine(currentTab);
+            cmd = Parser::getLastLine(currentTab);
+            stdcmd = cmd.toStdString();
             functionType = Parser::commandCode(cmd.toStdString());
+            if(functionType == -1){ Error(__SYNTAX_ERROR__); return; }
+            else if(functionType == 0) { this->clearInput(); return; }  // clening input area explicit
             argc = Parser::argc(functionType);
             argv = Parser::argv(cmd.toStdString());
             res = PerformanceManager::operation(functionType, argc, argv, graphs[currentTab]);
-            if(res != 0){ Error(_UNDEFINED_ERROR_); return;}
-            QString graphConectList = QString::fromStdString(graphs[currentTab]->show());
+            if(res != 0){ Error(_UNDEFINED_ERROR_); return; }
+            this->updateHystoru(stdcmd);
+            graphConectList = QString::fromStdString(graphs[currentTab]->show());
             ui->outputArea->setText(graphConectList);
-            std::string lastText = fields[currentTab]->toPlainText().toStdString();
-            std::string newText = e->text().toStdString();
-            std::string text = lastText + '\n';
+            lastText = fields[currentTab]->toPlainText().toStdString();
+            newText = e->text().toStdString();
+            text = lastText + '\n';
             fields[currentTab]->setText(QString::fromStdString(text));
         }
     break;
