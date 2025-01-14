@@ -169,7 +169,7 @@ void MainWindow::newFile() {
     Error(_FILE_NOT_CHOOSED_);
 }
 
-void MainWindow::saveFile() const {
+void MainWindow::saveFile() {
     uint id = ui->inputArea->currentIndex();
     Graph* temp = graphs[id];
 }
@@ -205,8 +205,8 @@ void MainWindow::help() {
     static bool opened = false;
     static const std::string filename = HELP_NAME;
     std::fstream file(filename);
-    static std::string info; info = "";
-    static std::string line; line = "";
+    static std::string info;
+    static std::string line;
     if(!opened){
         if(!file.is_open()){
             Error(_FAILED_TO_OPEN_);
@@ -219,6 +219,7 @@ void MainWindow::help() {
         opened = true;
     }
     ui->outputArea->setText(QString::fromStdString(info));
+    file.close();
 }
 
 void MainWindow::hystory() {
@@ -235,67 +236,79 @@ void MainWindow::hystory() {
         info += line + "\n";
     }
     ui->outputArea->setText(QString::fromStdString(info));
+    file.close();
 }
 
+// vvv KEY BOARD EVENTS vvv
+
+void MainWindow::backSpaceEvent(uint currentTab, QString& qText) {
+    if(Parser::lastLineIsEmpty(currentTab)){
+        Error(__EMPTY_INPUT__, true);
+        return;
+    }
+    else{
+        qText = fields[currentTab]->toPlainText();
+        QString::Iterator it = qText.end() - 1;
+        qText.erase(it);
+        fields[currentTab]->setText(qText);
+        return;
+    }
+}
+
+void MainWindow::enterCmdEvent(uint currentTab, QString &cmd, std::string &argv, QString &qText, QString &graphConectList, std::string &stdcmd, std::string &lastText, std::string &text) {
+    int res = 0;
+    int argc = -1;
+    int functionType = -1;
+    cmd             = Parser::getLastLine(currentTab);
+    functionType    = Parser::commandCode(cmd.toStdString());
+    // checks: vvv
+    if(functionType == -1){ Error(__SYNTAX_ERROR__); return; }
+    else if(functionType == 0) { this->clearInput(); return; }  // clening input area explicit
+    // end checks ^^^
+    argc = Parser::argc(functionType);
+    argv = Parser::argv(cmd.toStdString());
+    res = PerformanceManager::operation(functionType, argc, argv, graphs[currentTab]);
+    if(res != 0){ return; }
+    // updating hystory vvv
+    stdcmd = cmd.toStdString();
+    this->updateHystoru(stdcmd);
+    // end updating hystory ^^^ / update view vvv
+    graphConectList = QString::fromStdString(graphs[currentTab]->show());
+    ui->outputArea->setText(graphConectList);
+    // end update view ^^^ / updating text in memory vvv
+    lastText = fields[currentTab]->toPlainText().toStdString();
+    text = lastText + '\n';
+    qText = QString::fromStdString(text);
+    fields[currentTab]->setText(qText);
+    // end updating text in memory ^^^
+}
+
+void MainWindow::defaultKeyEvent(uint currentTab, QKeyEvent* e, std::string &lastText, std::string &newText, std::string &text) {
+    lastText = fields[currentTab]->toPlainText().toStdString();
+    newText = e->text().toStdString();
+    text = lastText + newText;
+    fields[currentTab]->setText(QString::fromStdString(text));
+}
+
+// ^^^ KEY BOARD EVENTS ^^^
+
 void MainWindow::keyPressEvent(QKeyEvent* e) {
-    static QString cmd;
-    static QString graphConectList;
-    static std::string stdcmd;
-    static std::string lastText;
-    static std::string newText;
-    static std::string text;
+    static QString      cmd;
+    static QString      graphConectList;
+    static QString      qText;
+    static std::string  stdcmd;
+    static std::string  lastText;
+    static std::string  newText;
+    static std::string  text;
+    static std::string  argv;
     if(!e){return;};
     QMainWindow::keyPressEvent(e);
     uint currentTab = ui->inputArea->currentIndex();
     if(currentTab == 0){return;}
-    int argc = -1;
-    std::string argv;
-    int functionType = -1;
-    switch(e->key()){
-    case Qt::Key_Backspace:
-        if(Parser::lastLineIsEmpty(currentTab)){
-            Error(__EMPTY_INPUT__, true);
-            return;
-        }
-        else{
-            QString text = fields[currentTab]->toPlainText();
-            QString::Iterator it = text.end() - 1;
-            text.erase(it);
-            fields[currentTab]->setText(text);
-            return;
-        }
-        break;
-    case Qt::Key_Return:    // you can convert rather graph pointer types
-        {
-            int res = 0;
-            cmd = Parser::getLastLine(currentTab);
-            stdcmd = cmd.toStdString();
-            functionType = Parser::commandCode(cmd.toStdString());
-            if(functionType == -1){ Error(__SYNTAX_ERROR__); return; }
-            else if(functionType == 0) { this->clearInput(); return; }  // clening input area explicit
-            argc = Parser::argc(functionType);
-            argv = Parser::argv(cmd.toStdString());
-            res = PerformanceManager::operation(functionType, argc, argv, graphs[currentTab]);
-            if(res != 0){ Error(_UNDEFINED_ERROR_); return; }
-            this->updateHystoru(stdcmd);
-            graphConectList = QString::fromStdString(graphs[currentTab]->show());
-            ui->outputArea->setText(graphConectList);
-            lastText = fields[currentTab]->toPlainText().toStdString();
-            newText = e->text().toStdString();
-            text = lastText + '\n';
-            fields[currentTab]->setText(QString::fromStdString(text));
-        }
-    break;
-    //case Qt::CTRL:  // ctrl + S = save, ctrl + E = exit, ctrl + LShift = decrement tab index ...
-    //   break;
-    default:
-        {
-            std::string lastText = fields[currentTab]->toPlainText().toStdString();
-            std::string newText = e->text().toStdString();
-            std::string text = lastText + newText;
-            fields[currentTab]->setText(QString::fromStdString(text));
-        }
-        break;
+    switch(e->key()) {
+    case Qt::Key_Backspace: this->backSpaceEvent(currentTab, qText); break;
+    case Qt::Key_Return:    this->enterCmdEvent(currentTab, cmd, argv, qText, graphConectList, stdcmd, lastText, text); break;
+    default:                this->defaultKeyEvent(currentTab, e,lastText, newText, text); break;
     }
     this->setFocus();
 }

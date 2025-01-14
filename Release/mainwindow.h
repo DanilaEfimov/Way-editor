@@ -36,6 +36,13 @@ private:
     static QCheckBox* ErrorReturned;
     static QCheckBox* WarningReturned;
 
+    // KEY EVENTS
+    void backSpaceEvent(uint curTab, QString& text);    // in .cpp file it contains near keyPressEvent
+    void enterCmdEvent(uint curTab, QString& cmd, std::string& argv, /* for performance */
+                    QString& qText, QString& graphConectList,   /* for updating output */
+                    std::string& stdcmd, std::string& lastText, std::string& text);
+    void defaultKeyEvent(uint curTab, QKeyEvent* e, std::string& lastText, std::string& newText, std::string& text);
+
     void updateHystoru(std::string& cmd);
     void clearHystory();
     void clearInput();
@@ -53,10 +60,11 @@ private:
     void bindViewMenu();
     void bindLineMenu();
 
-private slots:      /* MENUES */
+private slots:
+    /* MENUES */
     // FILE MENU
     void newFile();
-    void saveFile() const;
+    void saveFile();
     // VIEW MENU
     void setBlackTheme();
     void setWhiteTheme();

@@ -62,7 +62,7 @@
 #define _VL_HELLO_ "\nhere writen vertex list of graph\n"
 #define _CHOOSE_ "Choose graph file (.mat/.vl/.el)\n"
 #define _HELLO_ " Hello, Way Editor! \n \
-It's little framework for working \n \
+It's a little framework for working \n \
 with math graph. \n \
 best wishes WarerCode 2025 (c). \n \
 \n \
@@ -105,19 +105,19 @@ enum functions { // names of functions & their id
     computeDFS = 0x40, computeBFS, computePrima, Dejcstra
 };
 
-const std::map<std::string, int> types {
+inline const std::map<std::string, int> types {
     graphKey("UDirGraph", udirgraph), graphKey("DirGraph", dirgraph), graphKey("UDWGraph", udwgraph),
     graphKey("WDGraph", wdgraph), graphKey("UPseudoGraph", upseudograph), graphKey("DPseudoGraph", dpseudograph),
     graphKey("Tree", tree), graphKey("WTree", wtree), graphKey("BiTree", bitree),
 };
 
-const std::map<std::string, int> extentions {
+inline const std::map<std::string, int> extentions {
     extKey(".mat", MAT),    extKey(".MAT", MAT),    extKey(".Mat", MAT),
     extKey(".vl", VL),      extKey(".VL", VL),      extKey(".Vl", VL),
     extKey(".el", EL),      extKey(".EL", EL),      extKey(".El", EL),
 };
 
-const std::map<std::string, int> commands {
+inline const std::map<std::string, int> commands {
     cmdKey("clear", clear),
     cmdKey("weight", weight), cmdKey("addV", addV), cmdKey("addE", addE),
     cmdKey("eraseV", eraseV), cmdKey("eraseE", eraseE), cmdKey("EulerCycle", EulerCycle),
@@ -128,7 +128,7 @@ const std::map<std::string, int> commands {
     cmdKey("Dejcstra", Dejcstra),
 };
 
-const std::map<int, int> argcount {
+inline const std::map<int, int> argcount {
     countKey(weight, TWO), countKey(addV, LIMITLESS), countKey(addE, LIMITLESS),
     countKey(eraseV, ONE), countKey(eraseE, TWO), countKey(EulerCycle, ONE),
     countKey(CycleBase, ZERO), countKey(Blocks, ZERO), countKey(MaxV, ZERO),

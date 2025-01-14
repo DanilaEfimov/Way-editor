@@ -31,12 +31,13 @@ const std::string Parser::sType(uint code) {
     case names::wtree:          return "WTree";         break;
     case names::bitree:         return "BiTree";        break;
     default:
+        Error(_ERROR_GRAPH_TYPE_, true);
         return "Graph";
     }
     return "";
 }
 
-uint Parser::getType(std::string cmd) {
+uint Parser::getType(const std::string& cmd) {
     std::fstream file(cmd);
     std::string typeName = "";
     std::getline(file, typeName);
@@ -53,7 +54,7 @@ uint Parser::getType(std::string cmd) {
     return -1;
 }
 
-ushort Parser::getVertexCount(int fileType, std::string path) {
+ushort Parser::getVertexCount(int fileType, const std::string& path) {
     ushort V = 0;
     std::fstream file(path);
     std::string line = "";
@@ -112,7 +113,7 @@ int Parser::getExtention(std::string fileName) {
     return res.second;
 }
 
-byte** Parser::writeMatrixMat(ushort V, std::string path) {
+byte** Parser::writeMatrixMat(ushort V, const std::string& path) {
     if(V == 0){ return nullptr; }
     byte** mat = new byte*[V];
     for(size_t i = 0; i < V; i++){
@@ -150,7 +151,7 @@ byte** Parser::writeMatrixMat(ushort V, std::string path) {
     return mat;
 }
 
-byte** Parser::writeMatrixVL(ushort V, std::string path) {  // NOT fixed
+byte** Parser::writeMatrixVL(ushort V, const std::string& path) {  // NOT fixed
     byte** mat = nullptr;
     mat = new byte*[V];
     for(size_t i = 0; i < V; i++){
@@ -180,7 +181,7 @@ byte** Parser::writeMatrixVL(ushort V, std::string path) {  // NOT fixed
     return mat;
 }
 
-byte** Parser::writeMatrixEL(ushort V, std::string path) {
+byte** Parser::writeMatrixEL(ushort V, const std::string& path) {
     byte** mat = new byte*[V];
     for(size_t i = 0; i < V; i++){
         mat[i] = new byte[V]{0};
@@ -204,7 +205,7 @@ byte** Parser::writeMatrixEL(ushort V, std::string path) {
     return mat;
 }
 
-byte** Parser::initMatrix(int fileType, std::string path) {
+byte** Parser::initMatrix(int fileType, const std::string& path) {
     byte** mat = nullptr;
     ushort V = getVertexCount(fileType, path);
     if(fileType == -1){
@@ -226,6 +227,23 @@ byte** Parser::initMatrix(int fileType, std::string path) {
     }
     return mat;
 }
+
+// GRAPH INTO FILE vvv
+void Parser::graphToMat(Graph *G, std::fstream &file)
+{
+
+}
+
+void Parser::graphToVL(Graph *G, std::fstream &file)
+{
+
+}
+
+void Parser::graphToEL(Graph *G, std::fstream &file)
+{
+
+}
+//  GRAPH INTO FILE ^^^
 
 bool Parser::lastLineIsEmpty(uint index) {
     QTextEdit* current = MainWindow::fields[index];
@@ -249,7 +267,7 @@ QString Parser::getLastLine(uint index) {
     return QString::fromStdString(lastLine);
 }
 
-int Parser::commandCode(std::string command) {
+int Parser::commandCode(const std::string& command) {
     std::string functionName;
     size_t left = 0, right = command.find_first_of(' ');
     functionName = command.substr(left, right);
@@ -274,7 +292,7 @@ int Parser::argc(int commandCode) {
     }
 }
 
-std::string Parser::argv(std::string cmd) {
+std::string Parser::argv(const std::string& cmd) {
     std::string argv;
     size_t left = cmd.find_first_of(' '), right = cmd.size() - 1;
     argv = cmd.substr(left, right);
@@ -336,38 +354,21 @@ std::string Parser::rewriteEL(ushort V, byte** mat) {
     return answer;
 }
 
-std::string Parser::graphType(int code) {
-    switch(code){
-    case udirgraph: return "UDirGraph";
-    case dirgraph: return "DirGraph";
-    case udwgraph: return "UDWGraph";
-    case wdgraph: return "DWGraph";
-    case upseudograph: return "UPseudoGraph";
-    case dpseudograph: return "DPseudoGraph";
-    case tree: return "Tree";
-    case wtree: return "WTree";
-    case bitree: return "BiTree";
-    default:
-        Error(_ERROR_GRAPH_TYPE_);
-        return "Graph";
-    }
-}
-
 std::string Parser::readeableGraph(Graph* G) {
-    return graphType(G->getType()) + G->show() + "\n" + _HELLO_;
+    return sType(G->getType()) + G->show() + "\n" + _HELLO_;
 }
 
 Graph* Parser::initGraph(int graphType, ushort V, byte** mat) {
     switch(graphType){
-    case udirgraph: return new UDirGraph(V, mat);
-    case dirgraph: return new DirGraph(V, mat);
-    case udwgraph: return new UDWGraph(V, mat);
-    case wdgraph: return new WDGraph(V, mat);
-    case upseudograph: return new UPseudoGraph(V, mat);
-    case dpseudograph: return new DPseudoGraph(V, mat);
-    case tree: return new Tree(V, mat);
-    case wtree: return new WTree(V, mat);
-    case bitree: return new BiTree(V, mat);
+    case udirgraph:     return new UDirGraph(V, mat);
+    case dirgraph:      return new DirGraph(V, mat);
+    case udwgraph:      return new UDWGraph(V, mat);
+    case wdgraph:       return new WDGraph(V, mat);
+    case upseudograph:  return new UPseudoGraph(V, mat);
+    case dpseudograph:  return new DPseudoGraph(V, mat);
+    case tree:          return new Tree(V, mat);
+    case wtree:         return new WTree(V, mat);
+    case bitree:        return new BiTree(V, mat);
     default:
         Error(_ERROR_GRAPH_TYPE_);
         return nullptr;

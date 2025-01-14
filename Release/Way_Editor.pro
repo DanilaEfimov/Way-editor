@@ -52,4 +52,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     README.txt \
+    build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/help.txt \
+    build/Desktop_Qt_6_7_2_MinGW_64_bit-Debug/hystory.txt \
     way_editor_icon.png
