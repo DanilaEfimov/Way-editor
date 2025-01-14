@@ -442,8 +442,6 @@ UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) {
             }
         }
     }
-    // here _Right std::stack<uint> is empty !!!
-    // not able to be used more !!!
     return *this;
 }
 
