@@ -1,4 +1,23 @@
-# Way-editor
-Project for my year work. It about graphs, actually for planning road system. Here using special algorithms and ideas for analysis. It's interesting.
-Now I'm binding menue's actions (one less stays)
-Now I'm actually make command-line interface
+# Way Editor
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)](https://github.com/yourusername/way-editor/releases)
+
+Way Editor — это мощный фреймворк для работы с математическими графами, который позволяет пользователям легко создавать, редактировать и визуализировать графовые структуры. Благодаря интуитивно понятному интерфейсу и гибкой архитектуре, Way Editor идеально подходит как для студентов, так и для профессионалов в области математики и информатики.
+
+## Основные возможности
+
+- **Графическая визуализация**: Отображайте графы в виде динамических и интерактивных диаграмм.
+- **Создание и редактирование**: Легко добавляйте, удаляйте и редактируйте вершины и ребра.
+- **Поддержка алгоритмов**: Встраивайте и оптимизируйте алгоритмы работы с графами, такие как поиск в глубину, поиск в ширину и др.
+- **Экспорт и импорт**: Импортируйте графы из популярных форматов (JSON, XML) и экспортируйте их для использования в других приложениях.
+- **Кросс-платформенность**: Работает на Windows, macOS и Linux.
+
+## Установка
+
+Для установки Way Editor выполните следующие шаги:
+
+1. Клонируйте репозиторий:
+
+   ```bash
+   git clone https://github.com/yourusername/way-editor.git
