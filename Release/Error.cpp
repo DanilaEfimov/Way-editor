@@ -9,6 +9,7 @@ Error::Error(const QString message) {
     this->infoText = message;
     this->ErrorBox->setWindowTitle(_ERROR_BOX_);
     this->ErrorBox->setInformativeText(message);
+    this->ErrorBox->setIcon(QMessageBox::Information);
     this->ErrorBox->exec();
 }
 
@@ -19,6 +20,7 @@ Error::Error(const QString message, bool isWarning) {
     this->infoText = message;
     this->ErrorBox->setWindowTitle(_WARNING_BOX_);
     this->ErrorBox->setInformativeText(message);
+    this->ErrorBox->setIcon(QMessageBox::Warning);
     this->ErrorBox->exec();
 }
 

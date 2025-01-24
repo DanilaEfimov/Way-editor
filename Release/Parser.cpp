@@ -295,8 +295,23 @@ int Parser::argc(int commandCode) {
 std::string Parser::argv(const std::string& cmd) {
     std::string argv;
     size_t left = cmd.find_first_of(' '), right = cmd.size() - 1;
+    if(left == std::string::npos){
+        Error(__EMPTY_INPUT__, true);
+        return __EMPTY_INPUT__;
+    }
     argv = cmd.substr(left, right);
     return argv;
+}
+
+int Parser::argc(const std::string &argv) {
+    int count = 0;
+    std::stringstream ss(argv);
+    while(!ss.eof()){
+        int v = 0;
+        ss >> v;
+        count++;
+    }
+    return count;
 }
 
 std::string Parser::rewriteMat(ushort V, byte** mat) {

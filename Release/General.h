@@ -44,6 +44,7 @@
 #define _ERROR_FILE_TYPE_ "Undefined file extention or graph\n"
 #define _ERROR_GRAPH_TYPE_ "Undefined graph type\n"
 #define _INVALID_ARGUMENT_ "Was inputed invalid argument\n"
+#define _INVALID_ARGUMENT_COUNT_ "Invalid argument count\n"
 
 #define __UNCORRECT_INPUT_FILE__ "File contains mistakes\n"
 #define __EMPTY_GRAPH_SETTED__ "Was created empty graph\n"
@@ -78,6 +79,7 @@ Your graph file (not .txt)."
 typedef unsigned int uint;
 typedef std::pair<std::string, int> graphKey, extKey, cmdKey;
 typedef std::pair<int, int> countKey;
+typedef std::pair<uint, uint> edge_t;
 
 enum names {
     graph = 0,
@@ -130,7 +132,7 @@ inline const std::map<std::string, int> commands {
 
 inline const std::map<int, int> argcount {
     countKey(weight, TWO), countKey(addV, LIMITLESS), countKey(addE, LIMITLESS),
-    countKey(eraseV, ONE), countKey(eraseE, TWO), countKey(EulerCycle, ONE),
+    countKey(eraseV, LIMITLESS), countKey(eraseE, LIMITLESS), countKey(EulerCycle, ONE),
     countKey(CycleBase, ZERO), countKey(Blocks, ZERO), countKey(MaxV, ZERO),
     countKey(MaxE, ZERO), countKey(Degree, ONE), countKey(Weight, TWO),
     countKey(VW, ONE), countKey(EW, THREE), countKey(computeDFS, ONE),

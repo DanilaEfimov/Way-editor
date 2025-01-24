@@ -38,6 +38,9 @@ public:
     static int argc(int commandCode);
     static std::string argv(const std::string& cmd);
 
+    // functions ::PerformanceMananger
+    static int argc(const std::string& argv);
+
     // saving file text
     static std::string rewriteMat(ushort V, byte** mat);
     static std::string rewriteVL(ushort V,byte** mat);
