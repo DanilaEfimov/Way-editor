@@ -242,7 +242,7 @@ UDirGraph& UDWGraph::operator-(uint _Vertex) {
     if(_Vertex > this->V || _Vertex == 0){
         return *this;
     }
-    //this->UDirGraph::operator-(_Vertex);
+    this->UDirGraph::operator-(_Vertex);
     /*here will be deleting and resizing weights*/
     double* lastEWeights = this->eWeights;
     this->eWeights = new double[(this->V-1)*(this->V - 2)/2];

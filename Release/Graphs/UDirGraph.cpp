@@ -21,7 +21,7 @@ static byte setBit(uint pos, byte& value) {		// for change bit
 }
 
 static byte resetBit(uint pos, byte& value){
-    bool res = 0b00000001;
+    byte res = 0b00000001;
     pos %= 8;
     res <<= pos;    // res *= 2^pos
     res = ~res;     // 0b11110111 e.g.
@@ -35,6 +35,20 @@ static byte getBit(uint pos, byte value) {
 	mask <<= pos;	// res *= 2^pos
 	byte res = value & mask ? 0b00000001 : 0b00000000;
 	return res;
+}
+
+static void replaceBit(size_t size, byte* cv, size_t from, size_t to){  // size in bytes
+    if(to >= size*8 || from >= size*8) {return;}
+    byte bit = getBit(from, cv[from/8]);
+    if(bit){setBit(to, cv[to/8]);}
+    else {resetBit(to, cv[to/8]);}
+}
+
+static void copyBits(size_t size, size_t newSize, byte* from, byte* to){    // size in bytes
+    size_t min = size < newSize ? size : newSize;
+    for(size_t i = 0; i < min; i++){
+        to[i] = from[i];
+    }
 }
 
 static bool** toMatrix(ushort V, byte* cv, uint size = 0){
@@ -417,7 +431,7 @@ UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) {
     */
     while(!_Right.empty()){
         uint _Vertex = _Right.top();
-        if(_Vertex != 0 && _Vertex < this->V + 1){
+        if(_Vertex != 0 && (_Vertex <= this->V)){
             mat[_Vertex-1][this->V] = true; // setEdge
             this->E++;
         }
@@ -425,9 +439,10 @@ UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) {
         else {Error(_INVALID_ARGUMENT_);}
         _Right.pop();
     }
-    this->V++;
     delete[] this->connectivityVector;
-    this->connectivityVector = new byte[(this->V * (this->V - 1) / 2 + 7) / 8]{0};
+    size_t newSize = this->V > 1 ? (this->V * (this->V - 1) / 2 + 7) / 8 : 1;
+    this->V++;
+    this->connectivityVector = new byte[newSize]{0};
     for (size_t i = 0; i < this->V; i++) {
         uint skippedBits = (i + 1) * (i + 2) / 2;
         for (size_t j = i + 1; j < this->V; j++) {
@@ -468,44 +483,35 @@ UDirGraph& UDirGraph::operator-=(const UDirGraph& _Right) {
 }
 
 UDirGraph& UDirGraph::operator-(uint _Vertex) {
-    if (_Vertex > this->V || _Vertex == 0) {
-		return *this;
-	}
-    if(this->V == 1){
-        this->V--;
-        this->E = 0;
-        delete[] this->connectivityVector;
-        this->connectivityVector = nullptr;
-        return *this;
-    }
-    this->E = 0;
-    bool** mat = toMatrix(this->V, this->connectivityVector);
-    delete[] this->connectivityVector;
-    this->connectivityVector = new byte[((this->V - 1) * (this->V - 2) / 2 + 7) / 8]{false};
-    uint compliment = this->V - _Vertex;
+    if(_Vertex > this->V || _Vertex == 0 || this->V == 0){return *this;}
+    this->E -= this->getDegree(_Vertex);
+    uint size = (this->V*(this->V - 1)/2 + 7) / 8; // used bits in connectivity vector
+    uint newSize = ((this->V-1)*(this->V - 2)/2 + 7) / 8;
+    uint replaced = 0;
+    byte* newCV = new byte[newSize ? newSize : 1]{false};
     for(size_t i = 0; i < this->V; i++){
-        if(i + 1 == _Vertex){ continue; }
+        if(i + 1 == _Vertex){continue;}
         for(size_t j = i+1; j < this->V; j++){
-            if(mat[i][j]){
-                if(j + 1 == _Vertex){ continue; }
-                uint matBits = i*this->V + j;
-                uint skipped = (i+1)*(i+2)/2;
-                uint bit = matBits - skipped;
-                if(i+1 >= _Vertex && j+1 >= _Vertex){bit-=this->V-1;}
-                else if(j+1 >= _Vertex) {bit -= i+1;}
-                else if(i+1 >= _Vertex) {bit -= compliment;}
-                uint byte = bit / 8;
-                this->connectivityVector[byte] |= setBit(bit);
-                this->E++;
+            if(j+1 == _Vertex){continue;}
+            uint mat = i * this->V + j;
+            uint skipped = (i+1)*(i+2)/2;
+            uint sequence = mat - skipped;
+            uint byte = sequence / 8;
+            uint bit = sequence % 8;
+            if(getBit(bit, this->connectivityVector[byte])){
+                setBit(replaced % 8, newCV[replaced / 8]);
             }
+            else{
+                resetBit(replaced % 8, newCV[replaced / 8]);
+            }
+            replaced++;
         }
     }
-    for(size_t i = 0; i < this->V; i++){
-        delete[] mat[i];
-    }
-    delete[] mat;
-    this->V--;
-	return *this;
+    this->V -= 1;
+    if(size > 1){ delete[] this->connectivityVector; }
+    else{ delete this->connectivityVector; }
+    this->connectivityVector = newCV;
+    return *this;
     /*
     *   for example G - 2: (deleting of second vertex)
     *   matrix of some UDirGraph:

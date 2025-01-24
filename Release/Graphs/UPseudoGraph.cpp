@@ -27,7 +27,7 @@ static byte getBit(uint pos, byte value) {
 }
 
 static byte resetBit(uint pos, byte& value){
-    bool res = 0b00000001;
+    byte res = 0b00000001;
     pos %= 8;
     res <<= pos;    // res *= 2^pos
     res = ~res;     // 0b11110111 e.g.
@@ -115,9 +115,8 @@ bool UPseudoGraph::isConnected(uint _in, uint _out) const {
         return this->UDirGraph::isConnected(_in, _out);
     }
     else{
-        uint v = _in;
-        uint byte = (v - 1) / 8;
-        uint bit = (v - 1) % 8;
+        uint byte = (_in - 1) / 8;
+        uint bit = (_in - 1) % 8;
         return getBit(bit, this->loops[byte]);
     }
     return false;
@@ -128,10 +127,8 @@ void UPseudoGraph::setEdge(uint _in, uint _out) {
         return;
     }
     if(_in == _out){
-        if(!getBit(_in-1, this->loops[(_in-1)/8])){
-            this->E++;
-            setBit(_in-1, this->loops[(_in-1)/8]);
-        }
+        this->E++;
+        setBit(_in-1, this->loops[(_in-1)/8]);
     }
     else{
         this->UDirGraph::setEdge(_in, _out);
@@ -156,7 +153,8 @@ void UPseudoGraph::eraseEdge(uint _in, uint _out) {
 UDirGraph& UPseudoGraph::operator-(uint _Vertex) {
     if(_Vertex == 0 || _Vertex > this->V){return *this;}
     byte* lastLoops = this->loops;
-    this->loops = new byte[(this->V + 6)/8]{0};
+    uint newSize = (this->V + 7)/8 ? (this->V + 7)/8 : 1;
+    this->loops = new byte[newSize]{0};
     for(size_t i = 0; i < this->V; i++){
         uint bit;
         uint byte;
