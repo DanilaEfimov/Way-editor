@@ -1,7 +1,7 @@
 #ifndef TREE_H
 #define TREE_H
 
-#include "Graphs/UDirGraph.h"
+#include "UDirGraph.h"
 
 class Tree : public UDirGraph
 {

@@ -36,6 +36,7 @@ public:
     // ===========	 MATH	===========
     std::stack<uint>& Dejcstra(uint _in, uint _out) const;
     virtual UDirGraph& operator-(uint _Vertex) override;
+    virtual UDWGraph& operator+(std::stack<uint>& _Right) override;
     int operator()(uint _Vertex) const override;
 };
 
@@ -46,4 +47,7 @@ public:
 *   eWeights:   [1,2],[1,3],[1,4],[1,5]..,[2,3],[2,4],[2,5]..,[3,4],[3,5],[...]
 *   so weight of edge between i and j vertex placed at (i * V + j) place in
 *   bit vector
+*
+*   vWeights:   [1],[2],[3],[4]..,[this->V]
+*   own double for every vertex
 */

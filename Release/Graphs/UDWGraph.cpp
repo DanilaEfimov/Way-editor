@@ -17,12 +17,49 @@ static byte setBit(uint pos, byte& value) {		// for change bit
     return res;
 }
 
+static byte resetBit(uint pos, byte& value){
+    byte res = 0b00000001;
+    pos %= 8;
+    res <<= pos;    // res *= 2^pos
+    res = ~res;     // 0b11110111 e.g.
+    value &= res;
+    return res;
+}
+
 static byte getBit(uint pos, byte value) {
     byte mask = 0b00000001;
     pos %= 8;
     mask <<= pos;	// res *= 2^pos
     byte res = value & mask ? 0b00000001 : 0b00000000;
     return res;
+}
+
+static void copyBits(size_t size1, size_t size2, word* arr1, word* arr2){
+    size_t min = size1 < size2 ? size1 : size2;
+    for(size_t i = 0; i < min; i++){ arr2[i] = arr1[i]; }
+}
+
+static bool** toMatrix(ushort V, byte* cv, uint size = 0){
+    size = size ? size : V; // in operator+(std::stack<uint>) we need make mat one row more
+    bool** mat = new bool*[size];
+    for(size_t i = 0; i < size; i++){
+        mat[i] = new bool[size]{0};
+    }
+    for(size_t i = 0; i < V; i++){
+        mat[i][i] = false;
+        uint skippedBits = (i + 1) * (i + 2) / 2;
+        for(size_t j = i+1; j < V; j++){
+            uint matBits = i * V + j;
+            uint bit = matBits - skippedBits;
+            uint byte = bit / 8;
+            bool connected = getBit(bit, cv[byte]);
+            mat[i][j] = mat[j][i] = connected;
+        }
+    }
+    for(size_t i = 0; i < size; i++){
+        mat[i][size-1] = mat[size-1][i] = false;
+    }
+    return mat;
 }
 
 static void setDefaultWeight(word* weights, uint _V, double weight){
@@ -228,7 +265,8 @@ void UDWGraph::eraseEdge(uint _in, uint _out) {
         return;
     }
     if(this->isConnected(_in, _out)){
-        this->eWeights[this->V*(_out-1) + (_in - 1)] = 0.0;
+        size_t sequence = this->V*(_out-1) + (_in - 1);
+        this->eWeights[sequence] = 0.0;
     }
     this->UDirGraph::eraseEdge(_in, _out);
 }
@@ -239,26 +277,32 @@ std::stack<uint>& UDWGraph::Dejcstra(uint _in, uint _out) const {
 }
 
 UDirGraph& UDWGraph::operator-(uint _Vertex) {
-    if(_Vertex > this->V || _Vertex == 0){
+    if(_Vertex > this->V || _Vertex == 0 || this->V == 0){
         return *this;
     }
-    this->UDirGraph::operator-(_Vertex);
-    /*here will be deleting and resizing weights*/
-    double* lastEWeights = this->eWeights;
-    this->eWeights = new double[(this->V-1)*(this->V - 2)/2];
-    uint compliment = this->V - _Vertex;
+    // update this->vWeights
+    size_t newSizeV = this->V - 1 ? this->V : 1;
+    word* newVW = new word[newSizeV];
+    size_t compliment = this->V - _Vertex;
+    for(size_t i = 0; i < compliment; i++){
+        newVW[i + _Vertex - 1] = newVW[i + _Vertex];
+    }
+    copyBits(this->V, this->V-1, this->vWeights, newVW);
+    delete[] this->vWeights;
+    this->vWeights = newVW;
+    // update this->eWeights
+    size_t newSizeE = (this->V-1)*(this->V-2)/2 ? (this->V-1)*(this->V-2)/2 : 1;
+    word* newEW = new word[(newSizeE + 7) / 8];
+    uint replaced = 0;
     for(size_t i = 0; i < this->V; i++){
         if(i + 1 == _Vertex){continue;}
-        uint skipped = (i + 1) * (i + 2) / 2;
-        if(i + 1 >= _Vertex){skipped += compliment;}
-        for(size_t j = i + 1; j < this->V - i; j++){
-            if(j + 1 == _Vertex){continue;}
-            if(j + 1 >= _Vertex){skipped += i + 1;}
-            uint matBits = i * this->V + j;
-            uint base = matBits - skipped;
-
+        for(size_t j = i+1; j < this->V; j++){
+            if(j+1 == _Vertex){continue;}
+            newEW[replaced] = this->eWeights[this->V*i+j] - 1;
+            replaced++;
         }
     }
+    this->UDirGraph::operator-(_Vertex);
     return *this;
     /*
     *   for example G - 2: (deleting of second vertex)
@@ -277,6 +321,14 @@ UDirGraph& UDWGraph::operator-(uint _Vertex) {
     *   so every vertex in mat deals with this->V - 1 places
     *   it's used in conditions after 'bit' calculations
     */
+}
+
+UDWGraph &UDWGraph::operator+(std::stack<uint> &_Right) {
+    if(_Right.empty()){return *this;}
+    this->UDirGraph::operator+(_Right);
+    size_t newSezeE = this->V*(this->V+1)/2 ? this->V*(this->V+1)/2 : 1;
+    word* newEW = new word[(newSezeE+7)/8]{0.0};
+    return *this;
 }
 
 int UDWGraph::operator()(uint _Vertex) const {
