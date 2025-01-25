@@ -41,11 +41,15 @@ private:
     void enterCmdEvent(uint curTab, QString& cmd, std::string& argv, /* for performance */
                     QString& qText, QString& graphConectList,   /* for updating output */
                     std::string& stdcmd, std::string& lastText, std::string& text);
-    void defaultKeyEvent(uint curTab, QKeyEvent* e, std::string& lastText, std::string& newText, std::string& text);
+    void defaultKeyEvent(uint curTab, QKeyEvent* e, std::string& lastText,
+                         std::string& newText, std::string& text);
 
     void updateHystoru(std::string& cmd);
     void clearHystory();
     void clearInput();
+
+    // CHECKS
+    bool checkSavePolicy();
 
     // INITIALIZE
     void initMenu();
@@ -65,6 +69,8 @@ private slots:
     // FILE MENU
     void newFile();
     void saveFile();
+    void dontReplace();
+    void replace();
     // VIEW MENU
     void setBlackTheme();
     void setWhiteTheme();

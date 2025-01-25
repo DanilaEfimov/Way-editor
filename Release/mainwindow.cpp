@@ -5,6 +5,9 @@
 #include "Error.h"
 #include <QPalette>
 #include <QFileDialog>
+#include <QDialog>
+#include <QLayout>
+#include <QPushButton>
 #include <QDir>
 
 Ui::MainWindow* MainWindow::ui = new Ui::MainWindow;
@@ -57,6 +60,26 @@ void MainWindow::clearHystory() {
 void MainWindow::clearInput() {
     uint currentTab = ui->inputArea->currentIndex();
     fields[currentTab]->setText(_CLEAN_);
+}
+
+bool MainWindow::checkSavePolicy() {
+    QDialog* dialog = new QDialog();
+    dialog->setWindowTitle(_SAVE_WARNING_);
+    QLayout* layout = new QHBoxLayout(dialog);
+    QPushButton* ok;
+    QPushButton* cancel;
+    ok->setText(_OK_);
+    cancel->setText(_CANCEL_);
+    layout->addWidget(ok);
+    layout->addWidget(cancel);
+    dialog->setLayout(layout);
+    //QObject::connect(ok, &QPushButton::clicked, this, &MainWindow::replace);
+    //QObject::connect(cancel, &QPushButton::clicked, this, &MainWindow::replace);
+    dialog->exec();
+    delete dialog;
+    delete ok;
+    delete cancel;
+    delete layout;
 }
 
 void MainWindow::initMenu() {
@@ -170,8 +193,30 @@ void MainWindow::newFile() {
 }
 
 void MainWindow::saveFile() {
+    bool toReplace = this->checkSavePolicy();
+    if(toReplace){
+
+    }
+    else{
+
+    }
+    //std::fstream file(path+graphName, std::ios_base::)
+}
+
+void MainWindow::dontReplace() {
+    std::string path;
     uint id = ui->inputArea->currentIndex();
     Graph* temp = graphs[id];
+    path = ui->inputArea->tabText(id).toStdString();
+    path = Parser::getTempDirectory(path);
+}
+
+void MainWindow::replace() {
+    static std::string path;
+    static std::string fileName;
+    uint id = ui->inputArea->currentIndex();
+    Graph* temp = graphs[id];
+    std::string graphName = Parser::sType(temp->getType()) + std::to_string(id) + stdExt.find(MAT)->second;
 }
 
 void MainWindow::setBlackTheme() {

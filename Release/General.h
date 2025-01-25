@@ -59,8 +59,12 @@
 #define OUT_SEED 10 /* it means count of double numbers in string, which will be printed */
 #define FONT_SIZE 12 /* in points */
 #define _CLEAN_ ""
-#define _MAT_HELLO_ "\nhere writen matrix of graph\n"
-#define _VL_HELLO_ "\nhere writen vertex list of graph\n"
+#define _OK_ "OK"
+#define _CANCEL_ "CANCEL"
+#define _SAVE_WARNING_ "The file already exists, do you want to replace it?\n"
+#define _MAT_HELLO_ "\nhere written matrix of the graph\n"
+#define _VL_HELLO_ "\nhere written vertex list of the graph\n"
+#define _EL_Hello_ "\nhere written edge list of the graph\n"
 #define _CHOOSE_ "Choose graph file (.mat/.vl/.el)\n"
 #define _HELLO_ " Hello, Way Editor! \n \
 It's a little framework for working \n \
@@ -78,6 +82,7 @@ Your graph file (not .txt)."
 
 typedef unsigned int uint;
 typedef std::pair<std::string, int> graphKey, extKey, cmdKey;
+typedef std::pair<int, std::string> codeToExt;
 typedef std::pair<int, int> countKey;
 typedef std::pair<uint, uint> edge_t;
 
@@ -117,6 +122,10 @@ inline const std::map<std::string, int> extentions {
     extKey(".mat", MAT),    extKey(".MAT", MAT),    extKey(".Mat", MAT),
     extKey(".vl", VL),      extKey(".VL", VL),      extKey(".Vl", VL),
     extKey(".el", EL),      extKey(".EL", EL),      extKey(".El", EL),
+};
+
+inline const std::map<int, std::string> stdExt {
+    codeToExt(MAT, ".mat"),      codeToExt(VL, ".vl"),      codeToExt(EL, ".el"),
 };
 
 inline const std::map<std::string, int> commands {

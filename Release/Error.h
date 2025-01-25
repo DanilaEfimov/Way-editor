@@ -8,8 +8,8 @@
 class Error : private std::exception
 {
 private:
-    QMessageBox* ErrorBox;
-    QString infoText;
+    static QMessageBox* ErrorBox;
+    static QString infoText;
 public:
     Error(const QString message);
     Error(const QString message, bool isWarning);
