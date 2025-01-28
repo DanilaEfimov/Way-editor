@@ -14,7 +14,7 @@ const std::string Parser::getTempDirectory(const std::string &path) {
     res = "";
     size_t left = 0;
     size_t right = path.find_last_of('/');
-    if(right == std::string::npos){ Error(_FAILED_TO_OPEND_); return res; }
+    if(right == std::string::npos){ Error(_FAILED_TO_OPEND_); return path; }
     res = path.substr(left, right);
     return res;
 }
@@ -370,7 +370,7 @@ std::string Parser::rewriteEL(ushort V, byte** mat) {
 }
 
 std::string Parser::readeableGraph(Graph* G) {
-    return sType(G->getType()) + G->show() + "\n" + _HELLO_;
+    return G->show() + "\n" + _HELLO_;
 }
 
 Graph* Parser::initGraph(int graphType, ushort V, byte** mat) {

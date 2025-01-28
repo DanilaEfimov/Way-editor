@@ -44,8 +44,8 @@ private:
     void defaultKeyEvent(uint curTab, QKeyEvent* e, std::string& lastText,
                          std::string& newText, std::string& text);
 
-    void updateHystoru(std::string& cmd);
-    void clearHystory();
+    void updateHistory(std::string& cmd);
+    void clearHistory();
     void clearInput();
 
     // CHECKS

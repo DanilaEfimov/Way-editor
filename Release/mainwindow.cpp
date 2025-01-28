@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->initInputArea();
     this->initOutputArea();
     this->initWidgetsView();
-    this->clearHystory();
+    this->clearHistory();
 }
 
 MainWindow::~MainWindow() {
@@ -42,7 +42,7 @@ MainWindow::~MainWindow() {
     }
 }
 
-void MainWindow::updateHystoru(std::string &cmd) {
+void MainWindow::updateHistory(std::string &cmd) {
     static const std::string filename = HYSTORY_NAME;
     std::fstream file(filename, std::ios_base::app);
     if(!file.is_open()){
@@ -52,7 +52,7 @@ void MainWindow::updateHystoru(std::string &cmd) {
     file << cmd << "\n";
 }
 
-void MainWindow::clearHystory() {
+void MainWindow::clearHistory() {
     std::fstream file(HYSTORY_NAME, std::ios_base::out);
     file.close();
 }
@@ -66,20 +66,22 @@ bool MainWindow::checkSavePolicy() {
     QDialog* dialog = new QDialog();
     dialog->setWindowTitle(_SAVE_WARNING_);
     QLayout* layout = new QHBoxLayout(dialog);
-    QPushButton* ok;
-    QPushButton* cancel;
-    ok->setText(_OK_);
-    cancel->setText(_CANCEL_);
+    QPushButton* ok = new QPushButton(_OK_);
+    QPushButton* cancel = new QPushButton(_CANCEL_);
     layout->addWidget(ok);
     layout->addWidget(cancel);
     dialog->setLayout(layout);
-    //QObject::connect(ok, &QPushButton::clicked, this, &MainWindow::replace);
-    //QObject::connect(cancel, &QPushButton::clicked, this, &MainWindow::replace);
+    QObject::connect(ok, &QPushButton::clicked, this, &MainWindow::replace);
+    QObject::connect(cancel, &QPushButton::clicked, this, &MainWindow::replace);
+    QObject::connect(ok, &QPushButton::clicked, dialog, &QMainWindow::close);
+    QObject::connect(cancel, &QPushButton::clicked, dialog, &QMainWindow::close);
     dialog->exec();
+    bool res = ok->isChecked();
     delete dialog;
     delete ok;
     delete cancel;
     delete layout;
+    return res;
 }
 
 void MainWindow::initMenu() {
@@ -316,7 +318,7 @@ void MainWindow::enterCmdEvent(uint currentTab, QString &cmd, std::string &argv,
     if(res != 0){ return; }
     // updating hystory vvv
     stdcmd = cmd.toStdString();
-    this->updateHystoru(stdcmd);
+    this->updateHistory(stdcmd);
     // end updating hystory ^^^ / update view vvv
     graphConectList = QString::fromStdString(graphs[currentTab]->show());
     ui->outputArea->setText(graphConectList);
