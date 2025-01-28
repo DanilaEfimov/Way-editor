@@ -99,9 +99,7 @@ UDirGraph::UDirGraph(uint _V, byte** mat) : Graph(_V){
 }
 
 UDirGraph::~UDirGraph() {
-    if(this->connectivityVector != nullptr){
-        delete[] this->connectivityVector;
-    }
+    delete[] this->connectivityVector;
 }
 
 void UDirGraph::print(std::fstream& _to) const {

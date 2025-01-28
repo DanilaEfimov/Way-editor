@@ -8,6 +8,10 @@ Tree::~Tree()
 
 }
 
+uint Tree::getRoot() const {
+    return this->root;
+}
+
 void Tree::print(std::fstream &_to) const
 {
 
@@ -23,6 +27,16 @@ int Tree::getType() const {
 }
 
 bool Tree::isConnected(uint _in, uint _out) const
+{
+
+}
+
+Tree &Tree::operator+(std::stack<uint> &_Right)
+{
+
+}
+
+Tree &Tree::operator-(uint _Vertex)
 {
 
 }

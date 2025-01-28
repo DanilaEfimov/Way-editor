@@ -36,8 +36,8 @@ public:
     std::stack<uint>& DFS(uint _root = 1) const;
     std::stack<uint>& EulerCycle(uint _begin = 1) const;
     DirGraph& operator+=(const DirGraph& _Right);
-    DirGraph& operator+(std::stack<uint>& _Right);
     DirGraph& operator-=(const DirGraph& _Right);
+    virtual DirGraph& operator+(std::stack<uint>& _Right);
     virtual DirGraph& operator-(uint _Vertex);
     virtual int operator()(uint _Vertex) const override;
 };

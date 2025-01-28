@@ -101,11 +101,6 @@ void UDWGraph::print(std::fstream &_to) const { // NOT FIXED!!!
     if(this->V % OUT_SEED != 0){_to << std::endl;}
 }
 
-void UDWGraph::setEdge(uint _in, uint _out) {
-    this->UDirGraph::setEdge(_in, _out);
-    this->eWeights[(_out-1) * this->V + (_in-1) - 1] = static_cast<double>(1.0);
-}
-
 int UDWGraph::getType() const {
     return udwgraph;
 }
@@ -126,11 +121,11 @@ void UDWGraph::setMedianVWeights() {
     uint* degreeSum = new uint[this->V];
     for(size_t i = 0; i < this->V; i++){
         degrees[i] = this->getDegree(i+1);
-        degreeSum = 0;
+        degreeSum[i] = 0;
     }
     for(size_t i = 0; i < this->V; i++){
         for(size_t j = i + 1; j < this->V; j++){
-            if(this->isConnected(i, j)){
+            if(this->isConnected(i+1, j+1)){
                 degreeSum[i] += degrees[j];
                 degreeSum[j] += degrees[i];
             }
@@ -144,10 +139,13 @@ void UDWGraph::setMedianVWeights() {
 }
 
 void UDWGraph::setNormalEWeights() {
-    for(size_t i = 0; i < this->V*(this->V-1)/2; i++){
-        this->eWeights[i] = this->isConnected((i+1)/this->V, (i+1)%this->V)
-                                ? static_cast<double>(1.0)
-                                : static_cast<double>(0.0);
+    for(size_t i = 1; i <= this->V; i++){
+        size_t skipped = i*(i+1)/2;
+        for(size_t j = i + 1; j <= this->V; j++) {
+            double w = this->isConnected(i, j) ? 1.0 : 0.0;
+            size_t sequence = (i-1)*this->V+(j-1)-skipped;
+            this->eWeights[sequence] = w;
+        }
     }
     // 0 means undefined edge
 }
@@ -190,9 +188,13 @@ double UDWGraph::getWeightE(uint _in, uint _out) const {
         _in == 0 || _out == 0 || _in == _out){
         return -INFINITY;
     }
-    if(_out > _in){ uint temp = _in; _in = _out; _out = temp; }
     if(this->eWeights == nullptr){ return -INFINITY; }
-    return this->eWeights[(_in-1)*this->V + (_out - 1)];
+    if(!this->isConnected(_in, _out)) { return 0; }
+    if(_out > _in){ uint temp = _in; _in = _out; _out = temp; }
+    size_t skipped = _out*(_out+1)/2;
+    size_t sequence = (_out-1)*this->V+(_in-1)-skipped;
+    double w = this->eWeights[sequence];
+    return w;
 }
 
 void UDWGraph::setVWeight(uint _Vertex, double _value) {
@@ -259,6 +261,11 @@ double UDWGraph::getMaxVWeight() const {
     return maxW;
 }
 
+void UDWGraph::setEdge(uint _in, uint _out) {
+    this->UDirGraph::setEdge(_in, _out);
+    this->eWeights[(_out-1) * this->V + (_in-1) - 1] = static_cast<double>(1.0);
+}
+
 void UDWGraph::eraseEdge(uint _in, uint _out) {
     if(_in > this->V || _out > this->V ||
         _in == 0 || _out == 0 || _in == _out){
@@ -276,7 +283,7 @@ std::stack<uint>& UDWGraph::Dejcstra(uint _in, uint _out) const {
     return _Dejcstra;
 }
 
-UDirGraph& UDWGraph::operator-(uint _Vertex) {
+UDWGraph& UDWGraph::operator-(uint _Vertex) {
     if(_Vertex > this->V || _Vertex == 0 || this->V == 0){
         return *this;
     }
@@ -298,7 +305,7 @@ UDirGraph& UDWGraph::operator-(uint _Vertex) {
         if(i + 1 == _Vertex){continue;}
         for(size_t j = i+1; j < this->V; j++){
             if(j+1 == _Vertex){continue;}
-            newEW[replaced] = this->eWeights[this->V*i+j] - 1;
+            newEW[replaced] = this->eWeights[this->V*i+j - 1] - 1;
             replaced++;
         }
     }
@@ -326,8 +333,12 @@ UDirGraph& UDWGraph::operator-(uint _Vertex) {
 UDWGraph &UDWGraph::operator+(std::stack<uint> &_Right) {
     if(_Right.empty()){return *this;}
     this->UDirGraph::operator+(_Right);
-    size_t newSezeE = this->V*(this->V+1)/2 ? this->V*(this->V+1)/2 : 1;
-    word* newEW = new word[(newSezeE+7)/8]{0.0};
+    size_t lastSizeE = this->V*(this->V-1)/2 ? this->V*(this->V-1)/2 : 1;
+    size_t newSizeE = this->V*(this->V+1)/2 ? this->V*(this->V+1)/2 : 1;
+    word* newEW = new word[(newSizeE+7)/8]{0.0};
+    copyBits(newSizeE, lastSizeE, this->eWeights, newEW);
+    delete[] this->eWeights;
+    this->eWeights = newEW;
     return *this;
 }
 

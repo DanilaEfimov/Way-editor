@@ -35,6 +35,13 @@ static byte resetBit(uint pos, byte& value){
     return res;
 }
 
+static void copyBits(size_t size, size_t newSize, byte* from, byte* to){    // size in bytes
+    size_t min = size < newSize ? size : newSize;
+    for(size_t i = 0; i < min; i++){
+        to[i] = from[i];
+    }
+}
+
 UPseudoGraph::UPseudoGraph(uint V, byte** mat) : UDirGraph(V, mat) {
     this->loops = new byte[(V+7)/8]{0};
     // by default this graph created without loops
@@ -122,6 +129,17 @@ bool UPseudoGraph::isConnected(uint _in, uint _out) const {
     return false;
 }
 
+std::stack<uint> &UPseudoGraph::getLoops() const {
+    static std::stack<uint> allLoops;
+    allLoops = std::stack<uint>{};
+    for(size_t i = 0; i < this->V; i++){
+        if(this->isConnected(i+1, i+1)){
+            allLoops.push(i+1);
+        }
+    }
+    return allLoops;
+}
+
 void UPseudoGraph::setEdge(uint _in, uint _out) {
     if(_in == 0 || _out == 0 || _in > this->V || _out > this->V){
         return;
@@ -146,11 +164,29 @@ void UPseudoGraph::eraseEdge(uint _in, uint _out) {
         }
     }
     else{
-        this->UDirGraph::setEdge(_in, _out);
+        this->UDirGraph::eraseEdge(_in, _out);
     }
 }
 
-UDirGraph& UPseudoGraph::operator-(uint _Vertex) {
+UPseudoGraph &UPseudoGraph::operator+(std::stack<uint> &_Right) {
+    std::stack<uint> copy = _Right;
+    while(!copy.empty()){
+        uint vertex = copy.top();
+        if(vertex == this->V + 1){
+            size_t newSize = (this->V + 1 + 7) / 8;
+            byte* newLoops = new byte[newSize];
+            copyBits(newSize, newSize, this->loops, newLoops);
+            setBit(this->V+1, newLoops[(this->V+1)/8]);
+            delete[] this->loops;
+            this->loops = newLoops;
+            break;
+        }
+    }
+    this->UDirGraph::operator+(_Right);
+    return *this;
+}
+
+UPseudoGraph& UPseudoGraph::operator-(uint _Vertex) {
     if(_Vertex == 0 || _Vertex > this->V){return *this;}
     byte* lastLoops = this->loops;
     uint newSize = (this->V + 7)/8 ? (this->V + 7)/8 : 1;

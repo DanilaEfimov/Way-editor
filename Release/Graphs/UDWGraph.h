@@ -17,7 +17,6 @@ public:
 
     //===========	ACCESSORS	===========
     virtual void print(std::fstream& _to) const override;
-    virtual void setEdge(uint _in, uint _out) override;
     virtual int  getType() const override;
     virtual void setNormalVWeights();
     virtual void setMedianVWeights();
@@ -31,11 +30,13 @@ public:
                           double _begin = 0.0, double _end = 100.0);
     double getMaxEweight() const;
     double getMaxVWeight() const;
+
+    virtual void setEdge(uint _in, uint _out) override;
     virtual void eraseEdge(uint _in, uint _out) override;
 
     // ===========	 MATH	===========
     std::stack<uint>& Dejcstra(uint _in, uint _out) const;
-    virtual UDirGraph& operator-(uint _Vertex) override;
+    virtual UDWGraph& operator-(uint _Vertex) override;
     virtual UDWGraph& operator+(std::stack<uint>& _Right) override;
     int operator()(uint _Vertex) const override;
 };

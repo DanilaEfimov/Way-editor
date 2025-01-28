@@ -19,6 +19,22 @@ static byte getBit(uint pos, byte value) {
     return res;
 }
 
+static byte resetBit(uint pos, byte& value){
+    byte res = 0b00000001;
+    pos %= 8;
+    res <<= pos;    // res *= 2^pos
+    res = ~res;     // 0b11110111 e.g.
+    value &= res;
+    return res;
+}
+
+static void copyBits(size_t size, size_t newSize, byte* from, byte* to){    // size in bytes
+    size_t min = size < newSize ? size : newSize;
+    for(size_t i = 0; i < min; i++){
+        to[i] = from[i];
+    }
+}
+
 DPseudoGraph::DPseudoGraph(uint V, byte** mat) : DirGraph(V, mat) {
     this->loops = new byte[(V+7)/8]{0};
     // by default this graph created without loops
@@ -116,7 +132,64 @@ bool DPseudoGraph::isConnected(uint _in, uint _out) const {
     return false;
 }
 
-DirGraph& DPseudoGraph::operator-(uint _Vertex) {
+std::stack<uint> &DPseudoGraph::getLoops() const {
+    static std::stack<uint> allLoops;
+    allLoops = std::stack<uint>{};
+    for(size_t i = 0; i < this->V; i++){
+        if(this->isConnected(i+1, i+1)){
+            allLoops.push(i+1);
+        }
+    }
+    return allLoops;
+}
+
+void DPseudoGraph::setEdge(uint _in, uint _out) {
+    if(_in == 0 || _out == 0 || _in > this->V || _out > this->V){
+        return;
+    }
+    if(_in == _out){
+        this->E++;
+        setBit(_in-1, this->loops[(_in-1)/8]);
+    }
+    else{
+        this->DirGraph::setEdge(_in, _out);
+    }
+}
+
+void DPseudoGraph::eraseEdge(uint _in, uint _out) {
+    if(_in == 0 || _out == 0 || _in > this->V || _out > this->V){
+        return;
+    }
+    if(_in == _out){
+        if(getBit(_in-1, this->loops[(_in-1)/8])){
+            this->E--;
+            resetBit(_in-1, this->loops[(_in-1)/8]);
+        }
+    }
+    else{
+        this->DirGraph::eraseEdge(_in, _out);
+    }
+}
+
+DPseudoGraph &DPseudoGraph::operator+(std::stack<uint> &_Right) {
+    std::stack<uint> copy = _Right;
+    while(!copy.empty()){
+        uint vertex = copy.top();
+        if(vertex == this->V + 1){
+            size_t newSize = (this->V + 1 + 7) / 8;
+            byte* newLoops = new byte[newSize];
+            copyBits(newSize, newSize, this->loops, newLoops);
+            setBit(this->V+1, newLoops[(this->V+1)/8]);
+            delete[] this->loops;
+            this->loops = newLoops;
+            break;
+        }
+    }
+    this->DirGraph::operator+(_Right);
+    return *this;
+}
+
+DPseudoGraph& DPseudoGraph::operator-(uint _Vertex) {
     if(_Vertex == 0 || _Vertex > this->V){return *this;}
     byte* lastLoops = this->loops;
     this->loops = new byte[(this->V + 6)/8]{0};

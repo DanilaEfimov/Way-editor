@@ -16,8 +16,13 @@ public:
     virtual std::string& show() const override;
     virtual int getDegree(uint _Vertex, bool io) const override;
     virtual bool isConnected(uint _in, uint _out) const override;
+    std::stack<uint>& getLoops() const;
 
-    virtual DirGraph& operator-(uint _Vertex) override;
+    virtual void setEdge(uint _in, uint _out) override;
+    virtual void eraseEdge(uint _in, uint _out) override;
+
+    virtual DPseudoGraph& operator+(std::stack<uint>& _Right) override;
+    virtual DPseudoGraph& operator-(uint _Vertex) override;
 };
 
 #endif // DPSEUDOGRAPH_H
