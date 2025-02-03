@@ -48,6 +48,9 @@ private:
     void clearHistory();
     void clearInput();
 
+    // if operation have return some value => add answer-string in input area
+    void showNonVoidAnswer();
+
     // CHECKS
     bool checkSavePolicy();
 

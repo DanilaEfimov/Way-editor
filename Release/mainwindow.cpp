@@ -43,8 +43,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::updateHistory(std::string &cmd) {
-    static const std::string filename = HYSTORY_NAME;
-    std::fstream file(filename, std::ios_base::app);
+    std::fstream file(HYSTORY_NAME, std::ios_base::app);
     if(!file.is_open()){
         Error(_FAILED_TO_OPEN_);
         return;
@@ -60,6 +59,13 @@ void MainWindow::clearHistory() {
 void MainWindow::clearInput() {
     uint currentTab = ui->inputArea->currentIndex();
     fields[currentTab]->setText(_CLEAN_);
+}
+
+void MainWindow::showNonVoidAnswer() {
+    static QString text;
+    uint currentTab = ui->inputArea->currentIndex();
+    text = fields[currentTab]->toPlainText() + PerformanceManager::getAnswer();
+    fields[currentTab]->setText(text);
 }
 
 bool MainWindow::checkSavePolicy() {
@@ -155,7 +161,8 @@ void MainWindow::bindLineMenu() {
 }
 
 void MainWindow::newFile() {
-    QString path = QFileDialog::getOpenFileName(this, QObject::tr(_CHOOSE_), QDir::homePath(), NULL);
+    static QString path, graphConectList;
+    path = QFileDialog::getOpenFileName(this, QObject::tr(_CHOOSE_), QDir::homePath(), NULL);
     bool choosed = path.length() > 0;
     std::string stdpath = path.toStdString();
     if(choosed){
@@ -184,7 +191,7 @@ void MainWindow::newFile() {
         ui->inputArea->addTab(newField, path);
         // output area settings
         this->fields.emplace(item);
-        QString graphConectList = QString::fromStdString(graph->show());
+        graphConectList = QString::fromStdString(graph->show());
         ui->outputArea->setText(graphConectList);
         // view update
         index = this->fields.size();
@@ -309,13 +316,16 @@ void MainWindow::enterCmdEvent(uint currentTab, QString &cmd, std::string &argv,
     cmd             = Parser::getLastLine(currentTab);
     functionType    = Parser::commandCode(cmd.toStdString());
     // checks: vvv
-    if(functionType == -1){ Error(__SYNTAX_ERROR__); return; }
+    if(functionType == -1){ Error(__INVALID_COMMAND__); return; }
     else if(functionType == 0) { this->clearInput(); return; }  // clening input area explicit
     // end checks ^^^
     argc = Parser::argc(functionType);
     argv = Parser::argv(cmd.toStdString());
     res = PerformanceManager::operation(functionType, argc, argv, graphs[currentTab]);
     if(res != 0){ return; }
+    if(res == 0 && !PerformanceManager::isVoidOp(functionType)){
+        this->showNonVoidAnswer();
+    }
     // updating hystory vvv
     stdcmd = cmd.toStdString();
     this->updateHistory(stdcmd);

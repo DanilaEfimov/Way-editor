@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sstream>
 
-std::string Parser::answer = "";
+std::string Parser::temp = "";
 
 Parser::Parser() {}
 
@@ -314,22 +314,33 @@ int Parser::argc(const std::string &argv) {
     return count;
 }
 
+QString Parser::stackToString(std::stack<uint> &s) {
+    static std::string parsed;
+    parsed = "";
+    while(!s.empty()){
+        parsed += std::to_string(s.top());
+        s.pop();
+        if(!s.empty()){parsed += ", ";}
+    }
+    return QString::fromStdString(parsed);
+}
+
 std::string Parser::rewriteMat(ushort V, byte** mat) {
     if(mat == nullptr){
         Error(_UNDEFINED_ERROR_);
         return "";
     }
-    answer += "\n";
-    answer = std::to_string(V);
-    answer += "\n";
+    temp += "\n";
+    temp = std::to_string(V);
+    temp += "\n";
     for(size_t i = 0; i < V; i++){
         for(size_t j = 0; j < V; j++){
-            answer += mat[i][j] ? "1 " : "0 ";
+            temp += mat[i][j] ? "1 " : "0 ";
         }
-        answer += "\n";
+        temp += "\n";
     }
-    answer += _MAT_HELLO_;
-    return answer;
+    temp += _MAT_HELLO_;
+    return temp;
 }
 
 std::string Parser::rewriteVL(ushort V, byte** mat) {
@@ -337,18 +348,18 @@ std::string Parser::rewriteVL(ushort V, byte** mat) {
         Error(_UNDEFINED_ERROR_);
         return "";
     }
-    answer = std::to_string(V);
-    answer += "\n";
+    temp = std::to_string(V);
+    temp += "\n";
     for(size_t i = 0; i < V; i++){
         for(size_t j = 0; j < V; j++){
             std::string id = std::to_string(j + 1) + " ";
             if(mat[i][j]){
-                answer += id;
+                temp += id;
             }
         }
-        answer += "\n";
+        temp += "\n";
     }
-    return answer;
+    return temp;
 }
 
 std::string Parser::rewriteEL(ushort V, byte** mat) {
@@ -356,17 +367,17 @@ std::string Parser::rewriteEL(ushort V, byte** mat) {
         Error(_UNDEFINED_ERROR_);
         return "";
     }
-    answer += "\n";
+    temp += "\n";
     for(size_t i = 0; i < V; i++){
         for(size_t j = 0; j < V; j++){
             std::string id = std::to_string(j + 1) + " ";
             if(mat[i][j]){
-                answer += std::to_string(i+1) + " " + std::to_string(j+1) + "\n";
+                temp += std::to_string(i+1) + " " + std::to_string(j+1) + "\n";
             }
         }
-        answer += "\n";
+        temp += "\n";
     }
-    return answer;
+    return temp;
 }
 
 std::string Parser::readeableGraph(Graph* G) {

@@ -3,6 +3,7 @@
 
 #include "Graphs/Graph.h"
 #include <QString>
+#include <stack>
 
 typedef unsigned char byte, byte_t;
 typedef unsigned short ushort;
@@ -10,7 +11,7 @@ typedef unsigned short ushort;
 class Parser
 {
 private:
-    static std::string answer;
+    static std::string temp;
 public:
     Parser();
 
@@ -40,6 +41,7 @@ public:
 
     // functions ::PerformanceMananger
     static int argc(const std::string& argv);
+    static QString stackToString(std::stack<uint>& s);
 
     // saving file text
     static std::string rewriteMat(ushort V, byte** mat);

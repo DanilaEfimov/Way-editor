@@ -4,18 +4,20 @@
 #include <set>
 #include <sstream>
 
+QString PerformanceManager::nonVoidAnswer = "";
+
 int PerformanceManager::cast16(Graph *G, std::stack<uint> &args){
     int code = G->getType();
     switch(code){
-    case names::udirgraph:      static_cast<UDirGraph*>(G)->operator+(args);    break;
-    case names::dirgraph:       static_cast<UDirGraph*>(G)->operator+(args);    break;
-    case names::udwgraph:       static_cast<UDirGraph*>(G)->operator+(args);    break;
-    case names::wdgraph:        static_cast<UDirGraph*>(G)->operator+(args);    break;
-    case names::upseudograph:   static_cast<UDirGraph*>(G)->operator+(args);    break;
-    case names::dpseudograph:   static_cast<UDirGraph*>(G)->operator+(args);    break;
-    case names::tree:           static_cast<UDirGraph*>(G)->operator+(args);    break;
-    case names::wtree:          static_cast<UDirGraph*>(G)->operator+(args);    break;
-    case names::bitree:         static_cast<BiTree*>(G)->operator+(args);       break;
+        case names::udirgraph:      static_cast<UDirGraph*>(G)->operator+(args);    break;
+        case names::dirgraph:       static_cast<DirGraph*>(G)->operator+(args);     break;
+        case names::udwgraph:       static_cast<UDWGraph*>(G)->operator+(args);     break;
+        case names::wdgraph:        static_cast<WDGraph*>(G)->operator+(args);      break;
+        case names::upseudograph:   static_cast<UPseudoGraph*>(G)->operator+(args); break;
+        case names::dpseudograph:   static_cast<DPseudoGraph*>(G)->operator+(args); break;
+        case names::tree:           static_cast<Tree*>(G)->operator+(args);         break;
+        case names::wtree:          static_cast<WTree*>(G)->operator+(args);        break;
+        case names::bitree:         static_cast<BiTree*>(G)->operator+(args);       break;
     default:
         return -1;
     }
@@ -25,15 +27,15 @@ int PerformanceManager::cast16(Graph *G, std::stack<uint> &args){
 int PerformanceManager::cast17(Graph *G, uint _in, uint _out) {
     int code = G->getType();
     switch(code){
-    case names::udirgraph:      static_cast<UDirGraph*>(G)->setEdge(_in, _out);     break;
-    case names::dirgraph:       static_cast<DirGraph*>(G)->setEdge(_in, _out);      break;
-    case names::udwgraph:       static_cast<UDWGraph*>(G)->setEdge(_in, _out);      break;
-    case names::wdgraph:        static_cast<WDGraph*>(G)->setEdge(_in, _out);       break;
-    case names::upseudograph:   static_cast<UPseudoGraph*>(G)->setEdge(_in, _out);  break;
-    case names::dpseudograph:   static_cast<DPseudoGraph*>(G)->setEdge(_in, _out);  break;
-    case names::tree:           Error(__INVALID_COMMAND__); return -1;              break;
-    case names::wtree:          Error(__INVALID_COMMAND__); return -1;              break;
-    case names::bitree:         Error(__INVALID_COMMAND__); return -1;              break;
+        case names::udirgraph:      static_cast<UDirGraph*>(G)->setEdge(_in, _out);     break;
+        case names::dirgraph:       static_cast<DirGraph*>(G)->setEdge(_in, _out);      break;
+        case names::udwgraph:       static_cast<UDWGraph*>(G)->setEdge(_in, _out);      break;
+        case names::wdgraph:        static_cast<WDGraph*>(G)->setEdge(_in, _out);       break;
+        case names::upseudograph:   static_cast<UPseudoGraph*>(G)->setEdge(_in, _out);  break;
+        case names::dpseudograph:   static_cast<DPseudoGraph*>(G)->setEdge(_in, _out);  break;
+        case names::tree:           Error(__INVALID_COMMAND__); return -1;              break;
+        case names::wtree:          Error(__INVALID_COMMAND__); return -1;              break;
+        case names::bitree:         Error(__INVALID_COMMAND__); return -1;              break;
     default:
         return -1;
     }
@@ -43,15 +45,15 @@ int PerformanceManager::cast17(Graph *G, uint _in, uint _out) {
 int PerformanceManager::cast18(Graph *G, uint v) {
     int code = G->getType();
     switch(code){
-    case names::udirgraph:      static_cast<UDirGraph*>(G)->operator-(v);       break;
-    case names::dirgraph:       static_cast<DirGraph*>(G)->operator-(v);        break;
-    case names::udwgraph:       static_cast<UDWGraph*>(G)->operator-(v);        break;
-    case names::wdgraph:        static_cast<WDGraph*>(G)->operator-(v);         break;
-    case names::upseudograph:   static_cast<UPseudoGraph*>(G)->operator-(v);    break;
-    case names::dpseudograph:   static_cast<DPseudoGraph*>(G)->operator-(v);    break;
-    case names::tree:           static_cast<Tree*>(G)->operator-(v);            break;
-    case names::wtree:          static_cast<WTree*>(G)->operator-(v);           break;
-    case names::bitree:         static_cast<BiTree*>(G)->operator-(v);          break;
+        case names::udirgraph:      static_cast<UDirGraph*>(G)->operator-(v);       break;
+        case names::dirgraph:       static_cast<DirGraph*>(G)->operator-(v);        break;
+        case names::udwgraph:       static_cast<UDWGraph*>(G)->operator-(v);        break;
+        case names::wdgraph:        static_cast<WDGraph*>(G)->operator-(v);         break;
+        case names::upseudograph:   static_cast<UPseudoGraph*>(G)->operator-(v);    break;
+        case names::dpseudograph:   static_cast<DPseudoGraph*>(G)->operator-(v);    break;
+        case names::tree:           static_cast<Tree*>(G)->operator-(v);            break;
+        case names::wtree:          static_cast<WTree*>(G)->operator-(v);           break;
+        case names::bitree:         static_cast<BiTree*>(G)->operator-(v);          break;
     default:
         return -1;
     }
@@ -61,18 +63,38 @@ int PerformanceManager::cast18(Graph *G, uint v) {
 int PerformanceManager::cast19(Graph *G, uint _in, uint _out) {
     int code = G->getType();
     switch(code){
-    case names::udirgraph:      static_cast<UDirGraph*>(G)->eraseEdge(_in, _out);     break;
-    case names::dirgraph:       static_cast<DirGraph*>(G)->eraseEdge(_in, _out);      break;
-    case names::udwgraph:       static_cast<UDWGraph*>(G)->eraseEdge(_in, _out);      break;
-    case names::wdgraph:        static_cast<WDGraph*>(G)->eraseEdge(_in, _out);       break;
-    case names::upseudograph:   static_cast<UPseudoGraph*>(G)->eraseEdge(_in, _out);  break;
-    case names::dpseudograph:   static_cast<DPseudoGraph*>(G)->eraseEdge(_in, _out);  break;
-    case names::tree:           static_cast<Tree*>(G)->eraseEdge(_in, _out);          break;
-    case names::wtree:          static_cast<WTree*>(G)->eraseEdge(_in, _out);         break;
-    case names::bitree:         static_cast<BiTree*>(G)->eraseEdge(_in, _out);        break;
-    default:
+        case names::udirgraph:      static_cast<UDirGraph*>(G)->eraseEdge(_in, _out);     break;
+        case names::dirgraph:       static_cast<DirGraph*>(G)->eraseEdge(_in, _out);      break;
+        case names::udwgraph:       static_cast<UDWGraph*>(G)->eraseEdge(_in, _out);      break;
+        case names::wdgraph:        static_cast<WDGraph*>(G)->eraseEdge(_in, _out);       break;
+        case names::upseudograph:   static_cast<UPseudoGraph*>(G)->eraseEdge(_in, _out);  break;
+        case names::dpseudograph:   static_cast<DPseudoGraph*>(G)->eraseEdge(_in, _out);  break;
+        case names::tree:           static_cast<Tree*>(G)->eraseEdge(_in, _out);          break;
+        case names::wtree:          static_cast<WTree*>(G)->eraseEdge(_in, _out);         break;
+        case names::bitree:         static_cast<BiTree*>(G)->eraseEdge(_in, _out);        break;
+    default: Error(_UNDEFINED_ERROR_);
         return -1;
     }
+    return 0;
+}
+
+int PerformanceManager::cast37(Graph *G, uint v) {
+    int code = G->getType();
+    uint degree = 0;
+    switch(code){
+        case names::udirgraph:      degree = static_cast<UDirGraph*>(G)->operator()(v);     break;
+        case names::dirgraph:       degree = static_cast<DirGraph*>(G)->operator()(v);      break;
+        case names::udwgraph:       degree = static_cast<UDWGraph*>(G)->operator()(v);      break;
+        case names::wdgraph:        degree = static_cast<WDGraph*>(G)->operator()(v);       break;
+        case names::upseudograph:   degree = static_cast<UPseudoGraph*>(G)->operator()(v);  break;
+        case names::dpseudograph:   degree = static_cast<DPseudoGraph*>(G)->operator()(v);  break;
+        case names::tree:           degree = static_cast<Tree*>(G)->operator()(v);          break;
+        case names::wtree:          degree = static_cast<WTree*>(G)->operator()(v);         break;
+        case names::bitree:         degree = static_cast<BiTree*>(G)->operator()(v);        break;
+    default: Error(_UNDEFINED_ERROR_);
+        return -1;
+    }
+    nonVoidAnswer = QString::fromStdString("\n" + std::to_string(degree));
     return 0;
 }
 
@@ -131,10 +153,8 @@ int PerformanceManager::eraseV(const std::string &argv, Graph *G) {
 int PerformanceManager::eraseE(const std::string &argv, Graph *G) {
     int code = 0;
     int argc = Parser::argc(argv);
-    static std::string funcName;
     static std::set<edge_t> vertexes;
     std::stringstream ss(argv);
-    ss >> funcName;
     for(size_t i = 0; i < argc / 2; i++){
         uint _out, _in;
         ss >> _out >> _in;
@@ -147,16 +167,43 @@ int PerformanceManager::eraseE(const std::string &argv, Graph *G) {
     return code;
 }
 
+int PerformanceManager::degree(const std::string &argv, Graph *G){
+    int code = 0;
+    std::stringstream ss(argv);
+    int vertex;
+    ss >> vertex;
+    code = cast37(G, vertex);
+    return code;
+}
+
 int PerformanceManager::limitlessArgOp(int code, const std::string &argv, Graph *G){
     int res = 0;
     switch(code){
-    case functions::addV: res = PerformanceManager::addV(argv, G);      break;
-    case functions::addE: res = PerformanceManager::addE(argv, G);      break;
-    case functions::eraseV: res = PerformanceManager::eraseV(argv, G);  break;
-    case functions::eraseE: res = PerformanceManager::eraseE(argv, G);  break;
+        case functions::addV: res = PerformanceManager::addV(argv, G);      break;
+        case functions::addE: res = PerformanceManager::addE(argv, G);      break;
+        case functions::eraseV: res = PerformanceManager::eraseV(argv, G);  break;
+        case functions::eraseE: res = PerformanceManager::eraseE(argv, G);  break;
     default: return -1; break;
     }
     return res;
+}
+
+int PerformanceManager::twoArgOp(int code, const std::string &argv, Graph *G) {
+    int res = 0;
+    switch(code){
+    default: return -1; break;
+    }
+    return res;
+}
+
+int PerformanceManager::oneArgOp(int code, const std::string &argv, Graph *G) {
+    int res = 0;
+    switch(code){
+        case functions::Degree: res = PerformanceManager::degree(argv, G); break;
+    default: return -1; break;
+    }
+    return res;
+
 }
 
 PerformanceManager::PerformanceManager() {}
@@ -166,14 +213,60 @@ PerformanceManager::~PerformanceManager() {}
 int PerformanceManager::operation(int code, int argc, const std::string &argv, Graph *G){
     int res = 0;
     switch(argc){
-    case ZERO: break;
-    case ONE: break;
-    case TWO: break;
-    case THREE: break;
-    case LIMITLESS: res = limitlessArgOp(code, argv, G); break;
+        case ZERO: break;
+        case ONE: res = oneArgOp(code, argv, G); break;
+        case TWO: break;
+        case THREE: break;
+        case LIMITLESS: res = limitlessArgOp(code, argv, G); break;
     default: return -1; break;
     }
     return res;
 }
+
+bool PerformanceManager::isDirected(int code) {
+    switch(code){
+        case names::udirgraph:      return false;   break;
+        case names::dirgraph:       return true;    break;
+        case names::udwgraph:       return false;   break;
+        case names::wdgraph:        return true;    break;
+        case names::upseudograph:   return false;   break;
+        case names::dpseudograph:   return true;    break;
+        case names::tree:           return false;   break;
+        case names::wtree:          return false;   break;
+        case names::bitree:         return false;   break;
+    default: Error(_UNDEFINED_ERROR_); return false; break;
+    }
+    return false;
+    // ### You can look at all Classes in General.h::names enum. ###
+}
+
+bool PerformanceManager::isVoidOp(int code) {
+    switch(code){
+    case functions::clear:          return true; break;
+    case functions::weight:         return false; break;
+    case functions::addV:           return true; break;
+    case functions::addE:           return true; break;
+    case functions::eraseV:         return true; break;
+    case functions::eraseE:         return true; break;
+    case functions::EulerCycle:     return true; break;
+    case functions::CycleBase:      return true; break;
+    case functions::Blocks:         return true; break;
+    case functions::MaxV:           return true; break;
+    case functions::MaxE:           return true; break;
+    case functions::Degree:         return false; break;
+    case functions::Weight:         return true; break;
+    case functions::VW:             return true; break;
+    case functions::EW:             return true; break;
+    case functions::computeDFS:     return true; break;
+    case functions::computeBFS:     return true; break;
+    case functions::computePrima:   return true; break;
+    case functions::Dejcstra:       return true; break;
+    default: Error(__INVALID_COMMAND__); return false; break;
+    }
+    return false;
+    // ### You can look at all Classes in General.h::functions enum. ###
+}
+
+QString &PerformanceManager::getAnswer(){return nonVoidAnswer;}
 
 
