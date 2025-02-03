@@ -34,9 +34,9 @@ static byte getBit(uint pos, byte value) {
     return res;
 }
 
-static void copyBits(size_t size1, size_t size2, word* arr1, word* arr2){
+static void copyBits(size_t size1, size_t size2, word* from, word* to){
     size_t min = size1 < size2 ? size1 : size2;
-    for(size_t i = 0; i < min; i++){ arr2[i] = arr1[i]; }
+    for(size_t i = 0; i < min; i++){ to[i] = from[i]; }
 }
 
 static bool** toMatrix(ushort V, byte* cv, uint size = 0){
@@ -331,14 +331,17 @@ UDWGraph& UDWGraph::operator-(uint _Vertex) {
 }
 
 UDWGraph &UDWGraph::operator+(std::stack<uint> &_Right) {
+    static word* newEW;
     if(_Right.empty()){return *this;}
     this->UDirGraph::operator+(_Right);
-    size_t lastSizeE = this->V*(this->V-1)/2 ? this->V*(this->V-1)/2 : 1;
-    size_t newSizeE = this->V*(this->V+1)/2 ? this->V*(this->V+1)/2 : 1;
-    word* newEW = new word[(newSizeE+7)/8]{0.0};
-    copyBits(newSizeE, lastSizeE, this->eWeights, newEW);
+    size_t lastSizeE = this->V > 1 ? (this->V*(this->V-1)/2 + 7) / 8 : 1;
+    size_t totalSize = this->V ? (this->V*(this->V+1)/2 + 7) / 8 : 1;
+    newEW = new word[totalSize]{0.0};
+    copyBits(totalSize, lastSizeE, this->eWeights, newEW);
     delete[] this->eWeights;
-    this->eWeights = newEW;
+    this->eWeights = new word[totalSize]{0.0};
+    copyBits(lastSizeE, lastSizeE, newEW, this->eWeights);
+    delete[] newEW;
     return *this;
 }
 

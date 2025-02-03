@@ -147,7 +147,7 @@ std::string& UDirGraph::show() const {
     */
 }
 
-int UDirGraph::getDegree(uint _Vertex) const {
+int UDirGraph::getDegree(uint _Vertex) const {  // NOT FIXED
 	if (_Vertex > this->V || _Vertex == 0) {					// undefined argument branch
 		return -1;
 	}
@@ -226,8 +226,7 @@ void UDirGraph::eraseEdge(uint _in, uint _out) {
     uint bit = address % 8;
     bool conected = getBit(bit, this->connectivityVector[byte]);
     if(conected){
-        byte_t& value = this->connectivityVector[byte];
-        value = resetBit(bit, value);
+        this->connectivityVector[byte] -= 1 << bit;
         this->E--;
     }
     // here ever littlest of arguments is 'begin' of edge, greatest - 'end'
