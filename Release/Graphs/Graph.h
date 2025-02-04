@@ -20,6 +20,7 @@ public:
 	//===========	ACCESSORS	===========
     virtual void print(std::fstream&) const = 0;
     virtual std::string& show() const = 0;
+    virtual bool isConnected(uint _in, uint _out) const = 0;
     virtual int getType() const = 0;
     ushort getV() const {return this->V;};
 

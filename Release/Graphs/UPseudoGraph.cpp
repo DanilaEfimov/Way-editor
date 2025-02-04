@@ -44,7 +44,13 @@ static void copyBits(size_t size, size_t newSize, byte* from, byte* to){    // s
 
 UPseudoGraph::UPseudoGraph(uint V, byte** mat) : UDirGraph(V, mat) {
     this->loops = new byte[(V+7)/8]{0};
-    // by default this graph created without loops
+    for(size_t i = 0; i < V; i++){
+        size_t byte = i / 8;
+        size_t bit = i % 8;
+        if(mat[i][i]) {
+            setBit(bit, this->loops[byte]);
+        }
+    }
 }
 
 UPseudoGraph::~UPseudoGraph() {
@@ -91,7 +97,7 @@ std::string& UPseudoGraph::show() const {
     for(size_t i = 1; i <= this->V; i++){
         conectList += std::to_string(i);
         conectList += ": ";
-        for(size_t j = i; j <= this->V; j++){
+        for(size_t j = 1; j <= this->V; j++){
             if(this->isConnected(i, j)){
                 conectList += std::to_string(j);
                 conectList += ", ";
@@ -115,7 +121,7 @@ int UPseudoGraph::getDegree(uint _Vertex) const {
 }
 
 bool UPseudoGraph::isConnected(uint _in, uint _out) const {
-    if(_in > this->V || _out > this->V || _in == 0 || _out == 0){
+    if(_in > this->V || _out > this->V || _in*_out == 0){
         return false;
     }
     if(_in != _out){
@@ -169,18 +175,15 @@ void UPseudoGraph::eraseEdge(uint _in, uint _out) {
 }
 
 UPseudoGraph &UPseudoGraph::operator+(std::stack<uint> &_Right) {
-    std::stack<uint> copy = _Right;
-    while(!copy.empty()){
-        uint vertex = copy.top();
-        if(vertex == this->V + 1){
-            size_t newSize = (this->V + 1 + 7) / 8;
-            byte* newLoops = new byte[newSize];
-            copyBits(newSize, newSize, this->loops, newLoops);
-            setBit(this->V+1, newLoops[(this->V+1)/8]);
-            delete[] this->loops;
-            this->loops = newLoops;
-            break;
-        }
+    size_t lastSize = (this->V + 7)/8;
+    size_t newSize = (this->V + 8)/8;
+    if(newSize > lastSize){
+        byte* newLoops = new byte[newSize]{0};
+        copyBits(lastSize, newSize, this->loops, newLoops);
+        delete[] this->loops;
+        this->loops = new byte[newSize]{0};
+        copyBits(lastSize, newSize, newLoops, this->loops);
+        delete[] newLoops;
     }
     this->UDirGraph::operator+(_Right);
     return *this;

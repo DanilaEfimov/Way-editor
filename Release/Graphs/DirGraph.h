@@ -25,7 +25,7 @@ public:
     virtual std::string& show() const override;
     virtual int getDegree(uint _Vertex, bool io) const;
     virtual int getType() const override;
-    virtual bool isConnected(uint _in, uint _out) const;
+    virtual bool isConnected(uint _in, uint _out) const override;
     uint getEdges() const;
 
     virtual void setEdge(uint _in, uint _out);

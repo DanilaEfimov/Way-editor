@@ -52,8 +52,9 @@ static void copyBits(size_t size, size_t newSize, byte* from, byte* to){    // s
 }
 
 static bool** toMatrix(ushort V, byte* cv, uint size = 0){
+    static bool** mat;
     size = size ? size : V; // in operator+(std::stack<uint>) we need make mat one row more
-    bool** mat = new bool*[size];
+    mat = new bool*[size];
     for(size_t i = 0; i < size; i++){
         mat[i] = new bool[size]{0};
     }
@@ -99,7 +100,7 @@ UDirGraph::UDirGraph(uint _V, byte** mat) : Graph(_V){
 }
 
 UDirGraph::~UDirGraph() {
-    delete[] this->connectivityVector;
+    //delete[] this->connectivityVector;
 }
 
 void UDirGraph::print(std::fstream& _to) const {
@@ -147,29 +148,41 @@ std::string& UDirGraph::show() const {
     */
 }
 
-int UDirGraph::getDegree(uint _Vertex) const {  // NOT FIXED
+int UDirGraph::getDegree(uint _Vertex) const {
 	if (_Vertex > this->V || _Vertex == 0) {					// undefined argument branch
 		return -1;
 	}
 	uint res = 0;
-	for (size_t v = 1; v < _Vertex; v++) {						// check all vertexes littler than _Vertex
-		uint offset = _Vertex - v - 1;							// how many bits we have to shift to find [v][_Vertex] field
-		uint compliment = this->V - v;
-		uint base = v * this->V - v * (v + 1) / 2 - compliment;	// it's like begin of segment, but for matrix row
-		uint address = base + offset;
-		uint byte = address / 8;
-		byte_t isConnect = getBit(offset, this->connectivityVector[byte]);
-		res += isConnect;										// getBit() returns 1 or 0
-	}															// here checked all vertexes littler than _Vertex
-																// let's check others, what bigger than _Vertex
-	uint _compliment = this->V - _Vertex;						// how many bits contains about _Vertex's connectivity
-	uint _base = _Vertex * this->V - _Vertex * (_Vertex + 1) / 2 - _compliment;
-	for (size_t i = 0; i < _compliment; i++) {
-        uint byte = (_base + i) / 8;
-		byte_t field = this->connectivityVector[byte];
-		res += getBit(i, field);								// look at definition of 'getBit()': there i %= 8 too
-	}
+    size_t base = _Vertex - 2;
+    size_t offset = this->V-2;
+    size_t address = base;
+    if(_Vertex > 1){    // colum bypass condition
+        for(size_t i = 0; (i < _Vertex - 1) && offset; i++){    // collum of matrix bypass
+            size_t byte = address / 8;
+            size_t bit = address % 8;
+            res += getBit(bit, this->connectivityVector[byte]);
+            address += offset;
+            offset--;
+        }
+    }
+    size_t compliment = this->V - _Vertex;
+    size_t skipped = _Vertex*(_Vertex + 1) / 2;
+    base = this->V*_Vertex - skipped - compliment;
+    //  i < compliment  = row bypass condition
+    for(size_t i = 0; i < compliment; i++){     // row of matrix bypass
+        address = base + i;
+        size_t byte = address / 8;
+        size_t bit = address % 8;
+        res += getBit(bit, this->connectivityVector[byte]);
+    }
 	return res;
+    /*                  ### example ###
+    *    _ 1 0 1 0   lets get degree 3        _ 1 * 1 0
+    *    _ _ 0 1 0   and mark that fields     _ _ * 1 0
+    *    _ _ _ 0 1   which we have to         _ _ _ * *
+    *    _ _ _ _ 0   bypass                   _ _ _ _ 0
+    *
+    */
 }
 
 int UDirGraph::getType() const {
@@ -178,7 +191,7 @@ int UDirGraph::getType() const {
 
 bool UDirGraph::isConnected(uint _in, uint _out) const {                // can't be equals arguments
     bool res = false;
-    if (_in > this->V || _out > this->V || _in == _out || _in == 0 || _out == 0) {
+    if (_in > this->V || _out > this->V || _in == _out || _in*_out == 0) {
         return res;
     }
     bool directionBit = _out > _in;
@@ -416,7 +429,8 @@ UDirGraph& UDirGraph::operator+=(const UDirGraph& _Right) {
     return *this;
 }
 
-UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) {
+UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) { //CHECK MEMORY!!!!!!!!!!!!!!!!!!!!!
+    //Invalid address specified to RtlFreeHeap( 000001D5BE440000, 000001D5C37C20D0 )
     if(_Right.empty()){ return *this; }
     bool** mat = toMatrix(this->V, this->connectivityVector, this->V + 1);
     /*
@@ -436,7 +450,7 @@ UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) {
         else {Error(_INVALID_ARGUMENT_);}
         _Right.pop();
     }
-    delete[] this->connectivityVector;
+    //delete[] this->connectivityVector;
     size_t newSize = this->V > 1 ? (this->V * (this->V - 1) / 2 + 7) / 8 : 1;
     this->V++;
     this->connectivityVector = new byte[newSize]{0};
@@ -446,14 +460,14 @@ UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) {
             uint matBits = i * this->V + j;
             uint bit = matBits - skippedBits;
             uint byte = bit / 8;
-            if (mat[i][j]) {
-                this->connectivityVector[byte] |= setBit(bit);
-            }
-            else{
-                this->connectivityVector[byte] &= ~setBit(bit);
-            }
+            if (mat[i][j]) { this->connectivityVector[byte] |= setBit(bit); }
+            else{ this->connectivityVector[byte] &= ~setBit(bit); }
         }
     }
+    for(size_t i = 0; i < this->V; i++){
+        delete[] mat[i];
+    }
+    delete[] mat;
     return *this;
 }
 
@@ -483,7 +497,7 @@ UDirGraph& UDirGraph::operator-(uint _Vertex) {
     if(_Vertex > this->V || _Vertex == 0 || this->V == 0){return *this;}
     this->E -= this->getDegree(_Vertex);
     uint size = (this->V*(this->V - 1)/2 + 7) / 8; // used bits in connectivity vector
-    uint newSize = ((this->V-1)*(this->V - 2)/2 + 7) / 8;
+    uint newSize = this->V - 1 ? ((this->V-1)*(this->V - 2)/2 + 7) / 8 : 1;
     uint replaced = 0;
     byte* newCV = new byte[newSize ? newSize : 1]{false};
     for(size_t i = 0; i < this->V; i++){
@@ -505,8 +519,7 @@ UDirGraph& UDirGraph::operator-(uint _Vertex) {
         }
     }
     this->V -= 1;
-    if(size > 1){ delete[] this->connectivityVector; }
-    else{ delete this->connectivityVector; }
+    delete[] this->connectivityVector;
     this->connectivityVector = newCV;
     return *this;
     /*
