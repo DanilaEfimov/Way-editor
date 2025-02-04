@@ -113,6 +113,20 @@ int Parser::getExtention(std::string fileName) {
     return res.second;
 }
 
+std::string Parser::cutExtention(std::string &fileName) {
+    if(fileName.size() == 0){
+        Error(_UNCORRECT_FILE_NAME_);
+        return "";
+    }
+    size_t pos = fileName.find_last_of('.');
+    size_t size = fileName.size();
+    if(pos == std::string::npos){
+        Error(_UNCORRECT_FILE_NAME_); return "";
+    }
+    fileName.erase(pos, size);
+    return fileName;
+}
+
 byte** Parser::writeMatrixMat(ushort V, const std::string& path) {
     if(V == 0){ return nullptr; }
     byte** mat = new byte*[V];
@@ -213,15 +227,9 @@ byte** Parser::initMatrix(int fileType, const std::string& path) {
         return mat;
     }
     switch(fileType){
-    case MAT:
-        mat = writeMatrixMat(V, path);
-        break;
-    case VL:
-        mat = writeMatrixVL(V, path);
-        break;
-    case EL:
-        mat = writeMatrixEL(V, path);
-        break;
+    case MAT: mat = writeMatrixMat(V, path); break;
+    case VL: mat = writeMatrixVL(V, path); break;
+    case EL: mat = writeMatrixEL(V, path); break;
     default:
         return nullptr;
     }
@@ -229,19 +237,27 @@ byte** Parser::initMatrix(int fileType, const std::string& path) {
 }
 
 // GRAPH INTO FILE vvv
-void Parser::graphToMat(Graph *G, std::fstream &file)
-{
-
+void Parser::graphToMat(Graph *G, std::fstream &file) {
+    static std::string temp;
+    size_t v = G->getV();
+    temp = Parser::sType(G->getType()) + "\n";
+    temp += std::to_string(v) + "\n";
+    for(size_t i = 1; i <= v; i++){
+        for(size_t j = 1; j <= v; j++){
+            temp += G->isConnected(i, j) ? "1 " : "0 ";
+        }
+        temp += "\n";
+    }
+    temp += _BEST_WISHES_;
+    file << temp;
 }
 
-void Parser::graphToVL(Graph *G, std::fstream &file)
-{
-
+void Parser::graphToVL(Graph *G, std::fstream &file) {
+    static std::string temp;
 }
 
-void Parser::graphToEL(Graph *G, std::fstream &file)
-{
-
+void Parser::graphToEL(Graph *G, std::fstream &file) {
+    static std::string temp;
 }
 //  GRAPH INTO FILE ^^^
 
@@ -323,6 +339,10 @@ QString Parser::stackToString(std::stack<uint> &s) {
         if(!s.empty()){parsed += ", ";}
     }
     return QString::fromStdString(parsed);
+}
+
+QString Parser::intToString(int val) {
+    return QString::fromStdString(std::to_string(val));
 }
 
 std::string Parser::rewriteMat(ushort V, byte** mat) {

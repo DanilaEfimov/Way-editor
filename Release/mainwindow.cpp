@@ -83,10 +83,10 @@ bool MainWindow::checkSavePolicy() {
     QObject::connect(cancel, &QPushButton::clicked, dialog, &QMainWindow::close);
     dialog->exec();
     bool res = ok->isChecked();
-    delete dialog;
-    delete ok;
     delete cancel;
+    delete ok;
     delete layout;
+    delete dialog;
     return res;
 }
 
@@ -202,12 +202,25 @@ void MainWindow::newFile() {
 }
 
 void MainWindow::saveFile() {
+    size_t curTab = ui->inputArea->currentIndex();
+    if(curTab == 0){ Error(__NO_GRAPHS__, true); return;}
     bool toReplace = this->checkSavePolicy();
-    if(toReplace){
-
+    std::string path = ui->inputArea->tabText(curTab).toStdString();
+    int ext = Parser::getExtention(path);
+    Graph* temp = graphs[curTab];
+    Parser::cutExtention(path);
+    if(!toReplace){
+        std::fstream file(path + ".mat", std::ios_base::out);
+        Parser::graphToMat(temp, file);
+        file.close();
     }
     else{
-
+        switch(ext){
+            case MAT: break;
+            case EL: break;
+            case VL: break;
+        default: Error(_UNCORRECT_FILE_NAME_, true); break;
+        }
     }
     //std::fstream file(path+graphName, std::ios_base::)
 }

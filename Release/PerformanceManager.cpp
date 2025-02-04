@@ -94,7 +94,7 @@ int PerformanceManager::cast37(Graph *G, uint v) {
     default: Error(_UNDEFINED_ERROR_);
         return -1;
     }
-    nonVoidAnswer = QString::fromStdString("\n" + std::to_string(degree));
+    nonVoidAnswer = "\n" + Parser::intToString(degree);
     return 0;
 }
 
@@ -111,16 +111,21 @@ int PerformanceManager::addV(const std::string &argv, Graph *G){
         args.push(v);
         if(v == 0) {break;}
     }
+    if(args.size() > G->getV() && args.top() != 0){
+        Error(_INVALID_ARGUMENT_COUNT_);
+        return -1;
+    }
     return cast16(G, args);
 }
 
 int PerformanceManager::addE(const std::string &argv, Graph *G){
     int code = 0;
     std::stringstream ss(argv);
+    bool ispseudo = isPseudo(G->getType());
     while(!ss.eof()){
         int in = 0, out = 0;
         ss >> in >> out;
-        if(in <= out || in == 0 || out == 0){
+        if(in < out || in == 0 || out == 0 || (in==out && !ispseudo)){
             Error(__UNDEFINED_BAHAVIOUR__, true);
         }
         code = cast17(G, in, out);
@@ -153,6 +158,7 @@ int PerformanceManager::eraseV(const std::string &argv, Graph *G) {
 int PerformanceManager::eraseE(const std::string &argv, Graph *G) {
     int code = 0;
     int argc = Parser::argc(argv);
+    if(argc % 2){ Error(_INVALID_ARGUMENT_COUNT_); return -1;}
     static std::set<edge_t> vertexes;
     std::stringstream ss(argv);
     for(size_t i = 0; i < argc / 2; i++){
@@ -234,10 +240,26 @@ bool PerformanceManager::isDirected(int code) {
         case names::tree:           return false;   break;
         case names::wtree:          return false;   break;
         case names::bitree:         return false;   break;
-    default: Error(_UNDEFINED_ERROR_); return false; break;
+    default: Error(_ERROR_GRAPH_TYPE_); return false; break;
     }
     return false;
     // ### You can look at all Classes in General.h::names enum. ###
+}
+
+bool PerformanceManager::isPseudo(int code) {
+    switch(code){
+        case names::udirgraph:      return false;   break;
+        case names::dirgraph:       return false;   break;
+        case names::udwgraph:       return false;   break;
+        case names::wdgraph:        return false;   break;
+        case names::upseudograph:   return true;    break;
+        case names::dpseudograph:   return true;    break;
+        case names::tree:           return false;   break;
+        case names::wtree:          return false;   break;
+        case names::bitree:         return false;   break;
+    default: Error(_ERROR_GRAPH_TYPE_); return false; break;
+    }
+    return false;
 }
 
 bool PerformanceManager::isVoidOp(int code) {

@@ -13,6 +13,7 @@ Error::Error(const QString message) {
     ErrorBox->setWindowTitle(_ERROR_BOX_);
     ErrorBox->setInformativeText(message);
     ErrorBox->setIcon(QMessageBox::Information);
+    //ErrorBox->setStyleSheet("color: #F00F0F; background-color: #F0F0F0;");
     ErrorBox->exec();
 }
 
@@ -24,6 +25,7 @@ Error::Error(const QString message, bool isWarning) {
     ErrorBox->setWindowTitle(_WARNING_BOX_);
     ErrorBox->setInformativeText(message);
     ErrorBox->setIcon(QMessageBox::Warning);
+    //ErrorBox->setStyleSheet("color: #FFFFFF; background-color: #FF90AF;");
     ErrorBox->exec();
 }
 

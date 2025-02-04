@@ -22,6 +22,7 @@ public:
 
     // parsing graph's file
     static int getExtention(std::string fileName);
+    static std::string cutExtention(std::string& fileName);
     static byte** writeMatrixMat(ushort V, const std::string& path);
     static byte** writeMatrixVL (ushort V, const std::string& path);
     static byte** writeMatrixEL (ushort V, const std::string& path);
@@ -42,6 +43,7 @@ public:
     // functions ::PerformanceMananger
     static int argc(const std::string& argv);
     static QString stackToString(std::stack<uint>& s);
+    static QString intToString(int n);
 
     // saving file text
     static std::string rewriteMat(ushort V, byte** mat);

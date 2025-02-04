@@ -136,6 +136,11 @@
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>inputArea</tabstop>
+  <tabstop>notes</tabstop>
+  <tabstop>outputArea</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

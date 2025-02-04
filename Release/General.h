@@ -52,9 +52,11 @@
 #define __INVALID_COMMAND__ "Invalid command\n"
 #define __EMPTY_INPUT__ "Line is empty\n"
 #define __UNDEFINED_BAHAVIOUR__ "Undefined bahaviour\ncheck Your input\n"
+#define __NO_GRAPHS__ "Please, choose your graph file\n"
 
 #define _CONSOLE_START_ "You have created a new graph!\n"
 #define _NEW_EMPTY_GRAPH_ "You have create an empty graph!\n"
+#define _BEST_WISHES_ "Best wishes, Way Editor\n"
 
 #define OUT_SEED 10 /* it means count of double numbers in string, which will be printed */
 #define FONT_SIZE 12 /* in points */

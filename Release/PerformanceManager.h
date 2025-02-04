@@ -37,6 +37,7 @@ public:
 
     static int operation(int code, int argc, const std::string& argv, Graph* G);
     static bool isDirected(int code);
+    static bool isPseudo(int code);
     static bool isVoidOp(int code);
 
     // ACCESSORS
