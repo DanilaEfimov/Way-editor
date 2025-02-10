@@ -24,15 +24,15 @@ int PerformanceManager::cast16(Graph *G, std::stack<uint> &args){
     return 0;
 }
 
-int PerformanceManager::cast17(Graph *G, uint _in, uint _out) {
+int PerformanceManager::cast17(Graph *G, uint _out, uint _in) {
     int code = G->getType();
     switch(code){
-        case names::udirgraph:      static_cast<UDirGraph*>(G)->setEdge(_in, _out);     break;
-        case names::dirgraph:       static_cast<DirGraph*>(G)->setEdge(_in, _out);      break;
-        case names::udwgraph:       static_cast<UDWGraph*>(G)->setEdge(_in, _out);      break;
-        case names::wdgraph:        static_cast<WDGraph*>(G)->setEdge(_in, _out);       break;
-        case names::upseudograph:   static_cast<UPseudoGraph*>(G)->setEdge(_in, _out);  break;
-        case names::dpseudograph:   static_cast<DPseudoGraph*>(G)->setEdge(_in, _out);  break;
+        case names::udirgraph:      static_cast<UDirGraph*>(G)->setEdge(_out, _in);     break;
+        case names::dirgraph:       static_cast<DirGraph*>(G)->setEdge(_out, _in);      break;
+        case names::udwgraph:       static_cast<UDWGraph*>(G)->setEdge(_out, _in);      break;
+        case names::wdgraph:        static_cast<WDGraph*>(G)->setEdge(_out, _in);       break;
+        case names::upseudograph:   static_cast<UPseudoGraph*>(G)->setEdge(_out, _in);  break;
+        case names::dpseudograph:   static_cast<DPseudoGraph*>(G)->setEdge(_out, _in);  break;
         case names::tree:           Error(__INVALID_COMMAND__); return -1;              break;
         case names::wtree:          Error(__INVALID_COMMAND__); return -1;              break;
         case names::bitree:         Error(__INVALID_COMMAND__); return -1;              break;
@@ -121,17 +121,20 @@ int PerformanceManager::addV(const std::string &argv, Graph *G){
 int PerformanceManager::addE(const std::string &argv, Graph *G){
     int code = 0;
     std::stringstream ss(argv);
-    bool ispseudo = isPseudo(G->getType());
+    uint type = G->getType();
+    bool ispseudo = isPseudo(type);
+    bool isdirected = isDirected(type);
     while(!ss.eof()){
         int in = 0, out = 0;
-        ss >> in >> out;
-        if(in < out || in == 0 || out == 0 || (in==out && !ispseudo)){
+        ss >> out >> in;
+        if(in*out == 0 || (in==out && !ispseudo)){
             Error(__UNDEFINED_BAHAVIOUR__, true);
         }
-        code = cast17(G, in, out);
-        if(code != 0){return - 1;}
+        code = cast17(G, out, in);
+        if(code != 0){return code;}
     }
     return 0;
+    // input format: argv:: from-vertex [] to-vertex
 }
 
 int PerformanceManager::eraseV(const std::string &argv, Graph *G) {

@@ -70,6 +70,7 @@ void MainWindow::showNonVoidAnswer() {
 
 bool MainWindow::checkSavePolicy() {
     QDialog* dialog = new QDialog();
+    dialog->setSizeIncrement(DIALOG_W, DIALOG_H);
     dialog->setWindowTitle(_SAVE_WARNING_);
     QLayout* layout = new QHBoxLayout(dialog);
     QPushButton* ok = new QPushButton(_OK_);
@@ -198,7 +199,7 @@ void MainWindow::newFile() {
         ui->inputArea->setCurrentIndex(index);
         return;
     }
-    Error(_FILE_NOT_CHOOSED_);
+    else Error(_FILE_NOT_CHOOSED_);
 }
 
 void MainWindow::saveFile() {
@@ -207,22 +208,34 @@ void MainWindow::saveFile() {
     bool toReplace = this->checkSavePolicy();
     std::string path = ui->inputArea->tabText(curTab).toStdString();
     int ext = Parser::getExtention(path);
-    Graph* temp = graphs[curTab];
+    Graph* G = graphs[curTab];
     Parser::cutExtention(path);
-    if(!toReplace){
-        std::fstream file(path + ".mat", std::ios_base::out);
-        Parser::graphToMat(temp, file);
-        file.close();
+    std::fstream file;
+    if(!toReplace){ // rewrite existing file
+        file.open(path + ".mat", std::ios_base::out);
+        Parser::graphToMat(G, file);
+        file.open(path + ".el", std::ios_base::out);
+        Parser::graphToEL(G, file);
+        file.open(path + ".vl", std::ios_base::out);
+        Parser::graphToVL(G, file);
     }
-    else{
-        switch(ext){
-            case MAT: break;
-            case EL: break;
-            case VL: break;
-        default: Error(_UNCORRECT_FILE_NAME_, true); break;
+    else{   // save existing file
+        if(ext != MAT) {
+            file.open(path + ".mat", std::ios_base::out);
+            Parser::graphToMat(G, file);
+        }
+        if(ext != VL) {
+            file.open(path + ".vl", std::ios_base::out);
+            Parser::graphToVL(G, file);
+        }
+        if(ext != EL) {
+            file.open(path + ".el", std::ios_base::out);
+            Parser::graphToEL(G, file);
         }
     }
-    //std::fstream file(path+graphName, std::ios_base::)
+    file.open(path + ".txt", std::ios_base::out);
+    G->print(file);
+    file.close();
 }
 
 void MainWindow::dontReplace() {
@@ -266,7 +279,6 @@ void MainWindow::setRightMode() {
 void MainWindow::setLeftMode() {
     ui->central->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
 }
-
 
 void MainWindow::help() {
     static bool opened = false;

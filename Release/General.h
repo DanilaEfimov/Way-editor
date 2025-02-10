@@ -60,6 +60,8 @@
 
 #define OUT_SEED 10 /* it means count of double numbers in string, which will be printed */
 #define FONT_SIZE 12 /* in points */
+#define DIALOG_W 400
+#define DIALOG_H 300
 #define _CLEAN_ ""
 #define _OK_ "OK"
 #define _CANCEL_ "CANCEL"
