@@ -191,24 +191,33 @@ UPseudoGraph &UPseudoGraph::operator+(std::stack<uint> &_Right) {
 
 UPseudoGraph& UPseudoGraph::operator-(uint _Vertex) {
     if(_Vertex == 0 || _Vertex > this->V){return *this;}
+    size_t newSize = this->V ? (this->V + 7)/8 : 1;
+    size_t oldSize = this->V > 1 ? (this->V + 6)/8 : 1;
     byte* lastLoops = this->loops;
-    uint newSize = (this->V + 7)/8 ? (this->V + 7)/8 : 1;
-    this->loops = new byte[newSize]{0};
+    if(oldSize < newSize){
+        lastLoops = new byte[newSize];
+        copyBits(oldSize, newSize, this->loops, lastLoops);
+        delete[] this->loops;
+        this->loops = new byte[newSize]{0};
+    }
+    size_t bit;
+    size_t byte;
+    size_t skip = 0;
     for(size_t i = 0; i < this->V; i++){
-        uint bit;
-        uint byte;
-        if(i + 1 < _Vertex){
-            bit = i % 8;
-            byte = i / 8;
-        }
-        if(i + 1 > _Vertex){
-            bit = (i-1) % 8;
-            byte = (i-1) / 8;
-        }
+        bit = i % 8;
+        byte = (i+skip) / 8;
+        if(i + 1 == _Vertex) {skip = 1; continue;}
         if(getBit(bit, lastLoops[byte])){
-            setBit(bit, this->loops[byte]);
+            setBit(bit - skip, this->loops[byte]);
+        }
+        else {
+            resetBit(bit - skip, this->loops[byte]);
         }
     }
+    bit = (_Vertex - 1) % 8;    // if deleted vertex has loop..
+    byte = (_Vertex - 1) / 8;
+    resetBit(bit, this->loops[byte]);
+    if(oldSize < newSize) { delete[] lastLoops; }
     this->UDirGraph::operator-(_Vertex);
     return *this;
 }

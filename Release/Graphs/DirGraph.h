@@ -2,15 +2,18 @@
 #define DIRGRAPH_H
 #define STATIC_MEMORY 48   // 2 bytes from this->V + 4 bytes from this->E
 
-#include"Graph.h"
-#include<stack>
+#include "Graph.h"
+#include <stack>
 
 enum {
-    OUT, IN, ALL = 1
+    OUT, IN, ALL
 };
 
 class DirGraph : public Graph
 {
+private:
+    void clean() noexcept;
+    void resizeUp(size_t newSize, size_t oldSize) noexcept;  // resize down mat
 protected:
     uint E;
     byte* upConnectivityMat;
@@ -25,7 +28,7 @@ public:
     virtual std::string& show() const override;
     virtual int getDegree(uint _Vertex, bool io) const;
     virtual int getType() const override;
-    virtual bool isConnected(uint _in, uint _out) const override;
+    virtual bool isConnected(uint _out, uint _in) const override;
     uint getEdges() const;
 
     virtual void setEdge(uint _in, uint _out);
@@ -62,4 +65,5 @@ public:
 * Here we have to get only three bits: [1][2], [1][3], [2][3], [2][1], [3][1], [3][2]
 * and these bits written into vectors row by row: "1 1 1 0 0 0 0 0 + 1 1 1 0 0 0 0 0"
 * instead 0x00FFFFFF00FFFFFF00 -> 0b1110000011100000    (9 bytes to 2)
+*           ### for example true byte looks like 0xFF ###
 ****************************************************************/

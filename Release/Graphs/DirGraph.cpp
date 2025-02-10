@@ -1,12 +1,21 @@
 #include "DirGraph.h"
 #include "General.h"
 #include "Parser.h"
+#include "Error.h"
 #include <bitset>
 
 static byte setBit(uint pos = 0) {
     byte res = 0b00000001;
     pos %= 8;
     res <<= pos;	// res *= 2^pos
+    return res;
+}
+
+static byte setBit(uint pos, byte& value) {
+    byte res = 0b00000001;
+    pos %= 8;
+    res <<= pos;	// res *= 2^pos
+    value |= res;
     return res;
 }
 
@@ -27,59 +36,98 @@ static byte resetBit(uint pos, byte& value){
     return value;
 }
 
-static bool** toMatrix(ushort V, byte* cv, uint size = 0){
-    size = size ? size : V; // in operator+(std::stack<uint>) we need make mat one row more
-    bool** mat = new bool*[size];
-    for(size_t i = 0; i < size; i++){
-        mat[i] = new bool[size];
+static void copyBits(size_t size, size_t newSize, byte* from, byte* to){    // size in bytes
+    size_t min = size < newSize ? size : newSize;
+    for(size_t i = 0; i < min; i++){
+        to[i] = from[i];
     }
-    for(size_t i = 0; i < V; i++){
+}
+
+static bool** toMatrix(ushort V, byte* down, byte* up, uint size = 0){
+    static bool** mat;
+    size = size ? size : V; // in operator+(std::stack<uint>) we need make mat one row more
+    mat = new bool*[size];
+    for(size_t i = 0; i < size; i++){
+        mat[i] = new bool[size]{0};
+    }
+    for(size_t i = 0; i < V; i++) {
         mat[i][i] = false;
         uint skippedBits = (i + 1) * (i + 2) / 2;
-        for(size_t j = i+1; j < V; j++){
+        for(size_t j = i + 1; j < V; j++){
             uint matBits = i * V + j;
             uint bit = matBits - skippedBits;
             uint byte = bit / 8;
-            bool connected = getBit(bit, cv[byte]);
-            mat[i][j] = mat[j][i] = connected;
+            bool connected =  getBit(bit,  up[byte]);
+            mat[i][j]  = connected;
+        }
+    }
+    for(size_t i = 0; i < V; i++) {
+        mat[i][i] = false;
+        uint skippedBits = (i + 1) * (i + 2) / 2;
+        for(size_t j = i + 1; j < V; j++){
+            uint matBits = i * V + j;
+            uint bit = matBits - skippedBits;
+            uint byte = bit / 8;
+            bool connected =  getBit(bit,  down[byte]);
+            mat[j][i]  = connected;
         }
     }
     return mat;
 }
 
+void DirGraph::clean() noexcept {
+    this->V = 0;
+    this->E = 0;
+    delete[] this->upConnectivityMat;
+    delete[] this->downConnectivityMat;
+    this->upConnectivityMat = nullptr;
+    this->downConnectivityMat = nullptr;
+}
+
+void DirGraph::resizeUp(size_t newSize,  size_t oldSize) noexcept {
+    static byte* newUpConnectivityMat;
+    newUpConnectivityMat = new byte[newSize];
+    copyBits(oldSize, newSize, this->upConnectivityMat, newUpConnectivityMat);
+    delete[] this->upConnectivityMat;
+    this->upConnectivityMat = new byte[newSize];
+    copyBits(newSize, newSize, newUpConnectivityMat, this->upConnectivityMat);
+    delete[] newUpConnectivityMat;
+}
+
 DirGraph::DirGraph(uint _V, byte **mat) : Graph(_V) {
     this->E = 0;
-    if(mat == nullptr){                 // empty graph
+    if(mat == nullptr || _V == 0){                 // empty graph
         this->V = 0;
         this->upConnectivityMat = nullptr;
         this->downConnectivityMat = nullptr;
         return;
     }
-    this->upConnectivityMat = new byte[(_V*(_V-1)/2 + 7)/8]{0};         // half of connectivity matrix upper diagonal
-    this->downConnectivityMat = new byte[(_V*(_V-1)/2 + 7)/8]{0};       // half of connectivity matrix lower diagonal
+    size_t size = (_V*(_V-1)/2 + 7)/8;
+    this->upConnectivityMat = new byte[size ? size : 1]{0};         // half of connectivity matrix upper diagonal
+    this->downConnectivityMat = new byte[size ? size : 1]{0};       // half of connectivity matrix lower diagonal
     for(size_t i = 0; i < _V; i++){                                     // upper main diagonal
         for(size_t j = i + 1; j < _V; j++){                             // here j < i
-            if(!mat[i][j]){
-                continue;
-            }
             uint offset = (i+1)*(i+2)/2;
             uint matBits = i*_V + j;
             uint bit = matBits - offset;
             uint byte = bit / 8;
-            this->upConnectivityMat[byte] |= setBit(bit);
+            if(!mat[i][j])
+                this->upConnectivityMat[byte] &= ~setBit(bit);
+            else
+                this->upConnectivityMat[byte] |= setBit(bit);
             this->E++;
         }
     }
     for(size_t j = 0; j < _V; j++){                                     // lower main diagonal
         for(size_t i = j + 1; i < _V; i++){                             // here j > i
-            if(!mat[i][j]){                                             // transposed matrix
-                continue;
-            }
             uint offset = (j+1)*(j+2)/2;
             uint matBits = j*_V + i;
             uint bit = matBits - offset;
             uint byte = bit / 8;
-            this->downConnectivityMat[byte] |= setBit(bit);
+            if(!mat[i][j])
+                this->downConnectivityMat[byte] &= ~setBit(bit);
+            else
+                this->downConnectivityMat[byte] |= setBit(bit);
             this->E++;
         }
     }
@@ -127,7 +175,7 @@ std::string& DirGraph::show() const {
     for(size_t i = 1; i <= this->V; i++){
         conectList += std::to_string(i);
         conectList += ": ";
-        for(size_t j = i + 1; j <= this->V; j++){
+        for(size_t j = 1; j <= this->V; j++){
             if(this->isConnected(i, j)){
                 conectList += std::to_string(j);
                 conectList += ", ";
@@ -144,49 +192,64 @@ std::string& DirGraph::show() const {
     */
 }
 
-int DirGraph::getDegree(uint _Vertex, bool io) const {          // io: in - false; out - true;
-    if(_Vertex > this->V || _Vertex == 0){
-        return -1;                                              // invalid argument
+int DirGraph::getDegree(uint _Vertex, bool io) const {          // io: out - false; in - true;
+    if (_Vertex > this->V || _Vertex == 0) {					// undefined argument branch
+        return -1;
     }
-    int degree = 0;
-    for (size_t v = 1; v < _Vertex; v++) {						// check all vertexes littler than _Vertex
-        uint offset = _Vertex - v - 1;							// how many bits we have to shift to find [v][_Vertex] field
-        uint compliment = this->V - v;
-        uint base = v * this->V - v * (v + 1) / 2 - compliment;	// it's like begin of segment, but for matrix row
-        uint address = base + offset;
-        uint byte = address / 8;
-        byte_t isConnect = getBit(offset, io ? this->upConnectivityMat[byte] : this->downConnectivityMat[byte]);
-        degree += isConnect;									// getBit() returns 1 or 0
-    }															// here checked all vertexes littler than _Vertex
-    // let's check others, what bigger than _Vertex
-    uint _compliment = this->V - _Vertex;						// how many bits contains about _Vertex's connectivity
-    uint _base = _Vertex * this->V - _Vertex * (_Vertex + 1) / 2 - _compliment;
-    for (size_t i = 0; i < _compliment; i++) {
-        uint byte = (_base + i) / 8;
-        byte_t field = io ? this->upConnectivityMat[byte] : this->downConnectivityMat[byte];
-        degree += getBit(i, field);								// look at definition of 'getBit()': there i %= 8 too
+    byte* vec;
+    if(io == OUT){vec = this->upConnectivityMat;}
+    else {vec = this->downConnectivityMat;}
+    uint res = 0;
+    size_t base = _Vertex - 2;
+    size_t offset = this->V-2;
+    size_t address = base;
+    if(_Vertex > 1){    // colum bypass condition
+        for(size_t i = 0; (i < _Vertex - 1) && offset; i++){    // collum of matrix bypass
+            size_t byte = address / 8;
+            size_t bit = address % 8;
+            res += getBit(bit, vec[byte]);
+            address += offset;
+            offset--;
+        }
     }
-    return degree;
+    size_t compliment = this->V - _Vertex;
+    size_t skipped = _Vertex*(_Vertex + 1) / 2;
+    base = this->V*_Vertex - skipped - compliment;
+    //  i < compliment  = row bypass condition
+    for(size_t i = 0; i < compliment; i++){     // row of matrix bypass
+        address = base + i;
+        size_t byte = address / 8;
+        size_t bit = address % 8;
+        res += getBit(bit, vec[byte]);
+    }
+    return res;
+    /*                  ### example ###
+    *    _ 1 0 1 0   lets get degree 3 OUT    _ 1 * 1 0
+    *    _ _ 0 1 0   and mark that fields     _ _ * 1 0
+    *    _ _ _ 0 1   which we have to         _ _ _ * *
+    *    _ _ _ _ 0   bypass                   _ _ _ _ 0
+    *
+    */
 }
 
 int DirGraph::getType() const {
     return dirgraph;
 }
 
-bool DirGraph::isConnected(uint _in, uint _out) const {                // can't be equals arguments
+bool DirGraph::isConnected(uint _out, uint _in) const {                // can't be equals arguments
     bool res = false;
     if (_in > this->V || _out > this->V || _in == _out || _in == 0 || _out == 0) {
         return res;
     }
-    bool directionBit = _out > _in;
-    if(directionBit){byte_t temp = _in; _in = _out; _out = temp;}
+    bool directionBit = _out < _in;
+    if(!directionBit){byte_t temp = _in; _in = _out; _out = temp;}
     uint compliment = this->V - _out;
     uint base = _out * this->V - _out * (_out + 1) / 2 - compliment;	// in bits everywhere!
     uint offset = _in - _out - 1;
     uint address = base + offset;
     uint byte = address / 8;
     uint bit = address % 8;
-    res = getBit(bit, !directionBit ? this->upConnectivityMat[byte] : this->downConnectivityMat[byte]);
+    res = getBit(bit, directionBit ? this->upConnectivityMat[byte] : this->downConnectivityMat[byte]);
     return res;
     // here we have not difference between _in and _out. We have't swap it for _in < _out (look at UDirGraph)
     // here if _in > _out then we have to search such field of matrix, where i > j
@@ -198,12 +261,12 @@ uint DirGraph::getEdges() const {
     return this->E;
 }
 
-void DirGraph::setEdge(uint _in, uint _out) {                          // can't be equals arguments
-    if (_in > this->V || _out > this->V || _in == _out) {
+void DirGraph::setEdge(uint _out, uint _in) {                          // can't be equals arguments
+    if (_in > this->V || _out > this->V || _in == _out || isConnected(_out, _in)) {
         return;
     }
-    bool directionBit = _out > _in;
-    if(directionBit){byte_t temp = _in; _in = _out; _out = temp;}
+    bool directionBit = _out < _in;
+    if(!directionBit){byte_t temp = _in; _in = _out; _out = temp;}
     uint compliment = this->V - _out;
     uint base = _out * this->V - _out * (_out + 1) / 2 - compliment;	// in bits everywhere!
     uint offset = _in > _out ? _in - _out - 1 : _out - _in - 1;
@@ -211,17 +274,11 @@ void DirGraph::setEdge(uint _in, uint _out) {                          // can't 
     uint byte = address / 8;
     uint bit = address % 8;
     byte_t pos = 1 << bit;
-    bool connected = getBit(bit, !directionBit ? this->upConnectivityMat[byte] : this->downConnectivityMat[byte]);
-    if(connected){ return; }
-    else if(!directionBit){
-        this->upConnectivityMat[byte] |= pos;
-    }
-    else{
-        this->downConnectivityMat[byte] |= pos;
-    }
+    if(directionBit){ this->upConnectivityMat[byte] |= pos; }
+    else{ this->downConnectivityMat[byte] |= pos; }
     this->E++;
     // here all like in isConnected. Look at DirGraph::isConnected() description
-    // only there we return getBit(...) instead setBit(...)
+    // only there we turn getBit(...) instead setBit(...)
 }
 
 void DirGraph::eraseEdge(uint _in, uint _out) {
@@ -269,7 +326,7 @@ DirGraph& DirGraph::operator+=(const DirGraph &_Right) {    // not fixed (only s
     */
     ushort minV = this->V < _Right.getV() ? this->V : _Right.getV();
     for(size_t i = 1; i <= minV; i++){
-        for(size_t j = i+1; j <= minV; j++){
+        for(size_t j = 1; j <= minV; j++){
             if(_Right.isConnected(j,i)){
                 this->setEdge(j,i);
             }
@@ -281,9 +338,56 @@ DirGraph& DirGraph::operator+=(const DirGraph &_Right) {    // not fixed (only s
     return *this;
 }
 
-DirGraph& DirGraph::operator+(std::stack<uint> &_Right)
-{
+DirGraph& DirGraph::operator+(std::stack<uint> &_Right) {
+    if(_Right.empty()){ return *this; }
+    bool** mat = toMatrix(this->V, this->downConnectivityMat,this->upConnectivityMat, this->V + 1);
+    while(!_Right.empty()){
+        uint _Vertex = _Right.top();
+        if(_Vertex != 0 && (_Vertex <= this->V)){
+            mat[this->V][_Vertex-1] = true; // setEdge
+            this->E++;
+        }
+        else if(_Vertex == 0){ break; }
+        else {Error(_INVALID_ARGUMENT_);}
+        _Right.pop();
+    }
+    size_t newSize = this->V ? (this->V * (this->V + 1) / 2 + 7) / 8 : 1;
+    size_t oldSize = this->V ? (this->V * (this->V - 1) / 2 + 7) / 8 : 1;
+    this->resizeUp(newSize, oldSize);
+    this->V++;
+    delete[] this->downConnectivityMat;
+    this->downConnectivityMat = new byte[newSize]{0};
+    for (size_t i = 0; i < this->V; i++) {
+        uint skippedBits;
+        uint matBits;
+        for (size_t j = 0; j < this->V; j++) {
+            if(i == j){ continue; }
+            if(i > j) {
+                matBits = j * this->V + i;
+                skippedBits = (j + 1) * (j + 2) / 2;
+            }
+            else {
+                matBits = i * this->V + j;
+                skippedBits = (i + 1) * (i + 2) / 2;
+            }
+            uint bit = matBits - skippedBits;
+            uint byte = bit / 8;
+            if (mat[i][j]) {
+                if(i > j) this->downConnectivityMat[byte] |= setBit(bit);
+                else this->upConnectivityMat[byte] |= setBit(bit);
+            }
+            else {
+                if(i > j) this->downConnectivityMat[byte] &= ~setBit(bit);
+                else this->upConnectivityMat[byte] &= ~setBit(bit);
+            }
+        }
+    }
+    for(size_t i = 0; i < this->V; i++){
+        delete[] mat[i];
+    }
+    delete[] mat;
     return *this;
+    // arguments in stack - vertexes, which will be accessable from new vertex
 }
 
 DirGraph& DirGraph::operator-=(const DirGraph &_Right) {    // not fixed (only same size)
@@ -306,52 +410,73 @@ DirGraph& DirGraph::operator-=(const DirGraph &_Right) {    // not fixed (only s
     return *this;
 }
 
-DirGraph& DirGraph::operator-(uint _Vertex) {
+DirGraph& DirGraph::operator-(uint _Vertex) {   // NOT FIXED
     if (_Vertex > this->V || _Vertex == 0) {
         return *this;
     }
-    if(this->V == 1){
-        this->V--;
-        this->E = 0;
-        delete[] this->upConnectivityMat;
-        delete[] this->downConnectivityMat;
-        this->upConnectivityMat = nullptr;
-        this->downConnectivityMat = nullptr;
+    if(this->V == 1){   // empty graph branch
+        this->clean();
         return *this;
-        // empty graph branch
     }
-    this->E = 0;
-    bool** mat = toMatrix(this->V, this->upConnectivityMat);
-    this->upConnectivityMat = new byte[((this->V - 1) * (this->V - 2) / 2 + 7) / 8]{false};
-    this->downConnectivityMat = new byte[((this->V - 1) * (this->V - 2) / 2 + 7) / 8]{false};
-    uint compliment = this->V - _Vertex;
+    if(_Vertex > this->V || _Vertex == 0 || this->V == 0){return *this;}
+    this->E -= this->getDegree(_Vertex, IN) + this->getDegree(_Vertex, OUT);
+    uint size = (this->V*(this->V - 1)/2 + 7) / 8; // used bits in connectivity vector
+    uint newSize = this->V - 1 ? ((this->V-1)*(this->V - 2)/2 + 7) / 8 : 1;
+    uint replaced = 0;
+    byte* newUp = new byte[newSize ? newSize : 1]{false};
+    byte* newDown = new byte[newSize ? newSize : 1]{false};
     for(size_t i = 0; i < this->V; i++){
-        if(i + 1 == _Vertex){ continue; }
-        for(size_t j = i+1; j < this->V; j++){
-            if(j + 1 == _Vertex){ continue; }
-            uint matBits = i*this->V + j;
-            uint skipped = (i+1)*(i+2)/2;
-            uint bit = matBits - skipped;
-            if(i+1 >= _Vertex && j+1 >= _Vertex){bit-=this->V-1;}
-            else if(j+1 >= _Vertex) {bit -= i+1;}
-            else if(i+1 >= _Vertex) {bit -= compliment;}
-            uint byte = bit / 8;
-            if(mat[i][j]){
-                this->upConnectivityMat[byte] |= setBit(bit);
-                this->E++;
+        if(i + 1 == _Vertex){continue;}
+        for(size_t j = 0; j < this->V; j++){
+            if(j+1 == _Vertex){continue;}
+            if(i == j){continue;}
+            uint mat;
+            uint skipped;
+            if(i > j){
+                mat = j * this->V + i + 1;
+                skipped = (j+1)*(j+2)/2;
             }
-            if(mat[j][i]){
-                this->downConnectivityMat[byte] |= setBit(bit);
-                this->E++;
+            else{
+                mat = i * this->V + j + 1;
+                skipped = (i+1)*(i+2)/2;
             }
+            uint sequence = mat - skipped;
+            uint byte = sequence / 8;
+            uint bit = sequence % 8;
+            if(i > j){
+                if(getBit(bit, this->downConnectivityMat[byte])){setBit(replaced % 8, newDown[replaced / 8]);}
+                else{resetBit(replaced % 8, newDown[replaced / 8]);}
+            }
+            else {
+                if(getBit(bit, this->upConnectivityMat[byte])){setBit(replaced % 8, newUp[replaced / 8]);}
+                else{resetBit(replaced % 8, newUp[replaced / 8]);}
+            }
+            replaced++;
         }
     }
-    for(size_t i = 0; i < this->V; i++){
-        delete[] mat[i];
-    }
-    delete[] mat;
-    this->V--;
+    this->V -= 1;
+    delete[] this->upConnectivityMat;
+    this->upConnectivityMat = newUp;
+    delete[] this->downConnectivityMat;
+    this->downConnectivityMat = newDown;
     return *this;
+    /*
+    *   for example G - 2: (deleting of second vertex)
+    *   matrix of some UDirGraph:
+    *   0 1 0 0 1   or  * 1 0 0 1
+    *   1 0 0 1 0       * * 0 1 0
+    *   0 0 0 0 0       * * * 0 0
+    *   0 1 0 0 1       * * * * 1
+    *   1 0 0 1 0       * * * * *
+    *   how must looks returned graph mat:
+    *   * * 0 0 1   there isn't all i = 1 || j = 1 places
+    *   * * * * *   (vertexes id: 0, 1, 2 ... second have id = 1)
+    *   * * * 0 0
+    *   * * * * 1
+    *   * * * * *
+    *   so every vertex in mat deals with this->V - 1 places
+    *   it's used in conditions after 'bit' calculations
+    */
 }
 
 int DirGraph::operator()(uint _Vertex) const {

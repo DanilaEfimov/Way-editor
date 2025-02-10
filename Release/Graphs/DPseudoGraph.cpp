@@ -45,7 +45,7 @@ DPseudoGraph::~DPseudoGraph() {
 }
 
 int DPseudoGraph::getType() const {
-    return upseudograph;
+    return dpseudograph;
 }
 
 void DPseudoGraph::print(std::fstream &_to) const {
@@ -172,18 +172,15 @@ void DPseudoGraph::eraseEdge(uint _in, uint _out) {
 }
 
 DPseudoGraph &DPseudoGraph::operator+(std::stack<uint> &_Right) {
-    std::stack<uint> copy = _Right;
-    while(!copy.empty()){
-        uint vertex = copy.top();
-        if(vertex == this->V + 1){
-            size_t newSize = (this->V + 1 + 7) / 8;
-            byte* newLoops = new byte[newSize];
-            copyBits(newSize, newSize, this->loops, newLoops);
-            setBit(this->V+1, newLoops[(this->V+1)/8]);
-            delete[] this->loops;
-            this->loops = newLoops;
-            break;
-        }
+    size_t lastSize = (this->V + 7)/8;
+    size_t newSize = (this->V + 8)/8;
+    if(newSize > lastSize){
+        byte* newLoops = new byte[newSize]{0};
+        copyBits(lastSize, newSize, this->loops, newLoops);
+        delete[] this->loops;
+        this->loops = new byte[newSize]{0};
+        copyBits(lastSize, newSize, newLoops, this->loops);
+        delete[] newLoops;
     }
     this->DirGraph::operator+(_Right);
     return *this;
@@ -191,23 +188,33 @@ DPseudoGraph &DPseudoGraph::operator+(std::stack<uint> &_Right) {
 
 DPseudoGraph& DPseudoGraph::operator-(uint _Vertex) {
     if(_Vertex == 0 || _Vertex > this->V){return *this;}
+    size_t newSize = this->V ? (this->V + 7)/8 : 1;
+    size_t oldSize = this->V > 1 ? (this->V + 6)/8 : 1;
     byte* lastLoops = this->loops;
-    this->loops = new byte[(this->V + 6)/8]{0};
+    if(oldSize < newSize){
+        lastLoops = new byte[newSize];
+        copyBits(oldSize, newSize, this->loops, lastLoops);
+        delete[] this->loops;
+        this->loops = new byte[newSize]{0};
+    }
+    size_t bit;
+    size_t byte;
+    size_t skip = 0;
     for(size_t i = 0; i < this->V; i++){
-        uint bit;
-        uint byte;
-        if(i + 1 < _Vertex){
-            bit = i % 8;
-            byte = i / 8;
-        }
-        if(i + 1 > _Vertex){
-            bit = (i-1) % 8;
-            byte = (i-1) / 8;
-        }
+        bit = i % 8;
+        byte = (i+skip) / 8;
+        if(i + 1 == _Vertex) {skip = 1; continue;}
         if(getBit(bit, lastLoops[byte])){
-            setBit(bit, this->loops[byte]);
+            setBit(bit - skip, this->loops[byte]);
+        }
+        else {
+            resetBit(bit - skip, this->loops[byte]);
         }
     }
+    bit = (_Vertex - 1) % 8;    // if deleted vertex has loop..
+    byte = (_Vertex - 1) / 8;
+    resetBit(bit, this->loops[byte]);
+    if(oldSize < newSize) { delete[] lastLoops; }
     this->DirGraph::operator-(_Vertex);
     return *this;
 }

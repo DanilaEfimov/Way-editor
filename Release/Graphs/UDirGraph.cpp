@@ -77,7 +77,7 @@ static bool** toMatrix(ushort V, byte* cv, uint size = 0){
 
 UDirGraph::UDirGraph(uint _V, byte** mat) : Graph(_V){
 	this->E = 0;
-    if (mat == nullptr) {
+    if (mat == nullptr || _V == 0) {
 		this->V = 0;
         this->connectivityVector = nullptr;     // empty graph branch
         return;
@@ -429,17 +429,9 @@ UDirGraph& UDirGraph::operator+=(const UDirGraph& _Right) {
     return *this;
 }
 
-UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) { //CHECK MEMORY!!!!!!!!!!!!!!!!!!!!!
-    //Invalid address specified to RtlFreeHeap( 000001D5BE440000, 000001D5C37C20D0 )
+UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) {
     if(_Right.empty()){ return *this; }
     bool** mat = toMatrix(this->V, this->connectivityVector, this->V + 1);
-    /*
-    *   here we have mat like:
-    *   0 1 1 0
-    *   1 0 1 0
-    *   1 1 0 0
-    *   0 0 0 0     where is one unconnected vertex
-    */
     while(!_Right.empty()){
         uint _Vertex = _Right.top();
         if(_Vertex != 0 && (_Vertex <= this->V)){
@@ -450,9 +442,9 @@ UDirGraph& UDirGraph::operator+(std::stack<uint>& _Right) { //CHECK MEMORY!!!!!!
         else {Error(_INVALID_ARGUMENT_);}
         _Right.pop();
     }
-    //delete[] this->connectivityVector;
-    size_t newSize = this->V > 1 ? (this->V * (this->V - 1) / 2 + 7) / 8 : 1;
+    size_t newSize =((this->V+1) * (this->V + 2) / 2 + 7) / 8;
     this->V++;
+    delete[] this->connectivityVector;
     this->connectivityVector = new byte[newSize]{0};
     for (size_t i = 0; i < this->V; i++) {
         uint skippedBits = (i + 1) * (i + 2) / 2;
