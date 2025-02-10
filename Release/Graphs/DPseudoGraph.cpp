@@ -36,7 +36,7 @@ static void copyBits(size_t size, size_t newSize, byte* from, byte* to){    // s
 }
 
 DPseudoGraph::DPseudoGraph(uint V, byte** mat) : DirGraph(V, mat) {
-    this->loops = new byte[(V+7)/8]{0};
+    this->loops = new byte[V ? (V+7)/8 : 1]{0};
     // by default this graph created without loops
 }
 
@@ -93,7 +93,7 @@ std::string& DPseudoGraph::show() const {
     for(size_t i = 1; i <= this->V; i++){
         conectList += std::to_string(i);
         conectList += ": ";
-        for(size_t j = i; j <= this->V; j++){
+        for(size_t j = 1; j <= this->V; j++){
             if(this->isConnected(i, j)){
                 conectList += std::to_string(j);
                 conectList += ", ";

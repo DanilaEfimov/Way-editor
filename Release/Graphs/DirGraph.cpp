@@ -94,6 +94,50 @@ void DirGraph::resizeUp(size_t newSize,  size_t oldSize) noexcept {
     delete[] newUpConnectivityMat;
 }
 
+void DirGraph::updateUpVec(uint _Vertex, byte *array) noexcept {
+    size_t replaced = 0;
+    for(size_t i = 0; i < this->V; i++){
+        if(i + 1 == _Vertex){continue;}
+        for(size_t j = i + 1; j < this->V; j++){
+            if(j+1 == _Vertex){continue;}
+            uint mat = i * this->V + j;
+            uint skipped = (i+1)*(i+2)/2;
+            uint sequence = mat - skipped;
+            uint byte = sequence / 8;
+            uint bit = sequence % 8;
+            if(getBit(bit, this->upConnectivityMat[byte])){
+                setBit(replaced % 8, array[replaced / 8]);
+            }
+            else{
+                resetBit(replaced % 8, array[replaced / 8]);
+            }
+            replaced++;
+        }
+    }
+}
+
+void DirGraph::updateDownVec(uint _Vertex, byte *array) noexcept {
+    size_t replaced = 0;
+    for(size_t j = 0; j < this->V; j++){
+        if(j + 1 == _Vertex){continue;}
+        for(size_t i = j + 1; i < this->V; i++){
+            if(i + 1 == _Vertex){continue;}
+            uint mat = j * this->V + i;
+            uint skipped = (j+1)*(j+2)/2;
+            uint sequence = mat - skipped;
+            uint byte = sequence / 8;
+            uint bit = sequence % 8;
+            if(getBit(bit, this->downConnectivityMat[byte])){
+                setBit(replaced % 8, array[replaced / 8]);
+            }
+            else{
+                resetBit(replaced % 8, array[replaced / 8]);
+            }
+            replaced++;
+        }
+    }
+}
+
 DirGraph::DirGraph(uint _V, byte **mat) : Graph(_V) {
     this->E = 0;
     if(mat == nullptr || _V == 0){                 // empty graph
@@ -201,7 +245,7 @@ int DirGraph::getDegree(uint _Vertex, bool io) const {          // io: out - fal
     else {vec = this->downConnectivityMat;}
     uint res = 0;
     size_t base = _Vertex - 2;
-    size_t offset = this->V-2;
+    size_t offset = this->V-1;
     size_t address = base;
     if(_Vertex > 1){    // colum bypass condition
         for(size_t i = 0; (i < _Vertex - 1) && offset; i++){    // collum of matrix bypass
@@ -352,7 +396,7 @@ DirGraph& DirGraph::operator+(std::stack<uint> &_Right) {
         _Right.pop();
     }
     size_t newSize = this->V ? (this->V * (this->V + 1) / 2 + 7) / 8 : 1;
-    size_t oldSize = this->V ? (this->V * (this->V - 1) / 2 + 7) / 8 : 1;
+    size_t oldSize = this->V-1 ? (this->V * (this->V - 1) / 2 + 7) / 8 : 1;
     this->resizeUp(newSize, oldSize);
     this->V++;
     delete[] this->downConnectivityMat;
@@ -420,67 +464,23 @@ DirGraph& DirGraph::operator-(uint _Vertex) {   // NOT FIXED
     }
     if(_Vertex > this->V || _Vertex == 0 || this->V == 0){return *this;}
     this->E -= this->getDegree(_Vertex, IN) + this->getDegree(_Vertex, OUT);
-    uint size = (this->V*(this->V - 1)/2 + 7) / 8; // used bits in connectivity vector
     uint newSize = this->V - 1 ? ((this->V-1)*(this->V - 2)/2 + 7) / 8 : 1;
-    uint replaced = 0;
     byte* newUp = new byte[newSize ? newSize : 1]{false};
     byte* newDown = new byte[newSize ? newSize : 1]{false};
-    for(size_t i = 0; i < this->V; i++){
-        if(i + 1 == _Vertex){continue;}
-        for(size_t j = 0; j < this->V; j++){
-            if(j+1 == _Vertex){continue;}
-            if(i == j){continue;}
-            uint mat;
-            uint skipped;
-            if(i > j){
-                mat = j * this->V + i + 1;
-                skipped = (j+1)*(j+2)/2;
-            }
-            else{
-                mat = i * this->V + j + 1;
-                skipped = (i+1)*(i+2)/2;
-            }
-            uint sequence = mat - skipped;
-            uint byte = sequence / 8;
-            uint bit = sequence % 8;
-            if(i > j){
-                if(getBit(bit, this->downConnectivityMat[byte])){setBit(replaced % 8, newDown[replaced / 8]);}
-                else{resetBit(replaced % 8, newDown[replaced / 8]);}
-            }
-            else {
-                if(getBit(bit, this->upConnectivityMat[byte])){setBit(replaced % 8, newUp[replaced / 8]);}
-                else{resetBit(replaced % 8, newUp[replaced / 8]);}
-            }
-            replaced++;
-        }
-    }
+    this->updateUpVec(_Vertex, newUp);
+    this->updateDownVec(_Vertex, newDown);
     this->V -= 1;
     delete[] this->upConnectivityMat;
     this->upConnectivityMat = newUp;
     delete[] this->downConnectivityMat;
     this->downConnectivityMat = newDown;
     return *this;
-    /*
-    *   for example G - 2: (deleting of second vertex)
-    *   matrix of some UDirGraph:
-    *   0 1 0 0 1   or  * 1 0 0 1
-    *   1 0 0 1 0       * * 0 1 0
-    *   0 0 0 0 0       * * * 0 0
-    *   0 1 0 0 1       * * * * 1
-    *   1 0 0 1 0       * * * * *
-    *   how must looks returned graph mat:
-    *   * * 0 0 1   there isn't all i = 1 || j = 1 places
-    *   * * * * *   (vertexes id: 0, 1, 2 ... second have id = 1)
-    *   * * * 0 0
-    *   * * * * 1
-    *   * * * * *
-    *   so every vertex in mat deals with this->V - 1 places
-    *   it's used in conditions after 'bit' calculations
-    */
 }
 
 int DirGraph::operator()(uint _Vertex) const {
-    return this->getDegree(_Vertex, OUT);
+    return this->getDegree(_Vertex, IN);
     // it hard to choose IN | OUT
     // but I think that usefull is OUT for bypass algorithms
 }
+
+

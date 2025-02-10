@@ -14,6 +14,8 @@ class DirGraph : public Graph
 private:
     void clean() noexcept;
     void resizeUp(size_t newSize, size_t oldSize) noexcept;  // resize down mat
+    void updateUpVec(uint _Vertex, byte* array) noexcept;
+    void updateDownVec(uint _Vertex, byte* array) noexcept;
 protected:
     uint E;
     byte* upConnectivityMat;
