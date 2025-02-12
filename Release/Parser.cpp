@@ -330,7 +330,7 @@ int Parser::argc(const std::string &argv) {
     return count;
 }
 
-QString Parser::stackToString(std::stack<uint> &s) {
+QString Parser::stackToQString(std::stack<uint> &s) {
     static std::string parsed;
     parsed = "";
     while(!s.empty()){
@@ -341,8 +341,12 @@ QString Parser::stackToString(std::stack<uint> &s) {
     return QString::fromStdString(parsed);
 }
 
-QString Parser::intToString(int val) {
+QString Parser::intToQString(int val) {
     return QString::fromStdString(std::to_string(val));
+}
+
+QString Parser::doubleToQString(double value) {
+    return QString::fromStdString(std::to_string(value));
 }
 
 std::string Parser::rewriteMat(ushort V, byte** mat) {

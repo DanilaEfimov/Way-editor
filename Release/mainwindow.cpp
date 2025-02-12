@@ -347,7 +347,7 @@ void MainWindow::enterCmdEvent(uint currentTab, QString &cmd, std::string &argv,
     argc = Parser::argc(functionType);
     argv = Parser::argv(cmd.toStdString());
     res = PerformanceManager::operation(functionType, argc, argv, graphs[currentTab]);
-    if(res != 0){ return; }
+    if(res != 0){ Error(__UNDEFINED_BAHAVIOUR__, true);return; }
     if(res == 0 && !PerformanceManager::isVoidOp(functionType)){
         this->showNonVoidAnswer();
     }

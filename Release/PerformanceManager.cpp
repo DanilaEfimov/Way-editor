@@ -94,7 +94,51 @@ int PerformanceManager::cast37(Graph *G, uint v) {
     default: Error(_UNDEFINED_ERROR_);
         return -1;
     }
-    nonVoidAnswer = "\n" + Parser::intToString(degree);
+    nonVoidAnswer = "\n" + Parser::intToQString(degree);
+    return 0;
+}
+
+int PerformanceManager::cast38(Graph *G, uint in, uint out) {
+    int code = G->getType();
+    double value = 0.0;
+    switch(code){
+        case names::udirgraph:      Error(__INVALID_COMMAND__); return -1;              break;
+        case names::dirgraph:       Error(__INVALID_COMMAND__); return -1;              break;
+        case names::udwgraph:
+            if(in == out){value = static_cast<UDWGraph*>(G)->getWeightV(in);}
+            else{value = static_cast<UDWGraph*>(G)->getWeightE(in, out);}    break;
+        case names::wdgraph:
+            if(in == out){value = static_cast<UDWGraph*>(G)->getWeightV(in);}
+            else{value = static_cast<UDWGraph*>(G)->getWeightE(in, out);}    break;
+        case names::upseudograph:   Error(__INVALID_COMMAND__); return -1;              break;
+        case names::dpseudograph:   Error(__INVALID_COMMAND__); return -1;              break;
+        case names::tree:           Error(__INVALID_COMMAND__); return -1;              break;
+        case names::wtree:
+            if(in == out){value = static_cast<WTree*>(G)->getWeightV(in);}
+            else{Error(__INVALID_COMMAND__);}    break;
+        case names::bitree:         Error(__INVALID_COMMAND__); return -1;              break;
+    default: Error(_UNDEFINED_ERROR_);
+        return -1;
+    }
+    nonVoidAnswer = "\n" + Parser::doubleToQString(value);
+    return 0;
+}
+
+int PerformanceManager::cast48(Graph *G, uint v, double value) {
+    int code = G->getType();
+    switch(code){
+        case names::udirgraph:      Error(__INVALID_COMMAND__); return -1;              break;
+        case names::dirgraph:       Error(__INVALID_COMMAND__); return -1;              break;
+        case names::udwgraph:       static_cast<UDWGraph*>(G)->setVWeight(v, value);    break;
+        case names::wdgraph:        static_cast<WDGraph*>(G)->setVWeight(v, value);     break;
+        case names::upseudograph:   Error(__INVALID_COMMAND__); return -1;              break;
+        case names::dpseudograph:   Error(__INVALID_COMMAND__); return -1;              break;
+        case names::tree:           Error(__INVALID_COMMAND__); return -1;              break;
+        case names::wtree:          static_cast<WTree*>(G)->setVWeight(v, value);       break;
+        case names::bitree:         Error(__INVALID_COMMAND__); return -1;              break;
+    default: Error(_UNDEFINED_ERROR_);
+        return -1;
+    }
     return 0;
 }
 
@@ -176,6 +220,28 @@ int PerformanceManager::eraseE(const std::string &argv, Graph *G) {
     return code;
 }
 
+int PerformanceManager::VW(const std::string &argv, Graph *G) {
+    int argc = Parser::argc(argv);
+    if(argc != 2){ Error(_INVALID_ARGUMENT_COUNT_); return -1;}
+    if(!isWeighted(G->getType())){Error(__INVALID_COMMAND__, true); return -1;}
+    std::stringstream ss(argv);
+    uint _Vertex = 0;
+    double value = 0;
+    ss >> _Vertex >> value;
+    return cast48(G, _Vertex, value);
+}
+
+int PerformanceManager::Weight(const std::string &argv, Graph *G) {
+    int argc = Parser::argc(argv);
+    if(argc > 2){ Error(_INVALID_ARGUMENT_COUNT_); return -1;}
+    if(!isWeighted(G->getType())){Error(__INVALID_COMMAND__, true); return -1;}
+    std::stringstream ss(argv);
+    uint in, out;
+    if(argc == 1){ss >> in; out = in;}
+    else{ss >> in >> out;}
+    return cast38(G, in, out);
+}
+
 int PerformanceManager::degree(const std::string &argv, Graph *G){
     int code = 0;
     std::stringstream ss(argv);
@@ -200,6 +266,8 @@ int PerformanceManager::limitlessArgOp(int code, const std::string &argv, Graph 
 int PerformanceManager::twoArgOp(int code, const std::string &argv, Graph *G) {
     int res = 0;
     switch(code){
+        case functions::VW: res = PerformanceManager::VW(argv, G); break;
+        case functions::Weight: res = PerformanceManager::Weight(argv, G); break;
     default: return -1; break;
     }
     return res;
@@ -223,8 +291,8 @@ int PerformanceManager::operation(int code, int argc, const std::string &argv, G
     int res = 0;
     switch(argc){
         case ZERO: break;
-        case ONE: res = oneArgOp(code, argv, G); break;
-        case TWO: break;
+        case ONE:       res = oneArgOp(code, argv, G); break;
+        case TWO:       res = twoArgOp(code, argv, G); break;
         case THREE: break;
         case LIMITLESS: res = limitlessArgOp(code, argv, G); break;
     default: return -1; break;
@@ -265,27 +333,59 @@ bool PerformanceManager::isPseudo(int code) {
     return false;
 }
 
+bool PerformanceManager::isWeighted(int code) {
+    switch(code){
+        case names::udirgraph:      return false;   break;
+        case names::dirgraph:       return false;   break;
+        case names::udwgraph:       return true;   break;
+        case names::wdgraph:        return true;   break;
+        case names::upseudograph:   return false;    break;
+        case names::dpseudograph:   return false;    break;
+        case names::tree:           return false;   break;
+        case names::wtree:          return true;   break;
+        case names::bitree:         return false;   break;
+    default: Error(_ERROR_GRAPH_TYPE_); return false; break;
+    }
+    return false;
+}
+
+bool PerformanceManager::isTree(int code) {
+    switch(code){
+        case names::udirgraph:      return false;   break;
+        case names::dirgraph:       return false;   break;
+        case names::udwgraph:       return true;    break;
+        case names::wdgraph:        return false;   break;
+        case names::upseudograph:   return false;   break;
+        case names::dpseudograph:   return false;   break;
+        case names::tree:           return true;    break;
+        case names::wtree:          return true;    break;
+        case names::bitree:         return true;    break;
+    default: Error(_ERROR_GRAPH_TYPE_); return false; break;
+    }
+    return false;
+}
+
 bool PerformanceManager::isVoidOp(int code) {
     switch(code){
-    case functions::clear:          return true; break;
-    case functions::weight:         return false; break;
-    case functions::addV:           return true; break;
-    case functions::addE:           return true; break;
-    case functions::eraseV:         return true; break;
-    case functions::eraseE:         return true; break;
-    case functions::EulerCycle:     return true; break;
-    case functions::CycleBase:      return true; break;
-    case functions::Blocks:         return true; break;
-    case functions::MaxV:           return true; break;
-    case functions::MaxE:           return true; break;
-    case functions::Degree:         return false; break;
-    case functions::Weight:         return true; break;
-    case functions::VW:             return true; break;
-    case functions::EW:             return true; break;
-    case functions::computeDFS:     return true; break;
-    case functions::computeBFS:     return true; break;
-    case functions::computePrima:   return true; break;
-    case functions::Dejcstra:       return true; break;
+        case functions::clear:          return true; break;
+        case functions::edges:         return false; break;
+        case functions::addV:           return true; break;
+        case functions::addE:           return true; break;
+        case functions::eraseV:         return true; break;
+        case functions::eraseE:         return true; break;
+        case functions::EulerCycle:     return true; break;
+        case functions::CycleBase:      return true; break;
+        case functions::Blocks:         return true; break;
+        case functions::MaxV:           return true; break;
+        case functions::MaxE:           return true; break;
+        case functions::Degree:         return false; break;
+        case functions::Weight:         return false; break;
+        case functions::VW:             return true; break;
+        case functions::EW:             return true; break;
+        case functions::computeDFS:     return true; break;
+        case functions::computeBFS:     return true; break;
+        case functions::computePrima:   return true; break;
+        case functions::Dejcstra:       return true; break;
     default: Error(__INVALID_COMMAND__); return false; break;
     }
     return false;

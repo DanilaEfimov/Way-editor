@@ -42,8 +42,9 @@ public:
 
     // functions ::PerformanceMananger
     static int argc(const std::string& argv);
-    static QString stackToString(std::stack<uint>& s);
-    static QString intToString(int n);
+    static QString stackToQString(std::stack<uint>& s);
+    static QString intToQString(int n);
+    static QString doubleToQString(double value);
 
     // saving file text
     static std::string rewriteMat(ushort V, byte** mat);

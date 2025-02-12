@@ -32,6 +32,7 @@
 #define ERROR_BUTTON_THEME {190, 40, 40}
 #define WARNING_BUTTON_THEME {170, 190, 40}
 
+// ERRORS
 #define _ERROR_ "ERROR\n"
 #define _WARNING_ "WARNING\n"
 #define _ERROR_BOX_ "Error message\n"
@@ -46,6 +47,7 @@
 #define _INVALID_ARGUMENT_ "Was inputed invalid argument\n"
 #define _INVALID_ARGUMENT_COUNT_ "Invalid argument count\n"
 
+// WARNINGS
 #define __UNCORRECT_INPUT_FILE__ "File contains mistakes\n"
 #define __EMPTY_GRAPH_SETTED__ "Was created empty graph\n"
 #define __SYNTAX_ERROR__ "Syntax error\n"
@@ -54,10 +56,12 @@
 #define __UNDEFINED_BAHAVIOUR__ "Undefined bahaviour\ncheck Your input\n"
 #define __NO_GRAPHS__ "Please, choose your graph file\n"
 
+// MESSAGES
 #define _CONSOLE_START_ "You have created a new graph!\n"
 #define _NEW_EMPTY_GRAPH_ "You have create an empty graph!\n"
 #define _BEST_WISHES_ "Best wishes, Way Editor\n"
 
+// VARIABLES
 #define OUT_SEED 10 /* it means count of double numbers in string, which will be printed */
 #define FONT_SIZE 12 /* in points */
 #define DIALOG_W 400
@@ -84,6 +88,7 @@ You can load graph from .vl/.mat/.el file \n \
 for start push, please, 'file menu' -> 'new file' and choose \n \
 Your graph file (not .txt)."
 
+// DEFINES
 typedef unsigned int uint;
 typedef std::pair<std::string, int> graphKey, extKey, cmdKey;
 typedef std::pair<int, std::string> codeToExt;
@@ -108,7 +113,7 @@ enum count {
 
 enum functions { // names of functions & their id
     clear = 0x00,   // clear console input
-    weight = 0x01,
+    edges = 0x01,
     addV = 0x10, addE, eraseV, eraseE,
     EulerCycle = 0x20, CycleBase, Blocks,
     MaxV, MaxE, Degree, Weight, // Weight means 'getWeight'
@@ -134,7 +139,7 @@ inline const std::map<int, std::string> stdExt {
 
 inline const std::map<std::string, int> commands {
     cmdKey("clear", clear),
-    cmdKey("weight", weight), cmdKey("addV", addV), cmdKey("addE", addE),
+    cmdKey("edges", edges), cmdKey("addV", addV), cmdKey("addE", addE),
     cmdKey("eraseV", eraseV), cmdKey("eraseE", eraseE), cmdKey("EulerCycle", EulerCycle),
     cmdKey("CycleBase", CycleBase), cmdKey("Blocks", Blocks), cmdKey("MaxV", MaxV),
     cmdKey("MaxE", MaxE), cmdKey("Degree", Degree), cmdKey("Weight", Weight),
@@ -144,11 +149,11 @@ inline const std::map<std::string, int> commands {
 };
 
 inline const std::map<int, int> argcount {
-    countKey(weight, TWO), countKey(addV, LIMITLESS), countKey(addE, LIMITLESS),
+    countKey(edges, ZERO), countKey(addV, LIMITLESS), countKey(addE, LIMITLESS),
     countKey(eraseV, LIMITLESS), countKey(eraseE, LIMITLESS), countKey(EulerCycle, ONE),
     countKey(CycleBase, ZERO), countKey(Blocks, ZERO), countKey(MaxV, ZERO),
     countKey(MaxE, ZERO), countKey(Degree, ONE), countKey(Weight, TWO),
-    countKey(VW, ONE), countKey(EW, THREE), countKey(computeDFS, ONE),
+    countKey(VW, TWO), countKey(EW, THREE), countKey(computeDFS, ONE),
     countKey(computeBFS, ONE), countKey(computePrima, ONE),
     countKey(Dejcstra, TWO),
 };

@@ -17,11 +17,16 @@ private:
     static int cast19(Graph* G, uint _in, uint _out);
 
     static int cast37(Graph* G, uint v);
+    static int cast38(Graph* G, uint in, uint out);
+    static int cast48(Graph* G, uint v, double value);
 
     static int addV(const std::string& argv, Graph* G);
     static int addE(const std::string& argv, Graph* G);
     static int eraseV(const std::string& argv, Graph* G);
     static int eraseE(const std::string& argv, Graph* G);
+    static int VW(const std::string& argv, Graph* G);
+    static int EW(const std::string& argv, Graph* G);
+    static int Weight(const std::string& argv, Graph* G);
 
     static int degree(const std::string& argv, Graph* G);
 
@@ -38,6 +43,8 @@ public:
     static int operation(int code, int argc, const std::string& argv, Graph* G);
     static bool isDirected(int code);
     static bool isPseudo(int code);
+    static bool isWeighted(int code);
+    static bool isTree(int code);
     static bool isVoidOp(int code);
 
     // ACCESSORS
