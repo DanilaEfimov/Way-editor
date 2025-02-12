@@ -202,7 +202,7 @@ void UDWGraph::setVWeight(uint _Vertex, double _value) {
         return;
     }
     if(this->vWeights == nullptr) { return; }
-    this->vWeights[_Vertex] = _value;
+    this->vWeights[_Vertex - 1] = _value;
 }
 
 void UDWGraph::setEWeight(uint _in, uint _out, double _value) {
@@ -263,7 +263,9 @@ double UDWGraph::getMaxVWeight() const {
 
 void UDWGraph::setEdge(uint _in, uint _out) {
     this->UDirGraph::setEdge(_in, _out);
-    this->eWeights[(_out-1) * this->V + (_in-1) - 1] = static_cast<double>(1.0);
+    if(_out > _in){_in ^= _out; _out ^= _in; _in ^= _out;}
+    size_t pos = (_out-1) * this->V + (_in-1) - 1;
+    this->eWeights[pos] = static_cast<double>(1.0);
 }
 
 void UDWGraph::eraseEdge(uint _in, uint _out) {
@@ -298,18 +300,12 @@ UDWGraph& UDWGraph::operator-(uint _Vertex) {
     delete[] this->vWeights;
     this->vWeights = newVW;
     // update this->eWeights
-    size_t newSizeE = (this->V-1)*(this->V-2)/2 ? (this->V-1)*(this->V-2)/2 : 1;
-    word* newEW = new word[(newSizeE + 7) / 8];
-    uint replaced = 0;
-    for(size_t i = 0; i < this->V; i++){
-        if(i + 1 == _Vertex){continue;}
-        for(size_t j = i+1; j < this->V; j++){
-            if(j+1 == _Vertex){continue;}
-            newEW[replaced] = this->eWeights[this->V*i+j - 1] - 1;
-            replaced++;
-        }
-    }
     this->UDirGraph::operator-(_Vertex);
+    size_t newSizeE = this->V-1 ? this->V*(this->V-1)/2 : 1;
+    this->eWeights = new word[newSizeE];
+    for(size_t i = 0; i < newSizeE; i++){
+        this->eWeights[i] = 1.0;
+    }
     return *this;
     /*
     *   for example G - 2: (deleting of second vertex)

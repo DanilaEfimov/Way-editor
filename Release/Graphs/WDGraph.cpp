@@ -224,6 +224,11 @@ double WDGraph::getWeightE(uint _in, uint _out) const {
     return w;
 }
 
+void WDGraph::setVWeight(uint _Vertex, double _value)
+{
+
+}
+
 void WDGraph::setEWeight(uint _in, uint _out, double _value) {
     if(_in > this->V || _out > this->V ||
         _in == 0 || _out == 0 || _in == _out){

@@ -116,7 +116,6 @@ int UPseudoGraph::getDegree(uint _Vertex) const {
         return -1;
     }
     int res = this->UDirGraph::getDegree(_Vertex);
-    if(this->isConnected(_Vertex, _Vertex)){res++;}
     return res;
 }
 

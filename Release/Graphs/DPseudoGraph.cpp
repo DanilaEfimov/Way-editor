@@ -37,7 +37,13 @@ static void copyBits(size_t size, size_t newSize, byte* from, byte* to){    // s
 
 DPseudoGraph::DPseudoGraph(uint V, byte** mat) : DirGraph(V, mat) {
     this->loops = new byte[V ? (V+7)/8 : 1]{0};
-    // by default this graph created without loops
+    for(size_t i = 0; i < V; i++){
+        size_t byte = i / 8;
+        size_t bit = i % 8;
+        if(mat[i][i]){
+            setBit(bit, this->loops[byte]);
+        }
+    }
 }
 
 DPseudoGraph::~DPseudoGraph() {
@@ -112,7 +118,6 @@ int DPseudoGraph::getDegree(uint _Vertex, bool io) const {
         return -1;
     }
     int res = this->DirGraph::getDegree(_Vertex, io);
-    if(this->isConnected(_Vertex, _Vertex)){res++;}
     return res;
 }
 

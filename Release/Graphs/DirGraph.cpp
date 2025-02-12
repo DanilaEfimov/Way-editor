@@ -240,31 +240,16 @@ int DirGraph::getDegree(uint _Vertex, bool io) const {          // io: out - fal
     if (_Vertex > this->V || _Vertex == 0) {					// undefined argument branch
         return -1;
     }
-    byte* vec;
-    if(io == OUT){vec = this->upConnectivityMat;}
-    else {vec = this->downConnectivityMat;}
     uint res = 0;
-    size_t base = _Vertex - 2;
-    size_t offset = this->V-1;
-    size_t address = base;
-    if(_Vertex > 1){    // colum bypass condition
-        for(size_t i = 0; (i < _Vertex - 1) && offset; i++){    // collum of matrix bypass
-            size_t byte = address / 8;
-            size_t bit = address % 8;
-            res += getBit(bit, vec[byte]);
-            address += offset;
-            offset--;
+    if(io == OUT){
+        for(size_t i = 0; i < this->V; i++){
+            res += this->isConnected(_Vertex, i+1);
         }
     }
-    size_t compliment = this->V - _Vertex;
-    size_t skipped = _Vertex*(_Vertex + 1) / 2;
-    base = this->V*_Vertex - skipped - compliment;
-    //  i < compliment  = row bypass condition
-    for(size_t i = 0; i < compliment; i++){     // row of matrix bypass
-        address = base + i;
-        size_t byte = address / 8;
-        size_t bit = address % 8;
-        res += getBit(bit, vec[byte]);
+    else{
+        for(size_t i = 0; i < this->V; i++){
+            res += this->isConnected(i+1, _Vertex);
+        }
     }
     return res;
     /*                  ### example ###
@@ -480,7 +465,6 @@ DirGraph& DirGraph::operator-(uint _Vertex) {   // NOT FIXED
 int DirGraph::operator()(uint _Vertex) const {
     return this->getDegree(_Vertex, IN);
     // it hard to choose IN | OUT
-    // but I think that usefull is OUT for bypass algorithms
 }
 
 

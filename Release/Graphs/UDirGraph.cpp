@@ -153,27 +153,8 @@ int UDirGraph::getDegree(uint _Vertex) const {
 		return -1;
 	}
 	uint res = 0;
-    size_t base = _Vertex - 2;
-    size_t offset = this->V-2;
-    size_t address = base;
-    if(_Vertex > 1){    // colum bypass condition
-        for(size_t i = 0; (i < _Vertex - 1) && offset; i++){    // collum of matrix bypass
-            size_t byte = address / 8;
-            size_t bit = address % 8;
-            res += getBit(bit, this->connectivityVector[byte]);
-            address += offset;
-            offset--;
-        }
-    }
-    size_t compliment = this->V - _Vertex;
-    size_t skipped = _Vertex*(_Vertex + 1) / 2;
-    base = this->V*_Vertex - skipped - compliment;
-    //  i < compliment  = row bypass condition
-    for(size_t i = 0; i < compliment; i++){     // row of matrix bypass
-        address = base + i;
-        size_t byte = address / 8;
-        size_t bit = address % 8;
-        res += getBit(bit, this->connectivityVector[byte]);
+    for(size_t i = 0; i < this->V; i++){
+        res += this->isConnected(_Vertex, i+1);
     }
 	return res;
     /*                  ### example ###
